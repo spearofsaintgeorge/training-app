@@ -1,0 +1,4 @@
+*backup*.json
+*-snapshot-*.json
+*unreadable*.json
+app.check.js
