@@ -845,7 +845,7 @@
 <script>
 'use strict';
 /* ================= core constants ================= */
-const APP_VERSION = '3.2.0';
+const APP_VERSION = '3.2.1';
 const KEY = 'argus_training_v1';
 const DRAFT_KEY = KEY + ':draft';
 const SNAP_KEY = 'argus_training_v2_snapshot';
@@ -1108,7 +1108,7 @@ const PROGRAM = {
       vars:[V('Face Pull','cable'),V('Reverse Pec Deck','mach')],
       note:'Rear delts and upper back — posture work for the desk and the neck.'},
     {slot:'Biceps Curl', role:'acc', sets:3, rl:10, rh:15, failOK:true,
-      vars:[V('Biceps Curl','db'),V('Cable Curl','cable'),V('Hammer Curl','db')],
+      vars:[V('Biceps Curl','db'),V('Barbell Curl','bb'),V('Cable Curl','cable'),V('Hammer Curl','db')],
       note:'Superset with the pushdown — alternate them, 60–90 s between rounds.'},
     {slot:'Triceps Pushdown', role:'acc', sets:3, rl:10, rh:15, failOK:true,
       vars:[V('Overhead Extension','cable'),V('Triceps Pushdown','cable'),V('Dips','bw')],
@@ -1147,13 +1147,16 @@ function deloadSignal(){
   const c=ctx(); if(!c.b || c.ph.deload || c.ph.test || c.ph.pre || c.ph.complete || c.b.deloadWeek===c.w) return null;
   if(!c.tpl.cycle && c.tpl.weeks && c.w<c.tpl.weeks && phaseAt(c.tpl, c.w+1).deload) return null;
   const since=sortedLogs().filter(l=>l.deload).map(l=>l.date).concat(c.b.deloadWeek? [addDays(parseYmd(c.b.start), c.b.deloadWeek*7-1).toISOString()] : []).sort().pop() || '';
-  const recent=sortedLogs().filter(l=>!l.deload && l.date>since).slice(-4);
+  const pts=sortedLogs().map(l=>l.date).concat([today().toISOString()]); let gap='';
+  for(let i=1;i<pts.length;i++) if(daysBetween(pts[i-1], pts[i])>=AWAY_D) gap=pts[i-1];
+  const from=[since, gap].sort().pop();
+  const recent=sortedLogs().filter(l=>!l.deload && l.date>from).slice(-4);
   if(recent.filter(l=>l.readiness==='red').length>=2) return 'Two rough-day check-ins in your last few sessions';
   for(const k in PROGRAM) for(const ex of PROGRAM[k]){
     if(ex.role!=='main') continue;
     const v=prefVariant(ex); if(!LOADED_MODES.includes(v.mode) && v.mode!=='assist') continue;
     const lad=makeLadder(v, currentBodyweight()), lv=[];
-    for(const l of sortedLogs()){ if(l.deload||l.light||l.date<=since) continue; for(const e of l.entries){ if(e.exercise===v.n && e.mode===v.mode && e.slot===ex.slot){ const cc=classify(e,lad); if(cc){ const x=est(cc,e); if(x.trusted) lv.push(x.e); } } } }
+    for(const l of sortedLogs()){ if(l.deload||l.light||l.date<=from) continue; for(const e of l.entries){ if(e.exercise===v.n && e.mode===v.mode && e.slot===ex.slot){ const cc=classify(e,lad); if(cc){ const x=est(cc,e); if(x.trusted) lv.push(x.e); } } } }
     const n=lv.length; if(n>=3 && lv[n-1]<lv[n-2]-0.5 && lv[n-2]<lv[n-3]-0.5) return `${v.n} has slid two sessions running`;
   }
   return null;
@@ -1265,7 +1268,7 @@ function warmup(ex, mode, work){
 }
 
 function currentBodyweight(){ const pts=(DB.bw||[]).filter(p=>p&&num(p.lb)>0).sort(byDate); return pts.length? num(pts[pts.length-1].lb) : num(DB.profile.w); }
-function vizCfg(){ const s=DB.settings; return {bar:s.bar, trapBar:s.trapBar, plates:s.plates.slice(), stackStep:s.stackStep, bodyweight:currentBodyweight()}; }
+function vizCfg(){ const s=DB.settings; return {bar:s.bar, trapBar:s.trapBar, plates:s.plates.slice(), stackStep:s.stackStep, addOns:s.addOns!==false, bodyweight:currentBodyweight()}; }
 function sledKind(name){ return /Belt Squat/.test(name)? 'belt' : /Landmine/.test(name)? 'landmine' : /T-Bar/.test(name)? 'tbar' : 'sled'; }
 function bwKind(name){ return /Pull-up|Negatives|Chin|Dips/.test(name)? 'belt' : 'body'; }
 /* the drawing for whatever is in your hands; a drawing must never block logging a set */
@@ -1801,6 +1804,7 @@ function vizKB(w, count, cfg) {
 // vizStack(w, kind, cfg) -> HTML string. kind: 'mach' | 'cable'. cfg.stackStep = lb per plate.
 
 const ivStack_ADDON = { 2.5: '#8b95a6', 5: '#e7ecf3' };
+const ivStack_ADDMAX = 7.5;   // 2.5 + 5 lb add-ons together
 // The stack always draws this many slices so the card height never shifts as the pin moves.
 const ivStack_SLOTS = 12;
 
@@ -1821,7 +1825,9 @@ function vizStack(w, kind, cfg) {
   const m = ivStack_math(w, cfg && cfg.stackStep);
   if (!m) return '';
   const f = ivStack_fmt, cable = kind === 'cable';
-  const add = m.rem > 0 && m.rem <= 5 ? m.rem : 0, miss = m.rem > 5 ? m.rem : 0;
+  const addMax = cfg && cfg.addOns === false ? 0 : ivStack_ADDMAX;
+  const real = [2.5, 5, 7.5].some(a => Math.abs(m.rem - a) < 0.01);
+  const add = real && m.rem <= addMax ? m.rem : 0, miss = m.rem > 0 && !add ? m.rem : 0;
   if (m.n < 1) {
     return '<div class="iv-stack"><div class="warmup ivs-line">Under the top plate (' + f(m.step) + ' lb)</div></div>';
   }
@@ -1866,10 +1872,15 @@ function vizStack(w, kind, cfg) {
   const headTop = y;
   front[seamAt] = '<rect class="ivs-seam" x="' + X0 + '" y="' + headTop + '" width="' + PW + '" height="' + (liftBot - headTop) + '"/>';
 
-  let addW = 0;
   if (add > 0) {
-    addW = add >= 5 ? 22 : 15;
-    front.push('<rect class="ivs-add" x="' + (X0 + 7) + '" y="' + (headTop - 5.5) + '" width="' + addW + '" height="5" rx="1" fill="' + (ivStack_ADDON[add] || '#aab2bf') + '"/>');
+    // one add-on plate, or the 5 and the 2.5 side by side for 7.5
+    const parts = add > 5 ? [5, Math.round((add - 5) * 100) / 100] : [add];
+    let ax = X0 + 7;
+    for (const a of parts) {
+      const aw = a >= 5 ? 22 : 15;
+      front.push('<rect class="ivs-add" x="' + ax + '" y="' + (headTop - 5.5) + '" width="' + aw + '" height="5" rx="1" fill="' + (ivStack_ADDON[a] || '#aab2bf') + '"/>');
+      ax += aw + 2;
+    }
   }
 
   // Frame and rods sit behind the plates; the rods only show above the head and in the lift gap.
@@ -2374,7 +2385,7 @@ function rirLowOf(px){ return px.rirLabel? +String(px.rirLabel).split('–')[0] 
 
 function makeLadder(v, bw){
   const s=DB.settings, p=Math.min(...s.plates.map(Number).filter(x=>x>0)) || 2.5, raw=[];
-  const st=num(s.stackStep)||10, adds=s.addOns===false? [0] : [0,2.5,5].filter(a=>a<st);
+  const st=num(s.stackStep)||10, adds=s.addOns===false? [0] : [0,2.5,5,7.5].filter(a=>a<st);
   if(v.mode==='bb') for(let w=num(s.bar)||45; w<=1000; w+=2*p) raw.push(w);
   else if(v.mode==='trap') for(let w=num(s.trapBar)||60; w<=1100; w+=2*p) raw.push(w);
   else if(v.mode==='plate') for(let w=0; w<=1000; w+=2*p) raw.push(w);
@@ -2423,6 +2434,11 @@ function quarantined(e){
   const best=bestDbPressPerHand(); if(!best) return false;
   return Math.max(0,...workSets(e).map(s=>num(s.w))) > 0.75*best;
 }
+/* time away: a real break is 7+ blank days in a row anywhere since the lift's last counted session.
+   A steady two-a-week stretch (each lift every ~14 days) is not a break. */
+const AWAY_D=8;
+function longestHole(from, day){ const f=dayOf(from), d0=dayOf(day), ds=sortedLogs().map(l=>dayOf(l.date)).filter(x=>x>=f && x<d0); ds.push(d0); let m=0; for(let i=1;i<ds.length;i++) m=Math.max(m, daysBetween(ds[i-1], ds[i])); return m; }
+function backFromAway(last, day){ return daysBetween(dayOf(last), day) >= (longestHole(last, day)>=AWAY_D? GAP_D : GAP_D+7); }
 function levelOf(ex, v, lad, day){
   const H=[]; let q=null, lastAny=null, lastAnySlot=null;
   for(const l of sortedLogs()){
@@ -2439,14 +2455,15 @@ function levelOf(ex, v, lad, day){
   const src= Hs.length? Hs : H.filter(h=>est(h.c,h.e).trusted), cross=!Hs.length;
   if(!src.length) return {establish:true, quarantine:q};
   const age0=daysBetween(dayOf(src[0].log.date), day), e0=est(src[0].c, src[0].e);
-  if(age0>EXPIRE_D) return {establish:true, ref: e0.trusted? e0.e*DETRAIN_F : null, old:src[0], quarantine:q};
-  const isTest=h=> !!h.log.test && ex.scheme==='heavy' && !!ex.test;
+  if(age0>EXPIRE_D) return {establish:true, returning:true, ref:(e0.trusted||!cross)? e0.e*DETRAIN_F : null, old:src[0], quarantine:q};
+  const isTest=h=> !!h.log.test && ex.scheme==='heavy' && !!ex.test && !(h.e.card && !h.e.card.test);
   let lv;
   if(isTest(src[0])) lv=e0.e;
   else { const xs=src.slice(0,2).filter(h=>daysBetween(dayOf(h.log.date),day)<=EXPIRE_D && !isTest(h)).map(h=>est(h.c,h.e).e); lv= xs.length? mean(xs) : e0.e; }
-  const recent=(cross? lastAny : lastAnySlot) || src[0].log.date, ageAny=daysBetween(dayOf(recent), day);
+  const away=longestHole(src[0].log.date, day)>=AWAY_D;
+  const recent= away? src[0].log.date : ((cross? lastAny : lastAnySlot) || src[0].log.date), ageAny=daysBetween(dayOf(recent), day);
   const checkIn=ageAny>STALE_D; if(checkIn) lv*=DETRAIN_F;
-  return {lv, cross, checkIn, returning:ageAny>=GAP_D, trusted:e0.trusted, age:ageAny, last: cross? null : src[0], prev: cross? null : (src[1]||null), quarantine:q};
+  return {lv, cross, checkIn, returning: checkIn || ageAny>=(away? GAP_D : GAP_D+7), trusted:e0.trusted, age:ageAny, fullAge:age0, last: cross? null : src[0], prev: cross? null : (src[1]||null), quarantine:q};
 }
 function judgeSession(h, prevH, ex, v, track){
   const c=h.c, cd=h.e.card;
@@ -2492,7 +2509,7 @@ function cardFor(ex, v, px, Lv, lad, d){
     const r=Math.max(1, Math.min(px.rh, reps(T0,4)));
     return out({w:lad.toW(T0), E:T0, r, aim:r, pred:reps(T0,4), level:lv, rirShown:4, deload:true, hint:'Deload week — fewer sets, finish every set with 4 in the tank. It doesn\'t move your numbers.'});
   }
-  if(px.test && ex.test){
+  if(px.test && ex.test && !Lv.returning){
     const r=ex.test.r; L=lad.floorL(lv/(1+(r+rirT)/PK));
     return out({w:lad.toW(L), E:L, r, aim:r, pred:reps(L), level:lv, test:true, hint:`Test: warm up, then one top set of ${r} with ${rirT} left. Its estimate becomes your tested number.`});
   }
@@ -2503,7 +2520,7 @@ function cardFor(ex, v, px, Lv, lad, d){
   } else {
     J=judgeSession(Lv.last, Lv.prev, ex, v, track); T0= lad.assist? lad.toE(num(J.c.anchor.w)) : J.c.T0;
     const lc=Lv.last.e.card;
-    exitHold= !!(lc && lc.exit && J.c.W.every(s=>num(s.r)>=num(lc.r) && (!isNum(s.rir) || +s.rir>=num(lc.rirShown))));
+    exitHold= !Lv.checkIn && !!(lc && lc.exit && J.c.W.every(s=>num(s.r)>=num(lc.r) && (!isNum(s.rir) || +s.rir>=num(lc.rirShown))));
     Jp= Lv.prev? judgeSession(Lv.prev, null, ex, v, track) : null;
     const canStep= J.earned && !hold && !Lv.returning && !Lv.checkIn;
     const BRIDGE=(Ls)=>{
@@ -2524,7 +2541,7 @@ function cardFor(ex, v, px, Lv, lad, d){
       if(exitHold && !canStep){ L=T0; holdAim=true; why='settling on the new weight — reps climb back into the range'; }
       else if(canStep){ const Ls=lad.up(T0); if(Ls!=null && reps(Ls)>=px.rl){ L=Ls; why='▲ earned — top of the range at the planned effort'; } else if(Ls!=null) BRIDGE(Ls); else { L=T0; holdAim=true; } }
       else if(!Lv.returning && (J.over || (Lv.trusted && reps(T0)>px.rh))){ const p=pickD(lad, reps, px); L=p.L; unreachable=p.unreachable; why='too light last time — up'; }
-      else if(Lv.trusted? reps(T0)<px.rl : J.c.minR<px.rl){ const p=pickD(lad, reps, px); L=p.L; unreachable=p.unreachable; why='lighter — last sets ended closer to failure than planned'; }
+      else if(Lv.checkIn || (Lv.trusted? reps(T0)<px.rl : J.c.minR<px.rl)){ const p=pickD(lad, reps, px); L=p.L; unreachable=p.unreachable; why='lighter — last sets ended closer to failure than planned'; }
       else { L=T0; holdAim=true; why='hold the weight — beat the aim to step up'; }
     }
     if(J.blankFollowed && J.c.minR>=px.rl && !Lv.returning && !Lv.checkIn) L=Math.max(L,T0);       // G0
@@ -2535,7 +2552,7 @@ function cardFor(ex, v, px, Lv, lad, d){
     const c1=lad.ceilL(T0*(1-DOWN_PCT)); if(L<c1 && reps(c1)>=px.rl) L=c1;                        // G3
     if(J.missed && Jp && Jp.missed && !exitHold) L=Math.min(L, lad.floorL(T0*0.95));             // G4
     if(hold) why= d.readiness==='red'? 'rough day — no increase, more in the tank' : 'flat day — hold the load, one more rep in the tank';
-    else if(Lv.returning) why= Lv.checkIn? `it's been ${Lv.age} days — check-in session, a little lighter` : `first session back in ${Lv.age} days — one more rep in the tank, no increase`;
+    else if(Lv.returning) why= (px.test && ex.test)? 'back from time away — one easy top set, no test this time. Your number carries over.' : Lv.checkIn? `first full session in ${Lv.fullAge} days — check-in, ${L<T0-0.01? 'a little lighter' : 'same weight, more in the tank'}` : `first full session in ${Lv.fullAge} days — one more rep in the tank, ${L<T0-0.01? 'a little lighter' : 'no increase'}`;
     else if(J.missed && !J.over && why.startsWith('hold')) why='hold — last time had a miss or a grind';
     if(L<T0-0.01 && /^hold/.test(why)) why='a notch lighter than last time — that\'s what the prediction says today';
   }
@@ -2571,7 +2588,7 @@ function hangCard(ex, v, px, d){
   const best=Math.max(...workSets(last.e).map(s=>num(s.r))), prevBest=prev? Math.max(...workSets(prev.e).map(s=>num(s.r))) : null;
   const goalPrev= last.e.card && isNum(last.e.card.goal)? num(last.e.card.goal) : (prevBest!=null? prevBest+5 : best);
   const hit=best>=goalPrev, hold=d.readiness==='yellow'||d.readiness==='red';
-  const returning=daysBetween(dayOf(last.log.date), parseYmd(d.day)||today())>=GAP_D;
+  const returning=backFromAway(last.log.date, parseYmd(d.day)||today());
   const normal=!px.deload && !hold && !returning;
   const goal=Math.min(60, hit? (normal? best+5 : best) : goalPrev);
   const sets=workSets(last.e).map(s=>num(s.r)), grad=sets.length && sets.every(x=>x>=60);
@@ -2584,7 +2601,7 @@ function bwCard(ex, v, px, d){
   if(!hist.length) return {w:0, r:px.rl, aim:px.rl, establish:true, track:'B', hint:'Bodyweight — chase clean reps. Load comes once the top of the range is easy.'};
   const last=hist[hist.length-1], prev=hist[hist.length-2], S=workSets(last.e), thr=Math.max(1, rirLowOf(px));
   const lastRir=S[S.length-1].rir, top=S.every(s=>num(s.r)>=px.rh);
-  const quiet=d.readiness==='yellow'||d.readiness==='red'||px.deload||daysBetween(dayOf(last.log.date), parseYmd(d.day)||today())>=GAP_D;
+  const quiet=d.readiness==='yellow'||d.readiness==='red'||px.deload||backFromAway(last.log.date, parseYmd(d.day)||today());
   const earned= !quiet && top && (isNum(lastRir)? +lastRir>=thr : !!(prev && workSets(prev.e).length>=Math.min(px.sets,3) && workSets(prev.e).every(s=>num(s.r)>=px.rh)));
   const added=Math.max(0,...S.map(s=>num(s.w))), minR=Math.min(...S.map(s=>num(s.r)));
   if(earned) return {w:added, r:px.rl, aim:px.rl, track:'B', hint: ex.slot==='Hip Thrust'? 'top of the range — move to the loaded Hip Thrust, or add 5 lb' : 'top of the range — add 5 lb, or slow the lowering'};
@@ -2771,6 +2788,7 @@ function buildTabs(){
 }
 function go(id){
   if(id==='program') id='season';
+  tidyStaleDraft();
   currentView=id;
   document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.dataset.view===id));
   document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('active',b.dataset.t===id));
@@ -2786,7 +2804,7 @@ function renderView(id){
   if(id==='logbook') renderLogbook();
   if(id==='profile') renderProfileInputs();
 }
-function refresh(){ renderGlobalBanners(); renderHeader(); renderView(currentView); }
+function refresh(){ tidyStaleDraft(); renderGlobalBanners(); renderHeader(); renderView(currentView); }
 let toastT;
 function toast(msg, ms){ const e=$('toast'); if(!e) return; e.textContent=msg; e.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>e.classList.remove('show'), ms||2200); }
 function guardRO(){ if(READONLY){ toast('Safe mode — saving is paused until you choose below'); return true; } return false; }
@@ -2819,12 +2837,30 @@ function recommendedNext(){
   const i=SEASON_ORDER.indexOf(last.tpl);
   return SEASON_ORDER[Math.min(SEASON_ORDER.length-1, i+1)] || 'strength-bulk';
 }
+function draftStale(d){ return !!d && daysBetween(parseYmd(d.day), today())>=2; }
+function tidyStaleDraft(){ if(draftStale(DRAFT) && draftProgress(DRAFT).done===0 && !READONLY){ DRAFT=null; saveDraft(); stopTick(); } }
+function saveStaleDraft(){ const p=commitDraft(); if(p){ refresh(); offerSend(); } }
+function staleBlocked(){ if(!draftStale(DRAFT)) return false; toast(`Save or discard the unfinished ${DRAFT.session} from ${fmtD(parseYmd(DRAFT.day))} first`); if(GYM_OPEN) closeGym(); go('today'); return true; }
 function resumeHTML(){
   if(!DRAFT) return '';
+  if(draftStale(DRAFT)){ const p=draftProgress(DRAFT), dd=parseYmd(DRAFT.day);
+    return `<div class="resume"><div><div class="rt">${esc(DRAFT.session)} from ${esc(fmtDow(dd))} wasn't finished</div><div class="rs">${p.done} set${p.done===1?'':'s'} entered</div></div><div class="ra"><button class="btn sm primary" onclick="saveStaleDraft()">Save to ${esc(fmtD(dd))}</button><button class="btn sm ghost" onclick="discardDraft()">Discard</button></div></div>`; }
   const t=new Date(DRAFT.startedAt).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});
   const day=DRAFT.day===todayKey()? '' : ' on '+fmtDow(parseYmd(DRAFT.day));
   const p=draftProgress(DRAFT);
   return `<div class="resume"><div><div class="rt">▶ ${esc(DRAFT.session)} in progress</div><div class="rs">started ${esc(t)}${esc(day)} · ${p.done}/${p.total} sets${DRAFT.express?' · express':''}</div></div><div class="ra"><button class="btn sm primary" onclick="showGym()">Resume</button><button class="btn sm ghost" onclick="discardDraft()">Discard</button></div></div>`;
+}
+function awayLineHTML(){
+  const L=sortedLogs(); if(!L.length || READONLY) return '';
+  const n=daysBetween(dayOf(L[L.length-1].date), today()); if(n<GAP_D) return '';
+  const c=ctx(), span= n<=STALE_D? n+' days' : Math.round(n/7)+' weeks', end=c.b? blockEndDate(c.b) : null;
+  const where= (!c.b||c.ph.pre)? '' : c.ph.complete? ` — ${c.tpl.name} wrapped up${end? ' '+fmtD(end) : ''}` : ` — picking up at week ${c.w}, ${c.ph.name}`;
+  const how= c.ph.deload? 'It\'s a light week anyway: fewer sets, 4 in the tank.'
+    : n<=STALE_D? 'First time back on each weighted lift: no increases, one more rep in the tank.'
+    : n<=EXPIRE_D? 'First time back on each weighted lift: one more rep in the tank, and lighter where your numbers call for it.'
+    : 'Each weighted lift opens with a check-in set to find today\'s weight.';
+  const test= c.ph.test? ' Test week: lifts back from time away get one easy top set instead of a test.' : '';
+  return `<div class="banner"><div class="bx">${esc(`Back after ${span}${where}. ${how}${test}`)}</div></div>`;
 }
 function sendNudgeHTML(){
   const u=unsentCount(); if(!u || READONLY || DRAFT || !DB.settings.offerSend) return '';
@@ -2835,7 +2871,7 @@ function blockPromptHTML(){
   if(c.b && !c.ph.complete) return '';
   const head = c.b? `${c.tpl.name} complete 🏆 — start your next block` : (DB.blocks.length? `${tplFor(DB.blocks[DB.blocks.length-1]).short} block complete 🏁 — start your next block` : 'Pick your first block');
   const n=TEMPLATES[recommendedNext()];
-  return `<div class="banner"><div class="bt">${esc(head)}</div><div class="bx">Up next: <b style="color:var(--txt)">${esc(n.name)}</b>${n.weeks?`, ${n.weeks} weeks`:''}. ${esc(n.blurb)} Until you start it, lifts run its week-1 targets.<div style="margin-top:10px"><button class="btn sm primary" onclick="go('season')">Choose &amp; start →</button></div></div></div>`;
+  return `<div class="banner"><div class="bt">${esc(head)}</div><div class="bx">Up next: <b style="color:var(--txt)">${esc(n.name)}</b>${n.weeks?`, ${n.weeks} weeks`:''}. ${esc(n.blurb)} ${c.b? 'Until you start it, lifts keep running regular weeks.' : 'Until you start one, lifts run Strength + Bulk week-1 targets.'}<div style="margin-top:10px"><button class="btn sm primary" onclick="go('season')">Choose &amp; start →</button></div></div></div>`;
 }
 
 /* ================= today ================= */
@@ -2906,15 +2942,16 @@ function eatList(c){
   return [{id:'protein', t:'Protein', s:esc(pro)+' — some at every meal'}, {id:'creatine', t:'Creatine', s:'5 g — any time'}, third, {id:'water', t:'Water', s:'stay ahead of it — more on sauna days'}];
 }
 function renderToday(){
+  tidyStaleDraft();
   const c=ctx();
   $('today-date').textContent=new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
   $('today-sub').textContent=blockLine(c);
-  $('today-banners').innerHTML=resumeHTML()+blockPromptHTML()+deloadBannerHTML()+sendNudgeHTML();
+  $('today-banners').innerHTML=resumeHTML()+awayLineHTML()+blockPromptHTML()+deloadBannerHTML()+sendNudgeHTML();
   const todays=realLogs().filter(l=>sameDay(l.date,today()));
   const s=DRAFT? DRAFT.session : nextLift(), meta=SESSION_META[s];
   let liftRow;
   if(todays.length) liftRow={id:'lift', t:esc(todays.map(l=>l.day).join(' + ')), s:'logged today ✓', act:`<button class="btn sm ghost cact" onclick="event.stopPropagation();go('logbook')">View</button>`};
-  else if(DRAFT){ const p=draftProgress(DRAFT); liftRow={id:'lift', t:`${s} · ${meta.tag}`, s:`in progress · ${p.done}/${p.total} sets`, act:`<button class="btn sm primary cact" onclick="event.stopPropagation();showGym()">Resume</button>`}; }
+  else if(DRAFT){ const p=draftProgress(DRAFT), st=draftStale(DRAFT); liftRow={id:'lift', t:`${s} · ${meta.tag}`, s: st? `from ${fmtD(parseYmd(DRAFT.day))} · ${p.done} sets, not saved` : `in progress · ${p.done}/${p.total} sets`, act: st? `<button class="btn sm primary cact" onclick="event.stopPropagation();saveStaleDraft()">Save</button>` : `<button class="btn sm primary cact" onclick="event.stopPropagation();showGym()">Resume</button>`}; }
   else liftRow={id:'lift', t:`${s} · ${meta.tag}`, s:`${meta.focus}${c.ph.deload?' · light week':''}`, act:`<button class="btn sm primary cact" onclick="event.stopPropagation();openGym('${s}')">Start</button>`};
   const lv=ladderLevel(liftStats()), z2n=z2Week(), z2t=z2Target();
   const doItems=[liftRow,
@@ -2947,8 +2984,9 @@ function renderToday(){
 
 /* ================= dashboard ================= */
 function renderDashboard(){
+  tidyStaleDraft();
   const c=ctx();
-  $('dash-banners').innerHTML=resumeHTML()+blockPromptHTML();
+  $('dash-banners').innerHTML=resumeHTML()+awayLineHTML()+blockPromptHTML();
   $('kpi-phase').textContent = !c.b? 'No block' : c.ph.pre? 'Starts '+fmtD(parseYmd(c.b.start)) : c.ph.complete? 'Complete' : `W${c.w} · ${c.ph.name}`;
   $('kpi-next').textContent=nextLift();
   $('kpi-ladder').textContent=ladderLevel(liftStats()).kpi;
@@ -2964,8 +3002,8 @@ function renderUpNext(){
   $('upnext').innerHTML=`<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
       <div><div style="font-size:23px;font-weight:680;color:var(--amber2);line-height:1.1">${s} <span style="font-size:13px;color:var(--muted);font-weight:500">· ${m.tag}</span></div>
       <div style="font-size:12.5px;color:var(--muted);margin-top:2px">${m.focus}</div></div>
-      <div style="margin-left:auto;display:flex;gap:8px">${DRAFT?`<button class="btn primary sm" onclick="showGym()">Resume ${esc(DRAFT.session)}</button>`:`<button class="btn primary sm" onclick="openGym('${s}')">Start →</button>`}<button class="btn sm ghost" onclick="restDay()">Rest day</button></div></div>
-    <div style="font-size:11.5px;color:var(--dim);margin-top:9px">No clock on the lifts — the next one waits here until you log it. Daily threads run alongside: a walk, the sauna, the tower on off days.</div>`;
+      <div style="margin-left:auto;display:flex;gap:8px">${DRAFT? (draftStale(DRAFT)? `<button class="btn primary sm" onclick="saveStaleDraft()">Save ${esc(DRAFT.session)} to ${esc(fmtD(parseYmd(DRAFT.day)))}</button>` : `<button class="btn primary sm" onclick="showGym()">Resume ${esc(DRAFT.session)}</button>`):`<button class="btn primary sm" onclick="openGym('${s}')">Start →</button>`}<button class="btn sm ghost" onclick="restDay()">Rest day</button></div></div>
+    <div style="font-size:11.5px;color:var(--dim);margin-top:9px">The next lift waits here until you log it; the weeks follow the calendar. Daily threads run alongside: a walk, the sauna, the tower on off days.</div>`;
 }
 function renderRotationStrip(){
   const cur=ROTATION.indexOf(nextLift());
@@ -3250,7 +3288,7 @@ function selectSession(n){ activeSession=n; if(currentView==='sessions'){ render
 function suggestLine(v, sg){
   let h='';
   if(sg.quarantine){ const q=sg.quarantine, li=DB.logs.indexOf(q.log), ei=q.log.entries.indexOf(q.e), w=Math.max(0,...workSets(q.e).map(s=>num(s.w)));
-    h+=`<div class="seed est">◆ ${esc(fmtD(q.log.date))} says ${esc(r1(w))} lb on ${esc(v.n)} — per dumbbell, or both together? <button class="btn sm" onclick="confirmEntry(${li},${ei},false)">Per dumbbell</button> <button class="btn sm" onclick="confirmEntry(${li},${ei},true)">Both together</button></div>`; }
+    h+=`<div class="seed est">◆ ${esc(fmtD(q.log.date))} says ${esc(r1(w))} lb on ${esc(q.e.exercise)} — per dumbbell, both together${q.e.exercise==='Biceps Curl'? ', or a barbell' : ''}? <button class="btn sm" onclick="confirmEntry(${li},${ei},'each')">Per dumbbell</button> <button class="btn sm" onclick="confirmEntry(${li},${ei},'total')">Both together</button>${q.e.exercise==='Biceps Curl'? ` <button class="btn sm" onclick="confirmEntry(${li},${ei},'barbell')">Barbell</button>` : ''}</div>`; }
   if(sg.establish && !sg.opener) return h+`<div class="seed est">◆ ${esc(sg.hint)}</div>`;
   if(v.mode==='time') return h+`<div class="seed">▸ Set 1 goal: ${esc(sg.goal||sg.r||'—')} s <span style="color:var(--muted)">${esc(sg.hint||'')}</span></div>`;
   if(v.mode==='bw') return h+`<div class="seed">▸ ${num(sg.w)>0? '+'+esc(sg.w)+' lb' : 'Bodyweight'} · aim ${esc(sg.aim||sg.r)} <span style="color:var(--muted)">${esc(sg.hint||'')}</span></div>`;
@@ -3260,12 +3298,17 @@ function suggestLine(v, sg){
   return h+`<div class="seed">▸ ${esc(main)} <span style="color:var(--muted)">— ${esc(sg.hint||'')}</span></div>`
     +(sg.level? `<div class="basis">level ${Math.round(sg.level)} (est. max) → predicts ${sg.pred} reps at ${sg.rirShown} RIR${notes.length? ' · '+esc(notes.join(' · ')) : ''}</div>` : '');
 }
-function confirmEntry(li, ei, asTotal){
+function confirmEntry(li, ei, how){
   const l=DB.logs[li], e=l && l.entries[ei]; if(!e || guardRO()) return;
-  if(asTotal) e.sets.forEach(s=>{ s.w=Math.round(num(s.w)/2*100)/100; });
+  const was=e.exercise; let switched=false;
+  if(how==='total' || how===true) e.sets.forEach(s=>{ s.w=Math.round(num(s.w)/2*100)/100; });
+  if(how==='barbell'){ e.exercise='Barbell Curl'; e.mode='bb'; DB.variantPref['Biceps Curl']='Barbell Curl'; }
   e.confirmed=true; save();
-  if(DRAFT){ for(const ex of PROGRAM[DRAFT.session]||[]){ const sl=DRAFT.ex[ex.slot]; if(sl && sl.variant===e.exercise && sl.sets.every(x=>!x.done)){ const v=variantOf(ex, sl.variant), f=initSlot(ex, DRAFT, v); sl.card=f.card; sl.sets.forEach(x=>{ if(x.auto) x.w=f.sets[0].w; }); } } saveDraft(); }
-  toast(asTotal? 'Fixed — halved to per dumbbell ✓' : 'Confirmed per dumbbell ✓');
+  if(DRAFT){ for(const ex of PROGRAM[DRAFT.session]||[]){ const sl=DRAFT.ex[ex.slot]; if(!sl || sl.sets.some(x=>x.done)) continue;
+    if(how==='barbell' && sl.variant===was && ex.vars.some(x=>x.n==='Barbell Curl')){ switchVariant(DRAFT, ex, variantOf(ex,'Barbell Curl')); switched=true; continue; }
+    if(sl.variant===e.exercise){ const v=variantOf(ex, sl.variant), f=initSlot(ex, DRAFT, v); sl.card=f.card; sl.sets.forEach(x=>{ if(x.auto) x.w=f.sets[0].w; }); } }
+    saveDraft(); }
+  toast(how==='barbell'? (switched? 'Saved as a barbell curl — the card now uses Barbell Curl ✓' : 'Saved as a barbell curl — next session starts on Barbell Curl ✓') : (how==='total'||how===true)? 'Fixed — halved to per dumbbell ✓' : 'Confirmed per dumbbell ✓');
   if(GYM_OPEN) renderGym(); else refresh();
 }
 function listCardHTML(name, ex, d, disabled){
@@ -3278,27 +3321,29 @@ function listCardHTML(name, ex, d, disabled){
 }
 function renderSessionBody(){
   const el=$('session-body'), name=activeSession;
-  const mine=!!(DRAFT && DRAFT.session===name), other=!!(DRAFT && !mine);
+  const mine=!!(DRAFT && DRAFT.session===name), other=!!(DRAFT && !mine), stale=mine && draftStale(DRAFT);
   const d=mine? DRAFT : newDraft(name, {express:EXPRESS_PREVIEW});
   const c=ctxForDraft(d), meta=SESSION_META[name];
   const anyDone=mine && draftProgress(d).done>0;
   const phaseTxt=!c.b? 'week-1 targets' : c.ph.pre? 'pre-block · week-1 targets' : `${c.tpl.weeks?'W'+c.w+'/'+c.tpl.weeks:'W'+c.w} · ${c.ph.name}`;
   const tip=c.ph.deload? "Light week: fewer sets, about the same loads, stop 4 reps shy. These sessions don't move your progression." : c.ph.test? 'Test week: warm up, then one heavy top set of 1–3 on the main lift. Keep the rest light.' : 'Leave the prescribed reps in reserve on working sets. Gym mode builds the warm-up ramp and runs the rest timer.';
   let h='';
+  if(stale) h+=resumeHTML();
   if(other) h+=`<div class="resume"><div><div class="rt">▶ ${esc(DRAFT.session)} is in progress</div><div class="rs">Finish or discard it before starting ${name}.</div></div><div class="ra"><button class="btn sm primary" onclick="selectSession('${DRAFT.session}')">Go to it</button><button class="btn sm ghost" onclick="discardDraft()">Discard</button></div></div>`;
   const rd=d.readiness? ` <span class="pill ${d.readiness==='green'?'green':d.readiness==='yellow'?'amber':'red'}">${d.readiness}</span>` : '';
   h+=`<div class="banner"><div class="bt">${name} · ${meta.tag} &nbsp;<span class="pill amber">${esc(phaseTxt)}</span>${d.express?' <span class="pill steel">express</span>':''}${rd}</div>
     <div class="bx">${tip}</div>
     <div style="display:flex;gap:10px 14px;flex-wrap:wrap;margin-top:12px;align-items:center">
-      <button class="btn primary" ${other?'disabled':''} onclick="${mine?'showGym()':`openGym('${name}')`}">${mine?'▶ Resume in gym mode':'▶ Start in gym mode'}</button>
-      <label class="toggle" style="font-size:13px"><input type="checkbox" ${d.express?'checked':''} ${(other||anyDone)?'disabled':''} onchange="toggleExpress(this.checked)"> Express — core lifts, one fewer set</label>
+      <button class="btn primary" ${(other||stale)?'disabled':''} onclick="${mine?'showGym()':`openGym('${name}')`}">${mine?'▶ Resume in gym mode':'▶ Start in gym mode'}</button>
+      <label class="toggle" style="font-size:13px"><input type="checkbox" ${d.express?'checked':''} ${(other||anyDone||stale)?'disabled':''} onchange="toggleExpress(this.checked)"> Express — core lifts, one fewer set</label>
     </div></div>`;
-  sessionList(name, d.express).forEach(ex=>{ h+=`<div class="ex" id="exc-${PROGRAM[name].indexOf(ex)}">${listCardHTML(name, ex, d, other)}</div>`; });
-  h+=`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn primary" id="list-log" ${(mine&&!READONLY)?'':'disabled'} onclick="listLog()">Log ${name}</button>${mine?'<button class="btn ghost" onclick="discardDraft()">Discard</button>':''}</div>`;
+  sessionList(name, d.express).forEach(ex=>{ h+=`<div class="ex" id="exc-${PROGRAM[name].indexOf(ex)}">${listCardHTML(name, ex, d, other||stale)}</div>`; });
+  h+=`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn primary" id="list-log" ${(mine&&!READONLY&&!stale)?'':'disabled'} onclick="listLog()">Log ${name}</button>${mine?'<button class="btn ghost" onclick="discardDraft()">Discard</button>':''}</div>`;
   if(!mine && !other) h+=`<p class="why" style="margin-top:8px">Start typing a set and this becomes your in-progress session — it survives the phone locking or the app closing.</p>`;
   el.innerHTML=h;
 }
 function ensureDraftFor(name){
+  if(draftStale(DRAFT)){ staleBlocked(); return false; }
   if(DRAFT && DRAFT.session===name) return true;
   if(DRAFT){ toast(DRAFT.session+' is in progress — finish or discard it first'); return false; }
   if(guardRO()) return false;
@@ -3514,7 +3559,7 @@ function renderSettings(){
       <div class="field"><label>Trap bar (lb)</label><input id="set-trap" type="number" inputmode="decimal" value="${s.trapBar}"></div>
     </div>
     <div class="field"><label>Machine stack — lb per plate</label><input id="set-stack" type="number" inputmode="decimal" value="${s.stackStep}"></div>
-    <label class="toggle" style="margin:-4px 0 12px"><input type="checkbox" id="set-addons" ${s.addOns!==false?'checked':''}> Stacks have 2.5 / 5 lb add-on plates</label>
+    <label class="toggle" style="margin:-4px 0 12px"><input type="checkbox" id="set-addons" ${s.addOns!==false?'checked':''}> Stacks take 2.5 and 5 lb add-on plates (both = 7.5)</label>
     <p class="why" style="margin:-6px 0 12px">Trap bars run 45–75 lb — check the sticker on yours so the plate math is exact.</p>
     <div class="field"><label>Plates on hand</label><div style="display:flex;gap:12px;flex-wrap:wrap">${[45,35,25,10,5,2.5].map(p=>`<label class="toggle" style="font-size:13px"><input type="checkbox" class="set-plate" value="${p}" ${s.plates.includes(p)?'checked':''}> ${p}</label>`).join('')}</div></div>
     <div class="inline-fields">
@@ -3659,6 +3704,7 @@ function pickReady(session, r){
 let GYM_OPEN=false, SUMMARY=false, HANG=null, TICK=null;
 function openGym(session){
   if(guardRO()) return;
+  if(staleBlocked()) return;
   if(DRAFT && DRAFT.session!==session){
     if(!confirm(`${DRAFT.session} is still in progress. Discard it and start ${session}?`)) return;
     DRAFT=null; saveDraft();
@@ -3669,6 +3715,7 @@ function openGym(session){
 function startSession(session, o){ closeSheet(); DRAFT=newDraft(session, o); saveDraft(); activeSession=session; showGym(); }
 function showGym(){
   if(!DRAFT) return;
+  if(staleBlocked()) return;
   closeSheet(); GYM_OPEN=true; SUMMARY=false;
   $('gym').classList.remove('hidden'); document.body.style.overflow='hidden';
   wakeOn(); renderGym(); if(DRAFT.rest) ensureTick(); renderHeader();
@@ -3873,7 +3920,7 @@ function runSelftest(){
   const T=(name,fn)=>{ try{ const r=fn(); results.push({name, ok:r===true, msg:r===true?'':String(r)}); }catch(e){ results.push({name, ok:false, msg:'threw: '+e.message}); } };
   const eq=(a,b)=>JSON.stringify(a)===JSON.stringify(b) || `expected ${JSON.stringify(b)} got ${JSON.stringify(a)}`;
   const realDB=DB, realDraft=DRAFT, realNS=NOSAVE, realView=currentView;
-  NOSAVE=true;
+  NOSAVE=true; DRAFT=null;
   const fx=()=>({v:2, profile:{sz:{bench:{w:40,r:12,rir:2}}, w:200, h:70, a:40}, seq:0, logs:[
       {date:'2026-06-30T05:00:00.000Z', day:'Upper A', entries:[{exercise:'Dead Hang', sets:[{w:200,r:15},{w:200,r:15}]},{exercise:'Triceps Pushdown / Dips', sets:[{w:30,r:12}]},{exercise:'DB Bench Press',mode:'db',sets:[{w:40,r:8}]}]},
       {date:'2026-07-04T05:00:00.000Z', day:'Lower B', entries:[{exercise:'Hip Thrust',mode:'bb',sets:[{w:200,r:20},{w:200,r:20}]},{exercise:'Leg Press or Hack Squat',sets:[{w:55,r:12}]}]},
@@ -3907,7 +3954,7 @@ function runSelftest(){
       [[145,6,6],[110,8,8],[65,8,9],[85,9,10],[122.5,10,11],[40,7,8],[45,16,16],[10,20,20]]); });
     T('assisted pull-ups predict on bodyweight minus help; the other slot borrows the level safely', ()=>{ DB=engFx(); return eq([wra(cardOf('Upper A','Assisted Pull-up')), wra(cardOf('Upper B','Lat Pulldown','Assisted Pull-up'))],[[135,6,6],[140,10,11]]); });
     T('new lifts establish; stale lifts open with a check-in; a suspect old entry is held back until confirmed', ()=>{ DB=engFx(); const t=cardOf('Lower A','Trap Bar Deadlift'), r=cardOf('Upper B','Seated Cable Row'), b=cardOf('Upper B','Biceps Curl'); const pre=[!!t.establish, t.w, !!r.opener, r.w, r.r, !!b.quarantine];
-      DB.logs.find(l=>l.day==='Upper B').entries.find(e=>e.exercise==='Biceps Curl').confirmed=true; const b2=cardOf('Upper B','Biceps Curl'); return eq(pre.concat([!!b2.quarantine, !!b2.opener]),[true,null,true,35,10,true,false,true]); });
+      DB.logs.find(l=>l.day==='Upper B').entries.find(e=>e.exercise==='Biceps Curl').confirmed=true; const b2=cardOf('Upper B','Biceps Curl'); return eq(pre.concat([!!b2.quarantine, !!b2.opener]),[true,null,true,32.5,12,true,false,true]); });
     T('blank RIR after following the card never ratchets down; an on-target last set earns one step', ()=>{ DB=engFx(); const cd={w:145,E:145,r:6,aim:6,sets:3,rl:5,rh:6,rirT:3,rirLow:3,track:'P'};
       DB.logs.push({date:'2026-10-11T05:00:00.000Z',day:'Upper A',entries:[{exercise:'Barbell Bench',mode:'bb',slot:'Barbell Bench',card:cd,sets:[{w:145,r:6},{w:145,r:6},{w:145,r:6}]}]});
       const a=cardOf('Upper A','Barbell Bench',null,null,'2026-10-14'); DB.logs[DB.logs.length-1].entries[0].sets[2].rir=3; const b=cardOf('Upper A','Barbell Bench',null,null,'2026-10-14');
@@ -3916,7 +3963,7 @@ function runSelftest(){
       const y=cardOf('Upper A','Barbell Bench',null,{readiness:'yellow'},'2026-10-14'), x=cardOf('Upper A','Barbell Bench',null,{readiness:'red',express:true,loadAdj:0.9},'2026-10-14'); return eq([y.w,y.rirShown,x.w],[140,4,125]); });
     T('dumbbell jump too big → earn it with reps first', ()=>{ DB=engFx(); DB.logs.push({date:'2026-10-11T05:00:00.000Z',day:'Upper A',entries:[{exercise:'DB Row',mode:'db',slot:'Chest-Supported Row',card:{w:40,E:40,r:7,aim:8,sets:3,rl:6,rh:8,rirT:3,rirLow:3,track:'P'},sets:[{w:40,r:8,rir:3},{w:40,r:8,rir:3},{w:40,r:8,rir:3}]}]});
       const c=cardOf('Upper A','Chest-Supported Row','DB Row',null,'2026-10-14'); return eq([c.w,c.r,!!c.bridge],[40,9,true]); });
-    T('2+ weeks away → one more rep in the tank and no increase; 8+ weeks → check-in opener', ()=>{ DB=engFx(); const a=cardOf('Lower A','Hack Squat','Front Squat',null,'2026-10-17'), b=cardOf('Lower A','Hack Squat','Front Squat',null,'2026-12-15'); return eq([a.w,a.r,a.rirShown,!!b.opener],[105,8,4,true]); });
+    T('2+ weeks away → one more rep in the tank and no increase; 8+ weeks → check-in opener', ()=>{ DB=engFx(); const a=cardOf('Lower A','Hack Squat','Front Squat',null,'2026-10-17'), b=cardOf('Lower A','Hack Squat','Front Squat',null,'2026-12-15'); return eq([a.w,a.r,a.rirShown,!!b.opener,b.rirShown],[105,8,4,true,3]); });
     T('test week: one top set from the level; deload: fewer sets, 4 in the tank, a notch lighter only if the reps need it', ()=>{ DB=engFx(); DB.logs.push({date:'2027-01-12T06:00:00.000Z',day:'Upper A',entries:[{exercise:'Barbell Bench',mode:'bb',slot:'Barbell Bench',sets:[{w:185,r:5,rir:2},{w:185,r:5,rir:2},{w:185,r:5,rir:2}]}]});
       const t=cardOf('Upper A','Barbell Bench',null,null,'2027-01-19'); DB=engFx(); DB.logs.push({date:'2026-11-17T06:00:00.000Z',day:'Upper A',entries:[{exercise:'Barbell Bench',mode:'bb',slot:'Barbell Bench',sets:[{w:155,r:5,rir:2},{w:155,r:5,rir:2},{w:155,r:5,rir:2}]}]}); const d=cardOf('Upper A','Barbell Bench',null,null,'2026-11-24');
       DB.logs[DB.logs.length-1].entries[0].sets.forEach(x=>{ x.r=8; }); const d2=cardOf('Upper A','Barbell Bench',null,null,'2026-11-24'); return eq([t.w,t.r,d.w,d.r,d.sets,d.rirShown,d2.w],[205,2,150,4,2,4,155]); });
@@ -3935,6 +3982,46 @@ function runSelftest(){
     T('deload and test cards are never re-predicted mid-session', ()=>{ DB=engFx(); const ex=PROGRAM['Upper A'][0], v=ex.vars[0], mk=f=>({variant:v.n, card:Object.assign({w:155,E:155,r:5,rirT:4,rirShown:4,rl:4,rh:6,track:'P',sets:2},f), sets:[{w:155,r:8,rir:0,vn:v.n},{w:155,r:'',rir:''}]});
       return eq([!!repredictAfter(ex,mk({}),v,0), repredictAfter(ex,mk({deload:true}),v,0), repredictAfter(ex,mk({test:true}),v,0)],[true,null,null]); });
     T('after a re-prediction the next set pre-fills the predicted reps', ()=>{ const ex=PROGRAM['Upper A'][0], v=ex.vars[0], sl={variant:v.n, card:{r:5}, sets:[{w:155,r:8},{w:150,r:'',rp:7},{w:150,r:''}]}; return eq([defaultReps(sl,1,{rl:4},v), defaultReps(sl,2,{rl:4},v)],[7,5]); });
+    T('a July curl confirmed as a barbell moves to Barbell Curl and the slot follows it', ()=>{ DB=engFx(); const l=DB.logs.find(x=>x.day==='Upper B'), li=DB.logs.indexOf(l), ei=l.entries.findIndex(e=>e.exercise==='Biceps Curl'); confirmEntry(li, ei, 'barbell'); const e=l.entries[ei], bb=cardOf('Upper B','Biceps Curl','Barbell Curl'), db=cardOf('Upper B','Biceps Curl','Biceps Curl');
+      return eq([e.exercise, e.mode, !!e.confirmed, e.sets[0].w, DB.variantPref['Biceps Curl'], !!bb.opener, !!db.quarantine, !!db.establish],['Barbell Curl','bb',true,50,'Barbell Curl',true,false,true]); });
+    T('stacks load in 2.5 lb steps with add-ons; 7.5 draws as two add-on plates; add-ons off means whole plates only', ()=>{ DB=seeded(); DB.settings.stackStep=10; const v={n:'Lat Pulldown',mode:'cable'}, a=makeLadder(v,0).E.filter(x=>x>=40&&x<=50); DB.settings.addOns=false; const b=makeLadder(v,0).E.filter(x=>x>=40&&x<=50); const h=vizStack(47.5,'mach',{stackStep:10}), o=vizStack(47.5,'mach',{stackStep:10,addOns:false});
+      return eq([a, b, (h.match(/class="ivs-add"/g)||[]).length, /won/.test(h), /won/.test(o)],[[40,42.5,45,47.5,50],[40,50],2,false,true]); });
+    const isoD=d=>parseYmd(d).toISOString(), benchLog=(d,o)=>Object.assign({date:isoD(d),day:'Upper A',entries:[{exercise:'Barbell Bench',mode:'bb',slot:'Barbell Bench',sets:[{w:155,r:5,rir:2},{w:155,r:5,rir:2},{w:155,r:5,rir:2}]}]},o||{}),
+      fillLog=d=>({date:isoD(d),day:'Lower B',entries:[{exercise:'Leg Press',mode:'mach',slot:'Leg Press',sets:[{w:200,r:10,rir:2}]}]}),
+      Lb=day=>{ const ex=PROGRAM['Upper A'][0], v=ex.vars[0], x=levelOf(ex,v,makeLadder(v,200),parseYmd(day)); return [!!x.returning,!!x.checkIn,x.age]; };
+    T('a steady two-a-week stretch is not a break; a real break or a lone stale lift is', ()=>{
+      DB=engFx(); DB.logs.push(benchLog('2026-10-15'), fillLog('2026-10-12'), fillLog('2026-10-19'), fillLog('2026-10-22'), fillLog('2026-10-26')); const a=Lb('2026-10-29');
+      DB=engFx(); DB.logs.push(benchLog('2026-10-15'), fillLog('2026-10-12')); const b=Lb('2026-10-29');
+      DB=engFx(); DB.logs.push(benchLog('2026-10-15'), ...['2026-10-19','2026-10-22','2026-10-26','2026-10-29','2026-11-02'].map(fillLog)); const c=Lb('2026-11-04'), c2=Lb('2026-11-05');
+      DB=engFx(); DB.logs.push(benchLog('2026-10-20'), benchLog('2026-11-24',{deload:true})); const d=Lb('2026-12-01');
+      return eq([a,b,c,c2,d],[[false,false,14],[true,false,14],[false,false,20],[true,false,21],[true,true,42]]); });
+    T('the dead hang keeps progressing at two sessions a week', ()=>{ const hang=d=>({date:isoD(d),day:'Upper A',entries:[{exercise:'Dead Hang',mode:'time',slot:'Dead Hang',sets:[{w:0,r:35},{w:0,r:30},{w:0,r:28}]}]});
+      DB=engFx(); DB.logs.push(hang('2026-10-06'), fillLog('2026-10-09'), fillLog('2026-10-13'), fillLog('2026-10-16')); const a=cardOf('Upper A','Dead Hang',null,null,'2026-10-20').goal;
+      DB=engFx(); DB.logs.push(hang('2026-10-06')); const b=cardOf('Upper A','Dead Hang',null,null,'2026-10-20').goal; return eq([a,b],[40,35]); });
+    T('a muscle-day check-in after 4+ weeks lowers the weight into the range', ()=>{ DB=engFx(); const lp=(d,w)=>({date:isoD(d),day:'Upper B',entries:[{exercise:'Lat Pulldown',mode:'mach',slot:'Lat Pulldown',sets:[1,2,3,4].map(()=>({w,r:11,rir:2}))}]});
+      DB.logs.push(lp('2026-10-08',130), lp('2026-10-15',132.5)); const c=cardOf('Upper B','Lat Pulldown',null,null,'2026-11-16'); return eq([c.w,c.r,!!c.unreachable,/32 days/.test(c.hint)],[120,9,false,true]); });
+    T('back from time away in test week: one easy top set, no test; only a real test card replaces the average', ()=>{ DB=engFx(); DB.logs.push({date:isoD('2026-12-29'),day:'Upper A',entries:[{exercise:'Barbell Bench',mode:'bb',slot:'Barbell Bench',sets:[1,2,3,4,5].map(()=>({w:185,r:4,rir:1}))}]});
+      const t=cardOf('Upper A','Barbell Bench',null,null,'2027-01-19'); const head=[!!t.test, t.sets, t.r, t.rirShown, t.w, /no test this time/.test(t.hint)];
+      DB.logs.push({date:isoD('2027-01-19'),day:'Upper A',test:true,entries:[{exercise:'Barbell Bench',mode:'bb',slot:'Barbell Bench',card:{w:185,E:185,r:2,sets:1,rl:2,rh:2,rirT:2,rirShown:2,rirLow:2,track:'P'},sets:[{w:185,r:2,rir:2}]}]});
+      const ex=PROGRAM['Upper A'][0], v=ex.vars[0], lv=Math.round(levelOf(ex,v,makeLadder(v,200),parseYmd('2027-01-26')).lv*10)/10; return eq(head.concat([lv]),[false,1,2,2,185,true,212.8]); });
+    T('the early-deload offer ignores a slide from before a break', ()=>{ DB=seeded(); DB.blocks=[blk(-35)]; DB.activeBlockId='t'; const B=(n,r,rir)=>({date:addDays(today(),n).toISOString(),day:'Upper A',entries:[{exercise:'Barbell Bench',mode:'bb',slot:'Barbell Bench',sets:[1,2,3].map(()=>({w:155,r,rir}))}]});
+      DB.logs=[B(-30,5,2),B(-23,5,1),B(-16,4,1)]; const a=deloadSignal(); DB.logs=[B(-12,5,2),B(-9,5,1),B(-5,4,1)]; const b=deloadSignal();
+      DB.logs=[B(-40,6,3),B(-12,5,2),B(-9,5,1),B(-5,4,1)]; const c=deloadSignal(); return eq([a,b,c],[null,'Barbell Bench has slid two sessions running','Barbell Bench has slid two sessions running']); });
+    T('one quiet line after 14+ days away, none before', ()=>{ DB=seeded(); DB.blocks=[blk(-42)]; DB.activeBlockId='t'; const lg=n=>({date:addDays(today(),n).toISOString(),day:'Upper A',entries:[{exercise:'Barbell Bench',mode:'bb',slot:'Barbell Bench',sets:[{w:155,r:5,rir:2}]}]});
+      DB.logs=[lg(-20)]; const a=awayLineHTML(); DB.logs=[lg(-13)]; const b=awayLineHTML(); DB.logs=[lg(-40)]; const c=awayLineHTML();
+      return eq([a.includes('Back after 20 days — picking up at week 7, Build. First time back on each weighted lift: no increases, one more rep in the tank.'), b, c.includes('Back after 6 weeks'), c.includes('lighter where your numbers call for it')],[true,'',true,true]); });
+    T('an unfinished session from days ago is saved or discarded, not resumed; yesterday still resumes', ()=>{ const keep=DRAFT; DB=engFx(); const d=newDraft('Upper A',{}); d.day=ymd(addDays(today(),-3)); d.ex['Barbell Bench'].sets[0].w=155; d.ex['Barbell Bench'].sets[0].r=5; DRAFT=d; const h=resumeHTML(), y=draftStale({day:ymd(addDays(today(),-1))}); DRAFT=keep;
+      return eq([h.includes("wasn't finished"), h.includes('showGym()'), h.includes('saveStaleDraft()'), y],[true,false,true,false]); });
+    T('the card says when a return means a lighter weight', ()=>{ DB=engFx(); DB.logs.push(benchLog('2026-10-15'), fillLog('2026-10-12')); const c=cardOf('Upper A','Barbell Bench',null,null,'2026-10-29'); return eq([c.w,c.hint],[145,'first full session in 14 days — one more rep in the tank, a little lighter']); });
+    T('copy matches keep-the-calendar', ()=>{ DB=engFx(); renderUpNext(); const t=$('upnext').textContent; DB=seeded(); DB.blocks=[blk(-120)]; DB.activeBlockId='t'; const a=blockPromptHTML(); DB.blocks=[]; DB.activeBlockId=null; const b=blockPromptHTML();
+      return eq([t.includes('the weeks follow the calendar'), t.includes('No clock'), a.includes('keep running regular weeks'), a.includes('its week-1'), b.includes('Strength + Bulk week-1 targets')],[true,false,true,false,true]); });
+    T('stack drawing: only real add-on combinations count; 46 on a 10-lb stack still will not load', ()=>{ const a=vizStack(46,'mach',{stackStep:10}), b=vizStack(45,'mach',{stackStep:10}); return eq([/won/.test(a), (a.match(/class="ivs-add"/g)||[]).length, /won/.test(b), (b.match(/class="ivs-add"/g)||[]).length],[true,0,false,1]); });
+    T('a check-in after 4+ weeks is not held at an equipment-jump weight', ()=>{ DB=engFx(); DB.logs.push({date:isoD('2026-10-10'),day:'Upper A',entries:[{exercise:'DB Row',mode:'db',slot:'Chest-Supported Row',card:{w:45,E:45,r:6,aim:6,sets:3,rl:6,rh:8,rirT:3,rirShown:2,rirLow:3,track:'P',exit:true},sets:[{w:45,r:6,rir:2},{w:45,r:6,rir:2},{w:45,r:6,rir:2}]}]});
+      const c=cardOf('Upper A','Chest-Supported Row','DB Row',null,'2026-11-12'); return eq([c.w<45, /check-in, a little lighter/.test(c.hint), /first full session in 33 days/.test(c.hint)],[true,true,true]); });
+    T('the "first full session" count skips a deload session in between', ()=>{ DB=engFx(); DB.logs=DB.logs.filter(l=>!l.entries.some(e=>e.slot==='Barbell Bench')); DB.logs.push(benchLog('2026-10-08'),...['2026-10-15','2026-10-22','2026-10-29'].map(fillLog),benchLog('2026-11-05',{deload:true}),...['2026-11-12','2026-11-19','2026-11-26'].map(fillLog));
+      const c=cardOf('Upper A','Barbell Bench',null,null,'2026-12-03'); return eq([/first full session in 56 days/.test(c.hint)],[true]); });
+    T('a days-old unfinished session cannot be resumed from the Sessions tab or by typing a set', ()=>{ const keep=DRAFT, keepS=activeSession; DB=engFx(); const d=newDraft('Upper A',{}); d.day=ymd(addDays(today(),-3)); d.ex['Barbell Bench'].sets[0].w=155; d.ex['Barbell Bench'].sets[0].r=5; DRAFT=d; activeSession='Upper A'; renderSessionBody();
+      const body=$('session-body').innerHTML, typed=ensureDraftFor('Upper A'); DRAFT=keep; activeSession=keepS; return eq([body.includes('saveStaleDraft()'), /Resume in gym mode<\/button>/.test(body) && /disabled[^>]*onclick="showGym\(\)"/.test(body), typed],[true,true,false]); });
     T('pull-up ladder levels', ()=>{ const L=x=>ladderLevel(Object.assign(newStats(),x)).n; return eq([L({hang:25}),L({hang:40,assistFirst:120,assistBest:120,assistNow:120}),L({hang:40,assistFirst:120,assistBest:55,assistNow:60}),L({strict:1}),L({strict:6})],[1,2,3,4,5]); });
     T('phases + header chip', ()=>{ DB=seeded(); DB.blocks=[blk(-14)]; DB.activeBlockId='t'; const c=ctx(), ch=chipText(c), t=TEMPLATES['strength-bulk']; return eq([c.w,ch.n,ch.l,phaseAt(t,8).name,!!phaseAt(t,8).deload,!!phaseAt(t,16).test,!!phaseAt(t,17).complete,phaseAt(TEMPLATES.maintain,8).name,phaseAt(TEMPLATES.maintain,9).name],[3,'W3/16','Groove','Deload',true,true,true,'Deload','Base']); });
     T('no block and pre-block both run week-1 targets', ()=>{ DB=seeded(); const main=PROGRAM['Lower A'][0]; const a=prescribe(main,ctx()); DB.blocks=[blk(5)]; DB.activeBlockId='t'; const c=ctx(), b=prescribe(main,c); return eq([a.sets,a.rl,a.rh,a.rir,b.sets,b.rir,chipText(c).n,!!c.ph.pre],[3,5,6,3,3,3,'5d',true]); });
@@ -3960,7 +4047,7 @@ function runSelftest(){
     T('a blank assistance is "not chosen yet", never a strict pull-up', ()=>{ DB=seeded(); DB.profile.w=200; const v=VARIANT_INDEX['Assisted Pull-up']; const blank=equipViz(v,''), zero=equipViz(v,0), neg=vizAssist(-5,{bodyweight:200}); return eq([blank, /strict/i.test(zero), neg],['',true,'']); });
     T('send to OneDrive: unsent by time, deletes never hide new sessions, sent file imports as up to date', ()=>{ DB=seeded(); const L=(d,f)=>({date:d,finishedAt:f,day:'Upper A',entries:[{exercise:'Barbell Bench',mode:'bb',sets:[{w:135,r:5}]}]}); DB.logs=[L('2026-10-06T05:00:00.000Z','2026-10-06T23:00:00.000Z'),L('2026-10-08T05:00:00.000Z','2026-10-08T23:00:00.000Z')]; const a=unsentCount(); DB.lastSent={at:'2026-10-07T12:00:00.000Z',sessions:1}; const b=unsentCount(); DB.logs.splice(0,1); DB.logs.push(L('2026-10-09T05:00:00.000Z','2026-10-09T23:00:00.000Z')); const c=unsentCount(); const stamp={at:'2026-10-09T23:30:00.000Z',sessions:2}; const m=migrate(JSON.parse(JSON.stringify(Object.assign({_export:{at:stamp.at,app:APP_VERSION,sessions:2}},DB,{lastSent:stamp})))); const real=DB; DB=m; const d=unsentCount(); DB=real; return eq([a,b,c,d,'_export' in m,/^training-log-\d{4}-\d{2}-\d{2}-\d{4}\.txt$/.test(logFileName('txt'))],[2,1,2,0,false,true]); });
     T('muscle mapping', ()=>eq(['Romanian Deadlift','Leg Curl','Nordic Curl','Overhead Extension','Reverse Pec Deck','Trap Bar Deadlift','Chest-Supported Row','Dead Hang','Ab Wheel','Hanging Knee Raise','Leg Press Calf Raise'].map(inferMuscle),['Posterior','Posterior','Posterior','Arms','Shoulders','Posterior','Back','Grip','Core','Core','Calves']));
-  } finally { DB=realDB; DRAFT=realDraft; NOSAVE=realNS; currentView=realView; }
+  } finally { DB=realDB; DRAFT=realDraft; NOSAVE=realNS; currentView=realView; try{ if(GYM_OPEN) renderGym(); else go(realView); }catch(e){} }
   const pass=results.filter(r=>r.ok).length, ok=pass===results.length;
   console.log(`SELFTEST ${pass}/${results.length} ${ok?'PASS':'FAIL'}`);
   results.filter(r=>!r.ok).forEach(r=>console.warn('SELFTEST ✗ '+r.name+' — '+r.msg));
