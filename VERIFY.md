@@ -65,7 +65,7 @@ Sent logs land in the owner's OneDrive training Logs folder (outside this repo);
 
 ## Feature map
 
-Confirmed 2026-09-30 (v3.0.0); rows marked v3.1 added 2026-10-10. **A stale row is a defect.**
+Confirmed 2026-09-30 (v3.0.0); rows marked v3.1 added 2026-10-10; v3.2 engine rows 2026-10-10. **A stale row is a defect.**
 
 | Concept | Control | Source | Proof |
 |---|---|---|---|
@@ -74,11 +74,15 @@ Confirmed 2026-09-30 (v3.0.0); rows marked v3.1 added 2026-10-10. **A stale row 
 | Blocks & season | Season tab: Start / Move start / End block | `startBlock`, `makeBlock`, `moveBlock`, `endBlock`, `timelineHTML`, `blockCardHTML` | Strength + Bulk from Mon Oct 5 2026 ends Jan 24 2027; weeks 8 and 12 labelled Thanksgiving / Christmas |
 | Header chip | top-right chip | `chipText`, `renderHeader` | `W3/16 · Groove` mid-block; `5d · To block` before start |
 | Prescriptions | px line in Sessions and gym mode | `prescribe`, `PROGRAM`, `TEMPLATES` | self-test prescription rows (build, deload, express, flat day, peak) |
-| Progression | "Suggested" line | `suggest`, `incFor`, `roundLoad` | all sets at the top of the range → +10 lower / +5 upper next time; assisted pull-up help −10 (−5 at ≤30) |
+| Progression (v3.2 predictive engine) | 'Suggested' line + basis line on every card; finish summary 'card N @R, got M' | `planFor` → `makeLadder`, `classify` (working vs ramp sets), `rirOf`/`est` (level = load × (1 + (reps + RIR)/30)), `levelOf` (same-slot, 2-session mean, gap/stale/expire), `judgeSession`, `cardFor` (P/D tracks, bridge, guards G0–G4), `hangCard`, `bwCard`, `repredictAfter` | self-test rows 'predicted loads match the hand-worked examples', 'assisted pull-ups…' (both), 'blank RIR…never ratchets down', 'an establish card with a blank RIR…', 'flat/rough days…', 'dumbbell jump…', '2+ weeks away…', 'the week after a deload…', 'a test-week log only overrides…', 'a rough-day express session is logged light…', 'test week…deload…', 'hinges never…'; real-log run reproduces the 14 worked examples in the design spec |
 | Draft | any set input, gym mode | `newDraft`, `saveDraft`, `draftEntries`, `commitDraft` | type a set, reload mid-session → Resume banner with the value intact |
 | Gym mode | Start / Resume | `openGym`, `renderGym`, `gymDone`, `gymStep`, `gymRir`, `gymVariant` | ✓ Set done → set recorded, weight carried to the next set, rest timer running |
 | Rest timer | after ✓ Set done | `startRest`, `tick`, `restAlarm` | set `draft.rest.endAt` to now+1 s: "Rest over — go", flash, 3 oscillator tones, `fired` persisted |
 | Plate math + warm-up | gym set card | `plateMath`, `plateViz`, `warmup` | 225 on a 60 lb trap bar = 45 + 35 + 2.5 per side |
+| Prescriptions by phase (v3.2) | px line on every card | `prescribe` (phase.mus RIR for muscle work, hiRep → RIR 1, rirFloor 2 on hinges, peak/test overrides, returning +1 RIR, readiness +1/+2 once) | self-test 'hinges never prescribe below 2 RIR; high-rep isolation goes to 1' |
+| In-session re-prediction + variant split (v3.2) | Gym mode: after a set that's off plan, the next sets move one notch with a toast and the reps pre-fill; switching variant mid-exercise | `repredictAfter` (uses the card's shown RIR; never on deload/test cards), `gymDone` (stamps `set.vn`), `switchVariant` (clears stale marks), `defaultReps` (`rp`), `draftEntries` (one entry per variant, card only on the current one) | self-test rows 'a set done on another variant…', 'deload and test cards are never re-predicted…', 'after a re-prediction the next set pre-fills…'; e2e: Upper A bench 145×4@1 vs card 145×6@3 → set 2 = 140, reps 3, toast; switch to DB bench → log holds two entries |
+| Early deload (v3.2) | Today banner 'Make this week a deload' | `deloadSignal`, `deloadNow`, `ctxAt` (block.deloadWeek) | a main lift's level falling 2 sessions running, or 2 red check-ins, shows the banner; accepting turns this week into a deload only |
+| The Why + references (v3.2) | The Why tab | `WHY_CARDS`, `WHY_REFS`, `renderWhy` | 20 cards, 41 references; every DOI checked against Crossref (author + year) before publishing |
 | Equipment drawings (v3.1) | gym set card, under the steppers | `equipViz` dispatcher → `plateViz` (barbell), `vizTrap`, `vizSled`, `vizDB`, `vizKB`, `vizStack`, `vizAssist`, `vizBW`, `vizHang`/`vizHangTick` | self-test rows "every variant draws without NaN…" and "drawings exist for every loaded mode"; then open gym mode on one exercise per mode at 375 px and look |
 | Implement count (v3.1) | — | `V(name, mode, count)`, `VARIANT_INDEX`, `implCount` | DB Row / Goblet Squat draw one implement, bench/RDL draw a pair; tonnage counts pairs ×2 |
 | Send to OneDrive (v3.1) | Logbook → Send to OneDrive; sheet after each log; Today nudge (destination: the Training folder the phone already uses) | `sendLog`, `askSaved`, `confirmPending`, `offerSend`, `unsentCount`, `logStamp`, `logFileName` | share sheet gets `training-log-YYYY-MM-DD-HHMM.json` (iPhone) or the same JSON as `.txt` (Chrome/Android refuse .json); cancel = not sent; no share support or a share error = save-file sheet, counted as sent only after "It's in the Logs folder"; unsent = logs finished after the last send (deletes can't hide new ones); the file embeds its own `lastSent` and re-imports as up to date |
@@ -91,6 +95,8 @@ Confirmed 2026-09-30 (v3.0.0); rows marked v3.1 added 2026-10-10. **A stale row 
 ---
 
 ## Recipes by change class
+
+- **Weight engine.** Encode the case as a self-test row with a hand-computed expected card first. Then run the lifter's real exported log through `planFor` in a self-test page (NOSAVE) and compare against the design spec's worked examples. Never ship an engine change on unit rows alone.
 
 - **Data model.** Add a self-test row first. `migrate` must be idempotent: run it twice,
   compare. Never ship a `migrate` change without running it against a real exported

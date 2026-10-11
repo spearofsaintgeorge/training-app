@@ -133,6 +133,14 @@
   .ex .exnote{font-size:12.5px;color:var(--muted);margin-top:5px}
   .seed{font-family:var(--mono);font-size:12px;color:var(--steel);margin-top:6px}
   .seed.est{color:var(--amber2)}
+  .basis{font-family:var(--mono);font-size:11px;color:var(--dim);margin-top:3px}
+  .lastset{font-size:12.5px;color:var(--amber2);margin-top:10px;line-height:1.35}
+  .rirchips button.tgt{border-color:var(--amber2);color:var(--amber2)}
+  .rirchips button.tgt.on{color:var(--bg)}
+  ol.refs{margin:6px 0 0 18px;font-size:12.5px;color:var(--muted)}
+  ol.refs li{margin:5px 0;line-height:1.4}
+  ol.refs a{color:var(--steel);word-break:break-all}
+  .refk{font-family:var(--mono);font-size:10.5px;color:var(--dim);margin-top:8px}
   .lastline{font-family:var(--mono);font-size:12px;color:var(--steel);margin-top:5px;opacity:.85}
   .setrow{display:flex;gap:7px;align-items:center;margin-top:10px;flex-wrap:wrap}
   .setrow input{width:64px;background:var(--bg);border:1px solid var(--line);border-radius:7px;color:var(--txt);font-family:var(--mono);font-size:14px;padding:7px 8px;text-align:center}
@@ -790,19 +798,9 @@
   <section class="view" data-view="why">
     <h2 class="vh">No Black Boxes</h2>
     <h1 class="vt">The Why</h1>
-    <p class="lead">You build platforms you understand. Same here — every choice traces to evidence, not bro-lore.</p>
-    <div class="grid g2">
-      <div class="card"><h4>Strength and size, both</h4><p class="why">Heavy sets of 3–6 build strength; sets of 8–15 taken close to failure build size. Running both every week — two heavy days, two muscle days — is a well-supported way to get bigger and stronger at once, and each muscle still gets trained twice.</p></div>
-      <div class="card"><h4>Volume is the driver</h4><p class="why">Weekly hard-set volume (10–20 sets per muscle) is the strongest training lever for growth. We ramp it across the block instead of maxing it day one — fatigue is the tax on volume.</p></div>
-      <div class="card"><h4>Proximity to failure (RIR)</h4><p class="why">Growth happens across a wide rep range <b>if</b> sets end within ~1–3 reps of failure. Reps-in-reserve lets you autoregulate: push when fresh, back off when the body says so. The readiness check does this for you on flat days.</p></div>
-      <div class="card"><h4>Progressive overload</h4><p class="why">Muscle and strength only adapt to a rising demand. Double progression — add reps, then add load — is the simplest honest way to make the line go up. On the pull-up, the load that drops is the assistance.</p></div>
-      <div class="card"><h4>Planned deloads</h4><p class="why">Fatigue masks fitness. A light week every 4–6 weeks lets it clear so the next stretch starts higher. They land on Thanksgiving and Christmas weeks — the weeks life was going to deload you anyway.</p></div>
-      <div class="card"><h4>Spine-friendly loading</h4><p class="why">The trap bar keeps the load in line with your hips, so the low back works less for the same weight. Hack and belt squats load the legs without a bar across the spine. Chest-supported rows take the back out of rowing. Same stimulus, less wear.</p></div>
-      <div class="card"><h4>The pull-up ladder</h4><p class="why">Bigger lifters can't do many bodyweight reps, so we make the movement scalable: assistance that drops a notch at a time, timed hangs for grip and shoulders, and frequent easy practice on off days ("grease the groove"). Practice without fatigue builds the skill fastest.</p></div>
-      <div class="card"><h4>Bulk without a scale</h4><p class="why">A modest surplus plus enough protein builds muscle; the scoreboard is the bar, not the scale. Four real meals with protein at each covers it without counting anything.</p></div>
-      <div class="card"><h4>Protein & creatine</h4><p class="why">1.6–2.2 g/kg/day is the well-replicated range for maximizing muscle gain. Creatine monohydrate (5 g/day) is the most evidence-backed supplement there is — strength, size, and a cognitive bonus. Cheap, safe, proven.</p></div>
-      <div class="card"><h4>Zone 2 + the sauna</h4><p class="why">Cardiorespiratory fitness is among the strongest predictors of all-cause mortality, and frequent sauna use is linked to lower cardiovascular risk in large cohorts. A small, steady dose of both keeps the healthspan work going while the lifting does the building.</p></div>
-    </div>
+    <p class="lead">Every rule in this app traces to published research — meta-analyses and trials first, newest where they exist — or is labelled a design choice where the research runs out. Each card names its sources; the full list is at the bottom. Reviewed October 2026.</p>
+    <div class="grid g2" id="why-cards"></div>
+    <div class="card" style="margin-top:16px"><h4>References <span class="pill steel">verified against the source</span></h4><ol class="refs" id="why-refs"></ol></div>
   </section>
 
   <!-- PROFILE -->
@@ -831,7 +829,7 @@
     </div>
     <div class="card" style="margin-top:16px">
       <h4>Baseline sets <span class="pill">optional</span></h4>
-      <p class="why" style="margin-bottom:10px">Only used for a lift's very first suggestion when it has no history yet. Weight × reps for a strong set with ~2 reps left.</p>
+      <p class="why" style="margin-bottom:10px">Kept for reference. The app now predicts every weight from your logged sessions, so these no longer drive suggestions.</p>
       <div id="sz-inputs"></div>
       <button class="btn sm" style="margin-top:6px" onclick="saveProfile()">Save baseline</button>
     </div>
@@ -847,7 +845,7 @@
 <script>
 'use strict';
 /* ================= core constants ================= */
-const APP_VERSION = '3.1.1';
+const APP_VERSION = '3.2.0';
 const KEY = 'argus_training_v1';
 const DRAFT_KEY = KEY + ':draft';
 const SNAP_KEY = 'argus_training_v2_snapshot';
@@ -880,7 +878,7 @@ function num(v){ const n=parseFloat(v); return isFinite(n)?n:0; }
 function byDate(a,b){ return new Date(a.date)-new Date(b.date); }
 
 /* ================= state: load / migrate / save ================= */
-function defaultSettings(){ return {bar:45, trapBar:60, stackStep:10, plates:[45,35,25,10,5,2.5], rest:{main:180,sec:150,acc:90}, sound:true, offerSend:true}; }
+function defaultSettings(){ return {bar:45, trapBar:60, stackStep:10, plates:[45,35,25,10,5,2.5], rest:{main:180,sec:150,acc:90}, sound:true, offerSend:true, addOns:true}; }
 function normSettings(x){
   const d=defaultSettings();
   if(!x||typeof x!=='object'||Array.isArray(x)) return d;
@@ -891,7 +889,8 @@ function normSettings(x){
     plates: Array.isArray(x.plates)? x.plates.map(Number).filter(p=>p>0) : d.plates,
     rest: Object.assign({}, d.rest, (x.rest&&typeof x.rest==='object')?x.rest:{}),
     sound: x.sound!==false,
-    offerSend: x.offerSend!==false
+    offerSend: x.offerSend!==false,
+    addOns: x.addOns!==false
   };
   if(!o.plates.length) o.plates=d.plates;
   for(const k of ['main','sec','acc']) o.rest[k]=Math.max(15,Math.min(600,num(o.rest[k])||d.rest[k]));
@@ -997,15 +996,15 @@ const TEMPLATES = {
   'strength-bulk': {id:'strength-bulk', name:'Strength + Bulk', short:'Strength', weeks:16, when:'Fall · winter', z2:2, eat:'bulk',
     blurb:'Two heavy days, two muscle days, the pull-up ladder. Deloads land on Thanksgiving and Christmas weeks.',
     phases:[
-      {from:1, to:3,  name:'Groove',   heavy:{sets:3,rl:5,rh:6,rir:3}, setAdj:0, rir:3, note:'Learn the new lifts, set the baselines.'},
-      {from:4, to:7,  name:'Build',    heavy:{sets:4,rl:4,rh:6,rir:2}, setAdj:1, rir:2, note:'Volume climbs — the growth stretch.'},
+      {from:1, to:3,  name:'Groove',   heavy:{sets:3,rl:5,rh:6,rir:3}, setAdj:0, rir:3, mus:{rir:3}, note:'Learn the new lifts, set the baselines.'},
+      {from:4, to:7,  name:'Build',    heavy:{sets:4,rl:4,rh:6,rir:2}, setAdj:1, rir:2, mus:{rir:2,rirLabel:'1–2'}, note:'Volume climbs — the growth stretch.'},
       {from:8, to:8,  name:'Deload',   deload:true, heavy:{sets:4,rl:4,rh:6,rir:4}, setAdj:0, rir:4, note:'Fewer sets, same groove.'},
-      {from:9, to:11, name:'Build II', heavy:{sets:4,rl:3,rh:5,rir:2,rirLabel:'1–2'}, setAdj:1, rir:2, rirLabel:'1–2', note:'Heavier, fewer reps.'},
+      {from:9, to:11, name:'Build II', heavy:{sets:4,rl:3,rh:5,rir:2,rirLabel:'1–2'}, setAdj:1, rir:2, rirLabel:'1–2', mus:{rir:2,rirLabel:'1–2'}, note:'Heavier, fewer reps.'},
       {from:12,to:12, name:'Deload',   deload:true, heavy:{sets:4,rl:3,rh:5,rir:4}, setAdj:0, rir:4, note:'Fewer sets, same groove.'},
-      {from:13,to:15, name:'Peak',     heavy:{sets:5,rl:2,rh:4,rir:1}, setAdj:0, rir:1, note:'Heavy twos to fours. Hold the muscle work.'},
-      {from:16,to:16, name:'Test',     test:true, heavy:{sets:1,rl:1,rh:3,rir:1}, setAdj:-1, rir:3, note:'Top sets, new numbers, the trophy.'}
+      {from:13,to:15, name:'Peak',     heavy:{sets:5,rl:2,rh:4,rir:1}, setAdj:0, rir:1, mus:{rir:2}, note:'Heavy twos to fours. Hold the muscle work.'},
+      {from:16,to:16, name:'Test',     test:true, heavy:{sets:1,rl:1,rh:3,rir:1}, setAdj:-1, rir:3, mus:{rir:3}, note:'Top sets, new numbers, the trophy.'}
     ],
-    after:{name:'Complete', heavy:{sets:4,rl:4,rh:6,rir:2}, setAdj:0, rir:2, note:'Block done — keep cycling until you start the next.'},
+    after:{name:'Complete', heavy:{sets:4,rl:4,rh:6,rir:2}, setAdj:0, rir:2, mus:{rir:2}, note:'Block done — keep cycling until you start the next.'},
     lead:'Fall into winter: get strong in the big patterns, put on muscle, and own your bodyweight on the bar. Four lifts a week on the same rolling rotation — two heavy days, two muscle days. Deloads land on Thanksgiving and Christmas weeks on purpose.',
     mandate:'Get strong, get bigger, own the bar. Heavy days build the strength, muscle days build the size, the ladder builds the pull-up. Leave reps in reserve when in doubt — sixteen steady weeks beat one heroic one. Something pinches → swap the variant, back off, re-check.'},
   'lean-out': {id:'lean-out', name:'Lean-out', short:'Lean-out', weeks:12, when:'Late winter · spring', z2:3, eat:'cut',
@@ -1035,28 +1034,28 @@ const SESSION_META = {
   'Lower B':{tag:'Muscle', focus:'leg press + hamstrings'},
   'Upper B':{tag:'Muscle', focus:'pulldown + incline press'}
 };
-const V=(n,mode,count)=>count? {n,mode,count} : {n,mode};
+const V=(n,mode,count,extra)=>Object.assign(count? {n,mode,count} : {n,mode}, extra||{});
 /* role: main / sec / acc (sets the rest timer). scheme 'heavy' follows the phase's heavy prescription. core = kept in Express. */
 const PROGRAM = {
   'Lower A':[
-    {slot:'Trap Bar Deadlift', core:true, role:'main', scheme:'heavy', sets:4, rl:4, rh:6, lower:true,
+    {slot:'Trap Bar Deadlift', core:true, role:'main', scheme:'heavy', sets:4, rl:4, rh:6, lower:true, rirFloor:2, peak:{sets:3}, test:{r:3, rir:2},
       vars:[V('Trap Bar Deadlift','trap'),V('Trap Bar DL (low handles)','trap'),V('Romanian Deadlift','bb')],
-      note:'High handles first — a shorter pull that is kinder to the low back. Brace, push the floor away, stand tall. A neutral spine beats an extra rep.'},
+      note:'High handles shorten the pull. In low-handle tests the trap bar cut lower-back load about 8–15% versus a straight bar at light-to-moderate weights; at 70–80% of max the difference was no longer significant. Brace hard and always keep 2 in the tank.'},
     {slot:'Hack Squat', core:true, role:'sec', sets:3, rl:5, rh:8, lower:true,
       vars:[V('Hack Squat','plate'),V('Belt Squat','plate'),V('Leg Press','mach'),V('Front Squat','bb')],
       note:'Deep and controlled. Neck or traps flaring under the pads? Switch to the Belt Squat — the load hangs from your hips, nothing on the spine.'},
     {slot:'Bulgarian Split Squat', role:'sec', sets:2, rl:6, rh:8, lower:true,
       vars:[V('Bulgarian Split Squat','db'),V('KB Split Squat','kb'),V('Reverse Lunge','db'),V('Step-up','db')],
       note:'Per leg, weight per dumbbell. Front foot heavy, torso tall.'},
-    {slot:'Standing Calf Raise', role:'acc', sets:3, rl:8, rh:12,
+    {slot:'Standing Calf Raise', role:'acc', sets:3, rl:8, rh:12, failOK:true,
       vars:[V('Standing Calf Raise','mach'),V('Leg Press Calf Raise','mach'),V('DB Calf Raise','db',1)],
-      note:'Full stretch, one-second pause at the bottom. Builds the feet and ankles too.'},
+      note:'2 s down, 1 s pause in the full stretch at the bottom. Builds the feet and ankles too.'},
     {slot:'Ab Wheel / Dead Bug', role:'acc', sets:3, rl:8, rh:12,
       vars:[V('Ab Wheel','bw'),V('Dead Bug','bw'),V('Hanging Knee Raise','bw')],
       note:'Anti-extension. Ribs down — stop the range before your low back arches.'}
   ],
   'Upper A':[
-    {slot:'Barbell Bench', core:true, role:'main', scheme:'heavy', sets:4, rl:4, rh:6,
+    {slot:'Barbell Bench', core:true, role:'main', scheme:'heavy', sets:4, rl:4, rh:6, test:{r:2, rir:1},
       vars:[V('Barbell Bench','bb'),V('DB Bench Press','db'),V('Machine Chest Press','mach')],
       note:'Shoulder blades pinned, feet driving. Touch and press — pause a beat on the heavy weeks.'},
     {slot:'Assisted Pull-up', core:true, role:'main', scheme:'ladder', sets:4, rl:3, rh:6, ladder:true,
@@ -1073,47 +1072,47 @@ const PROGRAM = {
       note:'Seconds, as long as you can hold it clean. Relaxed shoulders, full grip. The hang is half the pull-up.'}
   ],
   'Lower B':[
-    {slot:'Leg Press', core:true, role:'main', sets:4, rl:10, rh:12, lower:true,
+    {slot:'Leg Press', core:true, role:'main', sets:4, rl:8, rh:12, lower:true,
       vars:[V('Leg Press','mach'),V('Belt Squat','plate'),V('Pendulum Squat','plate'),V('Hack Squat','plate'),V('Goblet Squat','kb',1)],
       note:'Deep, controlled, low back glued to the pad. Higher reps — this is the muscle day.'},
-    {slot:'Romanian Deadlift', core:true, role:'sec', sets:3, rl:8, rh:10, lower:true,
+    {slot:'Romanian Deadlift', core:true, role:'sec', sets:3, rl:8, rh:12, lower:true, rirFloor:2,
       vars:[V('Romanian Deadlift','bb'),V('DB RDL','db'),V('KB RDL','kb'),V('45° Back Extension','bw')],
       note:'Three seconds down. Stop where the hamstrings stop you, not where the low back takes over.'},
-    {slot:'Leg Curl', role:'acc', sets:3, rl:10, rh:15,
-      vars:[V('Leg Curl','mach'),V('Seated Leg Curl','mach'),V('Nordic Curl','bw')],
-      note:'Squeeze at the top, slow on the way back. Strong hamstrings protect the low back.'},
+    {slot:'Leg Curl', role:'acc', sets:3, rl:10, rh:15, failOK:true,
+      vars:[V('Seated Leg Curl','mach',0,{rampIn:2}),V('Leg Curl','mach'),V('Nordic Curl','bw')],
+      note:'Hips bent, hamstrings stretched. 2 s down, 1 s pause in the stretch. Strong hamstrings protect the low back.'},
     {slot:'Hip Thrust', role:'sec', sets:3, rl:8, rh:12, lower:true,
       vars:[V('Hip Thrust','bb'),V('Machine Hip Thrust','mach'),V('Glute Bridge','bw')],
       note:'Drive through the heels, pause at the top, ribs down.'},
     {slot:'Walking Lunge', role:'acc', sets:2, rl:10, rh:12,
       vars:[V('Walking Lunge','db'),V('KB Walking Lunge','kb'),V('Reverse Lunge','db')],
       note:'Per leg, weight per dumbbell.'},
-    {slot:'Seated Calf Raise', role:'acc', sets:3, rl:12, rh:20,
+    {slot:'Seated Calf Raise', role:'acc', sets:3, rl:12, rh:20, hiRep:true, failOK:true,
       vars:[V('Seated Calf Raise','mach')],
-      note:'High reps, full range.'}
+      note:'High reps taken hard — 1 rep left. 2 s down, 1 s pause in the stretch.'}
   ],
   'Upper B':[
-    {slot:'Lat Pulldown', core:true, role:'main', sets:4, rl:8, rh:12,
-      vars:[V('Lat Pulldown','mach'),V('Neutral-Grip Pulldown','mach'),V('Assisted Pull-up','assist')],
-      note:'Full stretch at the top, elbows to the ribs. This is ladder volume — it feeds the pull-up.'},
+    {slot:'Lat Pulldown', core:true, role:'main', sets:4, rl:8, rh:12, failOK:true,
+      vars:[V('Lat Pulldown','mach'),V('Neutral-Grip Pulldown','mach'),V('Assisted Pull-up','assist',0,{noFail:true})],
+      note:'Full stretch at the top, elbows to the ribs. 2 s down, 1 s pause in the stretch. This is ladder volume — it feeds the pull-up.'},
     {slot:'Incline DB Press', core:true, role:'sec', sets:3, rl:8, rh:12,
       vars:[V('Incline DB Press','db'),V('Incline Machine','mach'),V('Incline Barbell','bb')],
-      note:'Upper chest. Deep stretch at the bottom, weight per dumbbell.'},
+      note:'Upper chest, weight per dumbbell. 2 s down, 1 s pause in the deep stretch.'},
     {slot:'Seated Cable Row', role:'sec', sets:3, rl:10, rh:12,
       vars:[V('Seated Cable Row','cable'),V('Chest-Supported Row','mach'),V('DB Row','db',1)],
-      note:'Squeeze the blades, no torso swing, full stretch each rep.'},
-    {slot:'Lateral Raise', role:'acc', sets:3, rl:12, rh:20,
+      note:'Squeeze the blades, no torso swing. 2 s back, 1 s pause in the full stretch.'},
+    {slot:'Lateral Raise', role:'acc', sets:3, rl:12, rh:20, hiRep:true, failOK:true, setAdjOK:true,
       vars:[V('Lateral Raise','db'),V('Cable Lateral','cable'),V('Machine Lateral','mach')],
-      note:'Lead with the elbows, no swinging. This is shoulder width.'},
-    {slot:'Face Pull', role:'acc', sets:3, rl:15, rh:20,
+      note:'Lead with the elbows, no swinging, 1 rep left. 2 s down, 1 s pause at the bottom. This is shoulder width.'},
+    {slot:'Face Pull', role:'acc', sets:3, rl:15, rh:20, hiRep:true, failOK:true,
       vars:[V('Face Pull','cable'),V('Reverse Pec Deck','mach')],
       note:'Rear delts and upper back — posture work for the desk and the neck.'},
-    {slot:'Biceps Curl', role:'acc', sets:3, rl:10, rh:15,
+    {slot:'Biceps Curl', role:'acc', sets:3, rl:10, rh:15, failOK:true,
       vars:[V('Biceps Curl','db'),V('Cable Curl','cable'),V('Hammer Curl','db')],
       note:'Superset with the pushdown — alternate them, 60–90 s between rounds.'},
-    {slot:'Triceps Pushdown', role:'acc', sets:3, rl:10, rh:15,
-      vars:[V('Triceps Pushdown','cable'),V('Overhead Extension','cable'),V('Dips','bw')],
-      note:'Full lockout, controlled return.'}
+    {slot:'Triceps Pushdown', role:'acc', sets:3, rl:10, rh:15, failOK:true,
+      vars:[V('Overhead Extension','cable'),V('Triceps Pushdown','cable'),V('Dips','bw')],
+      note:'Overhead first: the stretched long head grows more. If the overhead position bothers the neck or shoulders, use the pushdown. Separate weights — don\'t carry one over to the other.'}
   ]
 };
 const VARIANT_INDEX = (()=>{ const m={}; for(const k in PROGRAM) for(const ex of PROGRAM[k]) for(const v of ex.vars) m[v.n]=v; return m; })();
@@ -1140,8 +1139,33 @@ function phaseAt(tpl, w){
 function ctxAt(d){
   const b=activeBlock(), tpl=tplFor(b);
   if(!b) return {b:null, tpl, w:0, ph:Object.assign({}, tpl.phases[0], {pre:true, noBlock:true})};
-  const w=weekOf(b,d);
-  return {b, tpl, w, ph:phaseAt(tpl,w)};
+  const w=weekOf(b,d); let ph=phaseAt(tpl,w);
+  if(b.deloadWeek===w && !ph.deload && !ph.test && !ph.pre && !ph.complete) ph=Object.assign({}, ph, {deload:true, name:'Deload', early:true, note:'Pulled forward — fatigue was piling up.'});
+  return {b, tpl, w, ph};
+}
+function deloadSignal(){
+  const c=ctx(); if(!c.b || c.ph.deload || c.ph.test || c.ph.pre || c.ph.complete || c.b.deloadWeek===c.w) return null;
+  if(!c.tpl.cycle && c.tpl.weeks && c.w<c.tpl.weeks && phaseAt(c.tpl, c.w+1).deload) return null;
+  const since=sortedLogs().filter(l=>l.deload).map(l=>l.date).concat(c.b.deloadWeek? [addDays(parseYmd(c.b.start), c.b.deloadWeek*7-1).toISOString()] : []).sort().pop() || '';
+  const recent=sortedLogs().filter(l=>!l.deload && l.date>since).slice(-4);
+  if(recent.filter(l=>l.readiness==='red').length>=2) return 'Two rough-day check-ins in your last few sessions';
+  for(const k in PROGRAM) for(const ex of PROGRAM[k]){
+    if(ex.role!=='main') continue;
+    const v=prefVariant(ex); if(!LOADED_MODES.includes(v.mode) && v.mode!=='assist') continue;
+    const lad=makeLadder(v, currentBodyweight()), lv=[];
+    for(const l of sortedLogs()){ if(l.deload||l.light||l.date<=since) continue; for(const e of l.entries){ if(e.exercise===v.n && e.mode===v.mode && e.slot===ex.slot){ const cc=classify(e,lad); if(cc){ const x=est(cc,e); if(x.trusted) lv.push(x.e); } } } }
+    const n=lv.length; if(n>=3 && lv[n-1]<lv[n-2]-0.5 && lv[n-2]<lv[n-3]-0.5) return `${v.n} has slid two sessions running`;
+  }
+  return null;
+}
+function deloadNow(){
+  const c=ctx(); if(!c.b || guardRO()) return;
+  if(!confirm(`Make this week (week ${c.w}) a deload? Fewer sets, about the same weights, 4 in the tank. The planned deloads stay where they are.`)) return;
+  c.b.deloadWeek=c.w; save(); toast('This week is a deload ✓'); refresh();
+}
+function deloadBannerHTML(){
+  const why=deloadSignal(); if(!why || READONLY) return '';
+  return `<div class="banner"><div class="bt">${esc(why)}</div><div class="bx">Fatigue can hide strength. A lighter week — fewer sets, about the same weights — usually brings it back. <button class="btn sm primary" style="margin-top:8px" onclick="deloadNow()">Make this week a deload</button></div></div>`;
 }
 function ctx(){ return ctxAt(today()); }
 function chipText(c){
@@ -1169,18 +1193,28 @@ function prescribe(ex, c, o){
   o=o||{}; const ph=c.ph||{};
   let sets, rl=ex.rl, rh=ex.rh, rir, rirLabel=null, test=false;
   const H=ph.heavy||{sets:ex.sets,rl:ex.rl,rh:ex.rh,rir:ph.rir!=null?ph.rir:2};
-  if(ex.scheme==='heavy'){ sets=H.sets; rl=H.rl; rh=H.rh; rir=H.rir; rirLabel=H.rirLabel||null; test=!!ph.test; }
+  if(ex.scheme==='heavy'){
+    sets=H.sets; rl=H.rl; rh=H.rh; rir=H.rir; rirLabel=H.rirLabel||null; test=!!ph.test;
+    if(ph.name==='Peak' && ex.peak && ex.peak.sets) sets=ex.peak.sets;
+    if(ph.test && ex.test){ sets=1; rl=rh=ex.test.r; rir=ex.test.rir; rirLabel=null; }
+  }
   else if(ex.scheme==='ladder'){ sets=ph.test?2:Math.max(3,H.sets); rir=Math.max(1,ph.rir!=null?ph.rir:2); }
   else {
     const adj=ph.setAdj||0;
-    sets=Math.min(5, ex.sets + (ex.role==='acc'? Math.min(0,adj) : adj));
-    rir=ph.rir!=null?ph.rir:2; rirLabel=ph.rirLabel||null;
+    sets=Math.min(5, ex.sets + ((ex.role==='acc' && !ex.setAdjOK)? Math.min(0,adj) : adj));
+    const M=ph.mus || {rir:ph.rir!=null?ph.rir:2, rirLabel:ph.rirLabel||null};
+    rir=M.rir; rirLabel=M.rirLabel||null;
+    if(ex.hiRep && !ph.deload && !ph.test){ rir=1; rirLabel=null; }
   }
   if(ph.deload){ sets=Math.max(1,Math.round(sets*0.6)); rir=4; rirLabel=null; }
+  if(ex.rirFloor){ const lo=rirLabel? +String(rirLabel).split('–')[0] : rir; if(lo<ex.rirFloor){ rir=Math.max(rir,ex.rirFloor); rirLabel=null; } }
+  if(o.rampIn && rir<3){ rir=3; rirLabel=null; }
   if(o.express) sets=Math.max(Math.min(2,sets), sets-1);
+  if(o.returning){ rir+=1; rirLabel=null; }
   if(o.readiness==='yellow'){ rir+=1; rirLabel=null; }
   if(o.readiness==='red'){ rir+=2; rirLabel=null; }
-  return {sets:Math.max(1,sets), rl, rh, rir, rirLabel, deload:!!ph.deload, test};
+  const buildPlus=!!ph.name && !ph.pre && !['Groove','Deload','Hold','Base','Reaccumulate'].includes(ph.name);
+  return {sets:Math.max(1,sets), rl, rh, rir, rirLabel, deload:!!ph.deload, test, buildPlus};
 }
 function rirText(px){ return (px.rirLabel||px.rir)+' RIR'; }
 function sessionList(name, express){ const list=PROGRAM[name]||[]; return express? list.filter(e=>e.core) : list; }
@@ -1193,12 +1227,6 @@ function roundLoad(w, mode){
   if(!(w>0)) return 0;
   const s=(mode==='mach'||mode==='cable')?2.5:((mode==='db'||mode==='kb')&&w<20?2.5:5);
   return Math.round(w/s)*s;
-}
-function incFor(ex, mode){
-  if(mode==='time') return 5;
-  if(mode==='bw'||mode==='assist') return 0;
-  if(mode==='db'||mode==='kb') return 5;
-  return ex.lower? 10 : 5;
 }
 function plateMath(total, mode){
   const base=loadBase(mode);
@@ -2327,63 +2355,272 @@ function histOf(name, mode, skipLight){
   }
   return out;
 }
-function seedFor(name){ const k=SEEDS[name]; const sz=k && DB.profile.sz && DB.profile.sz[k]; return sz && num(sz.w)>0 ? sz : null; }
 function workSets(e){ return (e.sets||[]).filter(s=>num(s.r)>0); }
-function suggest(ex, v, px, o){
-  o=o||{};
-  const mode=v.mode, name=v.n, hold=o.readiness==='yellow';
-  const hist=histOf(name, mode, true), all=histOf(name, mode, false);
-  const R=(x)=>Object.assign({w:null, r:null, hint:'', establish:false}, x);
-  if(mode==='time'){
-    const last=hist[hist.length-1]||all[all.length-1];
-    if(!last) return R({w:0, establish:true, hint:'Hang as long as you can hold it clean — that sets your baseline.'});
-    const best=Math.max(0,...workSets(last.e).map(s=>num(s.r)));
-    const goal=(hold||px.deload)? best : best+5;
-    return R({w:0, r:goal, hint:`last best ${best}s → go for ${goal}s`});
+/* ================= predictive engine =================
+   level = load × (1 + (reps + RIR) / 30) from the working sets of a lift in its slot.
+   Next load = the heaviest loadable weight predicted to give today's reps at today's RIR,
+   inside per-session guards. Every number on the card can be traced to that one formula. */
+const PK=30, TRUST_T=12, RIR_CAP=4, RAMP_RIR=5, MISSING_RIR=1, GAP_D=14, STALE_D=28, EXPIRE_D=56, DETRAIN_F=0.9,
+      UP_PCT={lower:0.05, upper:0.025}, LIGHT_UP_PCT=0.10, DOWN_PCT=0.10, BRIDGE_D=3, BRIDGE_H=2, REP_CEIL=30;
+const LOADED_MODES=['bb','trap','plate','db','kb','mach','cable'];
+const KB_RUNGS=[18,26,35,44,53,62,70,79,88,97,106];
+const ISO_DB=['Biceps Curl','Hammer Curl','Lateral Raise'];
+const DB_PRESSES=['DB Bench Press','Incline DB Press','DB Shoulder Press'];
+function isNum(x){ return x!=='' && x!=null && isFinite(+x); }
+function rhd(x){ return Math.ceil(x-0.5); }
+function mean(a){ return a.reduce((s,x)=>s+x,0)/a.length; }
+function r1(x){ return Math.round(x*10)/10; }
+function rirLowOf(px){ return px.rirLabel? +String(px.rirLabel).split('–')[0] : px.rir; }
+
+function makeLadder(v, bw){
+  const s=DB.settings, p=Math.min(...s.plates.map(Number).filter(x=>x>0)) || 2.5, raw=[];
+  const st=num(s.stackStep)||10, adds=s.addOns===false? [0] : [0,2.5,5].filter(a=>a<st);
+  if(v.mode==='bb') for(let w=num(s.bar)||45; w<=1000; w+=2*p) raw.push(w);
+  else if(v.mode==='trap') for(let w=num(s.trapBar)||60; w<=1100; w+=2*p) raw.push(w);
+  else if(v.mode==='plate') for(let w=0; w<=1000; w+=2*p) raw.push(w);
+  else if(v.mode==='db'){ for(let w=2.5; w<20; w+=2.5) raw.push(w); for(let w=20; w<=200; w+=5) raw.push(w); }
+  else if(v.mode==='kb') raw.push(...KB_RUNGS);
+  else { for(let k=1;k<=60;k++) for(const a of adds) raw.push(k*st+a); if(v.mode==='assist') raw.push(0); }
+  for(const h of histOf(v.n, v.mode, false)) for(const x of workSets(h.e)) if(num(x.w)>0) raw.push(num(x.w));
+  const assist=v.mode==='assist';
+  const toE=w=> assist? Math.round((bw-w)*100)/100 : w, toW=E=> assist? Math.round((bw-E)*100)/100 : E;
+  const E=[...new Set(raw.map(x=>Math.round(x*100)/100))].map(toE).filter(e=> assist? e>0 : e>=0).sort((a,b)=>a-b);
+  const L={E, toE, toW, assist,
+    floorL(x){ let r=null; for(const e of E){ if(e<=x+1e-9) r=e; else break; } return r==null? E[0] : r; },
+    ceilL(x){ for(const e of E) if(e>=x-1e-9) return e; return E[E.length-1]; },
+    up(x){ for(const e of E) if(e>x+1e-9) return e; return null; },
+    down(x){ let r=null; for(const e of E){ if(e<x-1e-9) r=e; else break; } return r; } };
+  L.step=x=>{ const u=L.up(x); return u==null? 5 : u-x; };
+  return L;
+}
+function effOf(s, e){ return e.mode==='assist'? (num(e.bw)||currentBodyweight())-num(s.w) : num(s.w); }
+
+/* working sets vs warm-up / ramp sets: the top load, plus later sets within one rung below it */
+function classify(e, lad){
+  let S=(e.sets||[]).filter(s=>num(s.r)>0 && !s.wu);
+  if(LOADED_MODES.includes(e.mode)) S=S.filter(s=>num(s.w)>0);
+  if(e.mode==='assist' && !(num(e.bw)||currentBodyweight())) return null;
+  if(!S.length) return null;
+  const E=S.map(s=>effOf(s,e)), top=Math.max(...E), i0=E.findIndex(x=>x>=top-0.01);
+  const below=lad? (lad.down(top)==null? top : lad.down(top)) : top-5;
+  const planned=e.card && isNum(e.card.E)? num(e.card.E) : null;
+  const W=S.filter((s,i)=> E[i]>=top-0.01 || (i>i0 && E[i]>=below-0.01) || !!s.adj || (planned!=null && Math.abs(E[i]-planned)<0.01));
+  const pool=W.filter(s=>!(isNum(s.rir) && +s.rir>=RAMP_RIR)), base=pool.length? pool : W, anchor=base[base.length-1];
+  return {W, anchor, T0:effOf(anchor,e), minR:Math.min(...W.map(s=>num(s.r))), maxR:Math.max(...W.map(s=>num(s.r))), lowConf:!pool.length};
+}
+/* a blank RIR after doing exactly what the card said = on target; any other blank = 1 (never pushes load up) */
+function rirOf(c, e){
+  if(isNum(c.anchor.rir)) return {rir:Math.min(+c.anchor.rir, RIR_CAP), src:'logged'};
+  const cd=e.card;
+  if(cd && isNum(cd.E) && isNum(cd.r) && c.T0>=num(cd.E)-0.01 && c.W.length>=num(cd.sets) && c.W.every(s=>num(s.r)>=num(cd.r))) return {rir:num(isNum(cd.rirShown)? cd.rirShown : cd.rirT), src:'card'};
+  return {rir:MISSING_RIR, src:'assumed'};
+}
+function est(c, e){ const ro=rirOf(c,e), T=num(c.anchor.r)+ro.rir; return {e: T<=1? c.T0 : c.T0*(1+T/PK), trusted:T<=TRUST_T, src:ro.src}; }
+function bestDbPressPerHand(){ let b=0; for(const l of realLogs()) for(const e of l.entries) if(e.mode==='db' && DB_PRESSES.includes(e.exercise)) for(const s of workSets(e)) b=Math.max(b,num(s.w)); return b; }
+/* an isolation dumbbell load far above the pressing loads is probably a both-hands total: hold it back until confirmed */
+function quarantined(e){
+  if(e.confirmed || e.mode!=='db' || !ISO_DB.includes(e.exercise)) return false;
+  const best=bestDbPressPerHand(); if(!best) return false;
+  return Math.max(0,...workSets(e).map(s=>num(s.w))) > 0.75*best;
+}
+function levelOf(ex, v, lad, day){
+  const H=[]; let q=null, lastAny=null, lastAnySlot=null;
+  for(const l of sortedLogs()){
+    for(const e of l.entries) if(e.exercise===v.n && e.mode===v.mode && workSets(e).length){ lastAny=l.date; if(e.slot===ex.slot) lastAnySlot=l.date; }
+    if(l.deload||l.light||(l.readiness==='red'&&l.express)) continue;
+    for(const e of l.entries){
+      if(e.exercise!==v.n || e.mode!==v.mode) continue;
+      if(quarantined(e)){ q={log:l, e}; continue; }
+      const c=classify(e, lad); if(c) H.push({log:l, e, c});
+    }
   }
-  const lastH=hist[hist.length-1];
-  if(!lastH){
-    const any=all[all.length-1];
-    if(any) return R({w:Math.max(0,...workSets(any.e).map(s=>num(s.w))), hint:'from a light-week session — build from here'});
-    const sd=seedFor(name);
-    if(sd) return R({w:num(sd.w), hint:'seeded from your baseline set'});
-    if(mode==='assist') return R({establish:true, hint:'New: find the assistance that gets you 5 clean reps with 1–2 left. Log it — the ladder starts there.'});
-    if(mode==='bw') return R({w:0, establish:true, hint:'Bodyweight — chase clean reps. Add load only once the top of the range is easy.'});
-    return R({establish:true, hint:`New lift — work up to a weight you could do for ${px.rh} with 2 left. Log it; the app takes it from there.`});
+  H.reverse();
+  const Hs=H.filter(h=>h.e.slot===ex.slot);
+  const src= Hs.length? Hs : H.filter(h=>est(h.c,h.e).trusted), cross=!Hs.length;
+  if(!src.length) return {establish:true, quarantine:q};
+  const age0=daysBetween(dayOf(src[0].log.date), day), e0=est(src[0].c, src[0].e);
+  if(age0>EXPIRE_D) return {establish:true, ref: e0.trusted? e0.e*DETRAIN_F : null, old:src[0], quarantine:q};
+  const isTest=h=> !!h.log.test && ex.scheme==='heavy' && !!ex.test;
+  let lv;
+  if(isTest(src[0])) lv=e0.e;
+  else { const xs=src.slice(0,2).filter(h=>daysBetween(dayOf(h.log.date),day)<=EXPIRE_D && !isTest(h)).map(h=>est(h.c,h.e).e); lv= xs.length? mean(xs) : e0.e; }
+  const recent=(cross? lastAny : lastAnySlot) || src[0].log.date, ageAny=daysBetween(dayOf(recent), day);
+  const checkIn=ageAny>STALE_D; if(checkIn) lv*=DETRAIN_F;
+  return {lv, cross, checkIn, returning:ageAny>=GAP_D, trusted:e0.trusted, age:ageAny, last: cross? null : src[0], prev: cross? null : (src[1]||null), quarantine:q};
+}
+function judgeSession(h, prevH, ex, v, track){
+  const c=h.c, cd=h.e.card;
+  const pc= cd? {rl:num(cd.rl), rh:num(cd.rh), sets:num(cd.sets), rirLow:num(cd.rirLow), buildPlus:!!cd.buildPlus}
+    : (()=>{ const p=prescribe(ex, ctxAt(dayOf(h.log.date)), {readiness:h.log.readiness, express:h.log.express}); return {rl:p.rl, rh:p.rh, sets:p.sets, rirLow:rirLowOf(p), buildPlus:p.buildPlus}; })();
+  const aimL= cd && isNum(cd.aim)? num(cd.aim) : pc.rh;
+  const fin0=(s,i)=> i===c.W.length-1 && ex.failOK && !v.noFail && pc.buildPlus;
+  const thr=Math.max(1, pc.rirLow-(track==='D'?1:0));
+  const effortOK=c.W.every((s,i)=> !isNum(s.rir) || fin0(s,i) || +s.rir>=thr);
+  const need=(track==='P' || (cd&&cd.bridge))? aimL : pc.rh;
+  const topped=c.W.length>=Math.min(pc.sets,3) && c.W.every(s=>num(s.r)>=need);
+  const src=rirOf(c,h.e).src;
+  const prevTopped= track==='D' && prevH && prevH.c.W.length>=Math.min(pc.sets,3) && prevH.c.W.every(s=>num(s.r)>=pc.rh);
+  const earned=topped && effortOK && !c.lowConf && num(c.anchor.r)>=pc.rl && (src==='logged' || prevTopped);
+  const over=track==='D' && c.W.every(s=>num(s.r)>=pc.rh+2);
+  const missed=c.W.some(s=>num(s.r)<pc.rl) || c.W.some((s,i)=> isNum(s.rir) && +s.rir===0 && !fin0(s,i) && num(s.r)<pc.rh+2);
+  return {c, earned, over, missed, topped, blankFollowed: src==='card'};
+}
+function fmtLoad(v, w){ return v.mode==='assist'? `${r1(w)} lb help` : v.mode==='db'||v.mode==='kb'? `${r1(w)} lb each` : `${r1(w)} lb`; }
+
+/* the card for one exercise today */
+function cardFor(ex, v, px, Lv, lad, d){
+  const hold=d.readiness==='yellow'||d.readiness==='red', rirT=px.rir, rirLow=rirLowOf(px), floor=ex.rirFloor||1;
+  const track=(ex.scheme==='heavy'||ex.scheme==='ladder'||px.rh+rirT<=TRUST_T)? 'P' : 'D';
+  const base={rirT, rirShown:rirT, rirLow, sets:px.sets, rl:px.rl, rh:px.rh, track, buildPlus:px.buildPlus};
+  if(!lad || !lad.E.length) return Object.assign(base, {establish:true, w:null, hint:`Work up to a weight you could do ${px.rh} times with ${px.rirLabel||px.rir} left. Log it; the app predicts from there.`});
+  if(Lv.establish){
+    const hint=`New or long-gone lift — work up to a weight you could do ${px.rh} times with ${px.rirLabel||px.rir} left, then do the sets there.`;
+    if(Lv.quarantine && !Lv.ref) return Object.assign(base, {establish:true, w:null, hint, quarantine:Lv.quarantine});
+    if(!Lv.ref) return Object.assign(base, {establish:true, w:null, hint});
+    const lv=Lv.ref, reps=(L,rr=rirT)=>rhd(PK*(lv/L-1)-rr);
+    const L= track==='P'? pickP(lad, reps, px, px.rh) : pickD(lad, reps, px).L;
+    const pred=reps(L), r=Math.max(1, Math.min(Math.max(pred,1), Math.max(px.rl, Math.min(px.rh, pred))));
+    return Object.assign(base, {establish:true, opener:true, w:lad.toW(L), E:L, r, aim:r, pred, level:lv,
+      hint:`Last done ${fmtD(Lv.old.log.date)} — start at ${fmtLoad(v, lad.toW(L))} × ${r} as a check-in, then adjust.`});
   }
-  const sets=workSets(lastH.e);
-  const hitTop=sets.length>0 && sets.every(s=>num(s.r)>=px.rh);
-  const grind=sets.some(s=>s.rir!=null && s.rir!=='' && num(s.rir)<=0);
-  const miss=sets.some(s=>num(s.r)<px.rl);
-  const prev=hist[hist.length-2];
-  const prevMiss=prev? workSets(prev.e).some(s=>num(s.r)<px.rl) : false;
-  if(px.test && mode!=='assist' && mode!=='bw'){
-    const best=Math.max(0,...hist.map(h=>entryBest(h.e)||0));
-    const w=roundLoad(best/(1+2/30)*0.97, mode);
-    return R({w:w||null, hint:'Test week — ramp up to one heavy top set of 1–3 with a rep left. It becomes your new estimated max.'});
+  const lv=Lv.lv, reps=(L,rr=rirT)=>rhd(PK*(lv/L-1)-rr);
+  let L, repTarget=null, aim=null, bridge=false, stalled=false, holdAim=false, why='', unreachable=false, exit=false, exitHold=false;
+  const out=(extra)=>Object.assign(base, extra);
+  if(px.deload){
+    let T0= Lv.cross? (track==='P'? pickP(lad, x=>reps(x,4), px, px.rh) : pickD(lad, x=>reps(x,4), px).L) : (lad.assist? lad.toE(num(Lv.last.c.anchor.w)) : Lv.last.c.T0);
+    if(reps(T0,4)<px.rl){ const alt=pickP(lad, x=>reps(x,4), px, px.rl); if(alt<T0) T0=alt; }
+    const r=Math.max(1, Math.min(px.rh, reps(T0,4)));
+    return out({w:lad.toW(T0), E:T0, r, aim:r, pred:reps(T0,4), level:lv, rirShown:4, deload:true, hint:'Deload week — fewer sets, finish every set with 4 in the tank. It doesn\'t move your numbers.'});
   }
-  if(mode==='assist'){
-    const w=Math.max(0,...sets.map(s=>num(s.w)));
-    if(px.deload) return R({w, hint:'deload — same assistance, easy reps'});
-    if(hitTop && !grind && !hold){ const step=w<=30?5:10; const nw=Math.max(0,w-step);
-      return R({w:nw, hint: nw===0? 'Zero assistance — that is a strict pull-up. Switch to "Pull-up".' : `▼ −${step} lb assistance — you earned it`}); }
-    if(miss && prevMiss) return R({w:w+(w<30?5:10), hint:'two short sessions — add a notch of help back and rebuild'});
-    if(grind) return R({w, hint:'hold here — you hit the redline last time'});
-    if(hold) return R({w, hint:'hold the assistance — feeling flat today'});
-    return R({w, hint:`same assistance — chase ${px.rh} on every set`});
+  if(px.test && ex.test){
+    const r=ex.test.r; L=lad.floorL(lv/(1+(r+rirT)/PK));
+    return out({w:lad.toW(L), E:L, r, aim:r, pred:reps(L), level:lv, test:true, hint:`Test: warm up, then one top set of ${r} with ${rirT} left. Its estimate becomes your tested number.`});
   }
-  const w=Math.max(0,...sets.map(s=>num(s.w)));
-  if(px.deload) return R({w, hint:'deload — same load, fewer sets, stop 4 reps shy'});
-  if(mode==='bw'){
-    if(hitTop && !grind && !hold) return R({w, hint: w>0? 'top of the range — add 5 lb or slow the lowering' : 'top of the range — slow the lowering, or add 5 lb'});
-    return R({w, hint:'chase the top of the range'});
+  let J=null, Jp=null, T0=null;
+  if(Lv.cross){
+    L= track==='P'? pickP(lad, reps, px, px.rh) : (()=>{ const p=pickD(lad, reps, px); unreachable=p.unreachable; return p.L; })();
+    why='from your level on this lift in another session';
+  } else {
+    J=judgeSession(Lv.last, Lv.prev, ex, v, track); T0= lad.assist? lad.toE(num(J.c.anchor.w)) : J.c.T0;
+    const lc=Lv.last.e.card;
+    exitHold= !!(lc && lc.exit && J.c.W.every(s=>num(s.r)>=num(lc.r) && (!isNum(s.rir) || +s.rir>=num(lc.rirShown))));
+    Jp= Lv.prev? judgeSession(Lv.prev, null, ex, v, track) : null;
+    const canStep= J.earned && !hold && !Lv.returning && !Lv.checkIn;
+    const BRIDGE=(Ls)=>{
+      const cap=px.rh+(ex.scheme==='heavy'? BRIDGE_H : BRIDGE_D);
+      if(J.c.maxR<cap){ L=T0; repTarget=aim=Math.min(J.c.maxR+1, cap, REP_CEIL); bridge=true; why=`earn ${fmtLoad(v, lad.toW(Ls))}: ${repTarget} reps here first`; }
+      else { const rr=Math.max(rirT-1, floor), r2=reps(Ls, rr);
+        if(r2>=px.rl-1){ L=Ls; repTarget=aim=Math.max(1,r2); base.rirShown=rr; exit=true; why='equipment jump — one exposure at one more rep of effort; set 1 is a check-in'; }
+        else { L=T0; repTarget=aim=cap; stalled=true; why='stalled by the equipment step — keep adding reps, or use a variant with finer steps if your gym has one'; } }
+    };
+    if(track==='P'){
+      L=pickP(lad, reps, px, px.rh); why='predicted from your level';
+      if(exitHold){ L=Math.max(L,T0); why='settling on the new weight — reps climb back into the range'; }
+      else if(J.c.lowConf || num(J.c.anchor.r)<px.rl){ L=Math.min(pickP(lad, x=>reps(x,rirT+1), px, px.rh), lad.down(T0)==null? T0 : lad.down(T0)); why='last set was far from the plan — one rung under, set 1 is a check-in'; }
+      if(canStep){ const Ls=lad.up(T0);
+        if(Ls!=null && reps(Ls)>=px.rl){ if(Ls>L){ L=Ls; } why='▲ earned — you beat the card at the planned effort'; }
+        else if(Ls!=null && (v.mode==='db'||v.mode==='kb')) BRIDGE(Ls); }
+    } else {
+      if(exitHold && !canStep){ L=T0; holdAim=true; why='settling on the new weight — reps climb back into the range'; }
+      else if(canStep){ const Ls=lad.up(T0); if(Ls!=null && reps(Ls)>=px.rl){ L=Ls; why='▲ earned — top of the range at the planned effort'; } else if(Ls!=null) BRIDGE(Ls); else { L=T0; holdAim=true; } }
+      else if(!Lv.returning && (J.over || (Lv.trusted && reps(T0)>px.rh))){ const p=pickD(lad, reps, px); L=p.L; unreachable=p.unreachable; why='too light last time — up'; }
+      else if(Lv.trusted? reps(T0)<px.rl : J.c.minR<px.rl){ const p=pickD(lad, reps, px); L=p.L; unreachable=p.unreachable; why='lighter — last sets ended closer to failure than planned'; }
+      else { L=T0; holdAim=true; why='hold the weight — beat the aim to step up'; }
+    }
+    if(J.blankFollowed && J.c.minR>=px.rl && !Lv.returning && !Lv.checkIn) L=Math.max(L,T0);       // G0
+    if((J.missed && !J.over) || hold || Lv.returning || Lv.checkIn){ if(L>T0) L=T0; }             // G1
+    const cap= track==='P'? lad.floorL(T0+Math.max(lad.step(T0), UP_PCT[ex.lower?'lower':'upper']*T0))
+                          : (J.over? Math.max(lad.up(T0)==null? T0 : lad.up(T0), lad.floorL(T0*(1+LIGHT_UP_PCT))) : (lad.up(T0)==null? T0 : lad.up(T0)));
+    if(!bridge && L>cap) L=cap;                                                                   // G2
+    const c1=lad.ceilL(T0*(1-DOWN_PCT)); if(L<c1 && reps(c1)>=px.rl) L=c1;                        // G3
+    if(J.missed && Jp && Jp.missed && !exitHold) L=Math.min(L, lad.floorL(T0*0.95));             // G4
+    if(hold) why= d.readiness==='red'? 'rough day — no increase, more in the tank' : 'flat day — hold the load, one more rep in the tank';
+    else if(Lv.returning) why= Lv.checkIn? `it's been ${Lv.age} days — check-in session, a little lighter` : `first session back in ${Lv.age} days — one more rep in the tank, no increase`;
+    else if(J.missed && !J.over && why.startsWith('hold')) why='hold — last time had a miss or a grind';
+    if(L<T0-0.01 && /^hold/.test(why)) why='a notch lighter than last time — that\'s what the prediction says today';
   }
-  if(hitTop && !grind && !hold){ const inc=incFor(ex,mode); return R({w:roundLoad(w+inc,mode), hint:`▲ +${inc} — you earned it`}); }
-  if(miss && prevMiss) return R({w:roundLoad(w*0.9,mode), hint:'two short sessions in a row — reset 10% and build back'});
-  if(grind) return R({w, hint:'hold here — you hit the redline last time'});
-  if(hold) return R({w, hint:'hold the load — feeling flat today'});
-  if(miss) return R({w, hint:'same load — own the bottom of the range first'});
-  return R({w, hint:'same load — chase the top of the range'});
+  if(d.loadAdj && d.loadAdj<1){ L=lad.floorL(L*d.loadAdj); why='express at −10% — core lifts, extra in the tank'; }
+  if(!(isFinite(L) && L>=0)){ console.error('prediction failed', v.n); return Object.assign(base, {establish:true, w:null, hint:`Work up to a weight you could do ${px.rh} times with ${px.rirLabel||px.rir} left.`}); }
+  const pred=reps(L, base.rirShown);
+  if(repTarget==null) repTarget=Math.max(1, Math.min(Math.max(px.rl, Math.min(px.rh, pred)), Math.max(pred,1)));
+  if(pred<px.rl && !bridge && !exit && !exitHold) unreachable=true;
+  if(aim==null) aim= track==='P'? (repTarget<px.rh? repTarget+1 : px.rh)
+                   : holdAim? Math.min(px.rh, Math.max(pred, J? J.c.minR : pred)+1, pred+2) : Math.min(pred+1, px.rh);
+  aim=Math.max(repTarget, Math.min(aim, reps(L, floor)));
+  return out({w:lad.toW(L), E:L, r:repTarget, aim, pred, level:lv, bridge, stalled, unreachable, exit, hint:why,
+    basis:`level ${Math.round(lv)} → ${fmtLoad(v, lad.toW(L))} × ${repTarget} @ ${base.rirShown} RIR · predicted ${pred}${aim>repTarget?` · aim ${aim}`:''}`});
+}
+function pickP(lad, reps, px, aimR){
+  let L=null; for(let i=lad.E.length-1;i>=0;i--){ if(reps(lad.E[i])>=aimR){ L=lad.E[i]; break; } }
+  if(L==null) L=lad.E[0];
+  const u=lad.up(L); if(reps(L)>px.rh+1 && u!=null && reps(u)>=px.rl) L=u;
+  return L;
+}
+function pickD(lad, reps, px){
+  const mid=Math.ceil((px.rl+px.rh)/2); let best=null, bd=1e9;
+  for(const L of lad.E){ const r=reps(L); if(r>=px.rl && r<=px.rh){ const dd=Math.abs(r-mid); if(dd<bd-1e-9){ bd=dd; best=L; } } }
+  if(best!=null) return {L:best, unreachable:false};
+  for(const L of lad.E) if(reps(L)<=px.rh) return {L, unreachable:true};
+  return {L:lad.E[lad.E.length-1], unreachable:true};
+}
+/* dead hang: beat last goal on a normal day → +5 s; sets 2+ match last time's same set */
+function hangCard(ex, v, px, d){
+  const hist=histOf(v.n,'time',false).filter(h=>!h.log.deload && workSets(h.e).length);
+  if(!hist.length) return {establish:true, w:0, r:null, goal:px.rl, setGoals:[], hint:'Hang as long as you can hold it clean — that sets your baseline.'};
+  const last=hist[hist.length-1], prev=hist[hist.length-2];
+  const best=Math.max(...workSets(last.e).map(s=>num(s.r))), prevBest=prev? Math.max(...workSets(prev.e).map(s=>num(s.r))) : null;
+  const goalPrev= last.e.card && isNum(last.e.card.goal)? num(last.e.card.goal) : (prevBest!=null? prevBest+5 : best);
+  const hit=best>=goalPrev, hold=d.readiness==='yellow'||d.readiness==='red';
+  const returning=daysBetween(dayOf(last.log.date), parseYmd(d.day)||today())>=GAP_D;
+  const normal=!px.deload && !hold && !returning;
+  const goal=Math.min(60, hit? (normal? best+5 : best) : goalPrev);
+  const sets=workSets(last.e).map(s=>num(s.r)), grad=sets.length && sets.every(x=>x>=60);
+  return {w:0, r:goal, goal, setGoals:[goal].concat(sets.slice(1)), aim:goal, track:'T',
+    hint: grad? 'Every set at 60 s — graduate: add 5–10 lb or a harder hang.' : hit? `beat ${goalPrev}s last time → ${goal}s now` : `last goal ${goalPrev}s not reached yet — same goal`};
+}
+/* bodyweight moves: reps until earned, then +5 lb or the loaded variant */
+function bwCard(ex, v, px, d){
+  const hist=histOf(v.n,'bw',false).filter(h=>!h.log.deload && workSets(h.e).length);
+  if(!hist.length) return {w:0, r:px.rl, aim:px.rl, establish:true, track:'B', hint:'Bodyweight — chase clean reps. Load comes once the top of the range is easy.'};
+  const last=hist[hist.length-1], prev=hist[hist.length-2], S=workSets(last.e), thr=Math.max(1, rirLowOf(px));
+  const lastRir=S[S.length-1].rir, top=S.every(s=>num(s.r)>=px.rh);
+  const quiet=d.readiness==='yellow'||d.readiness==='red'||px.deload||daysBetween(dayOf(last.log.date), parseYmd(d.day)||today())>=GAP_D;
+  const earned= !quiet && top && (isNum(lastRir)? +lastRir>=thr : !!(prev && workSets(prev.e).length>=Math.min(px.sets,3) && workSets(prev.e).every(s=>num(s.r)>=px.rh)));
+  const added=Math.max(0,...S.map(s=>num(s.w))), minR=Math.min(...S.map(s=>num(s.r)));
+  if(earned) return {w:added, r:px.rl, aim:px.rl, track:'B', hint: ex.slot==='Hip Thrust'? 'top of the range — move to the loaded Hip Thrust, or add 5 lb' : 'top of the range — add 5 lb, or slow the lowering'};
+  const aim=Math.min(REP_CEIL, Math.min(minR+1, px.rh));
+  return {w:added, r:Math.min(minR, px.rh)||px.rl, aim, track:'B', hint:`same load — aim for ${aim} on every set`};
+}
+/* everything the card needs for one exercise, for a draft day */
+function planFor(ex, d, vOverride){
+  const sl=d.ex && d.ex[ex.slot], v=vOverride || (sl? variantOf(ex, sl.variant) : prefVariant(ex));
+  const day=parseYmd(d.day)||today(), c=ctxForDraft(d), loaded=LOADED_MODES.includes(v.mode)||v.mode==='assist';
+  const bw=currentBodyweight();
+  const lad= loaded && !(v.mode==='assist' && !bw)? makeLadder(v, bw) : null;
+  const Lv= lad? levelOf(ex, v, lad, day) : null;
+  const exposures= v.rampIn? histOf(v.n, v.mode, false).length : 99;
+  const px=prescribe(ex, c, {express:!!d.express, readiness:d.readiness||null, returning:!!(Lv&&Lv.returning), rampIn: exposures<num(v.rampIn)});
+  let card;
+  if(v.mode==='time') card=hangCard(ex, v, px, d);
+  else if(v.mode==='bw') card=bwCard(ex, v, px, d);
+  else card=cardFor(ex, v, px, Lv||{establish:true}, lad, d);
+  return {v, px, Lv, lad, card};
+}
+/* after a working set: if it landed off plan, move the next set one rung toward that set's own estimate */
+function repredictAfter(ex, sl, v, si){
+  const cd=sl.card; if(!cd || cd.E==null || cd.deload || cd.test || sl.variant!==(sl.sets[si].vn||sl.variant) || !LOADED_MODES.concat(['assist']).includes(v.mode)) return null;
+  const s=sl.sets[si], rir=s.rir; if(!isNum(rir)) return null;
+  const tgt=isNum(cd.rirShown)? +cd.rirShown : +cd.rirT;
+  const off=Math.abs(+rir-tgt)>=1 || num(s.r)<Math.min(cd.rl, num(cd.r)||cd.rl) || num(s.r)>cd.rh; if(!off) return null;
+  const lad=makeLadder(v, currentBodyweight()), E0=lad.toE(num(s.w));
+  const lvSet=E0*(1+(num(s.r)+Math.min(+rir,RIR_CAP))/PK), reps=(L)=>rhd(PK*(lvSet/L-1)-tgt);
+  const px={rl:cd.rl, rh:cd.rh};
+  let L= cd.track==='P'? pickP(lad, reps, px, cd.r) : pickD(lad, reps, px).L;
+  const up=lad.up(E0), dn=lad.down(E0);
+  if(L>E0) L= (DRAFT && (DRAFT.readiness==='yellow'||DRAFT.readiness==='red'))? E0 : (up==null? E0 : Math.min(L, up));
+  if(L<E0) L= dn==null? E0 : Math.max(L, dn);
+  if(Math.abs(L-E0)<0.01) return null;
+  return {w:lad.toW(L), dir: L>E0? 'up' : 'down', pred: Math.max(1, Math.min(cd.rh, reps(L)))};
 }
 function fmtSet(s, mode){
   const rir=(s.rir!=null && s.rir!=='')?`@${s.rir}`:'';
@@ -2406,6 +2643,7 @@ function entryBest(e){
   if(!sets.length) return null;
   if(t==='sec'||t==='reps') return Math.max(...sets.map(s=>num(s.r)));
   if(t==='assist'){ const ok=sets.filter(s=>num(s.r)>=3); return ok.length? Math.min(...ok.map(s=>num(s.w))) : null; }
+  const c=classify(e, null); if(c){ const T=Math.min(num(c.anchor.r)+rirOf(c,e).rir, TRUST_T); return Math.round((T<=1? c.T0 : c.T0*(1+T/PK))*10)/10; }
   const v=Math.max(...sets.map(s=>e1rm(s.w,s.r)));
   return v>0? Math.round(v*10)/10 : null;
 }
@@ -2508,9 +2746,9 @@ function regress(pts){
   let sxy=0, sxx=0; for(let i=0;i<n;i++){ sxy+=(xs[i]-mx)*(ys[i]-my); sxx+=(xs[i]-mx)*(xs[i]-mx); }
   return sxx? sxy/sxx : null;
 }
-function defaultRate(name, t){
+function defaultRate(name, t, cur){
   if(t==='assist') return -5; if(t==='sec') return 5; if(t==='reps') return 1;
-  return /Deadlift|Squat|Leg Press|Hack|Belt|RDL|Romanian|Hip Thrust|Pendulum/.test(name)? 10 : 5;
+  return Math.round(num(cur)*(/Deadlift|Squat|Leg Press|Hack|Belt|RDL|Romanian|Hip Thrust|Pendulum|Lunge|Step-up|Calf|Leg Curl|Trap Bar|Good Morning/.test(name)? 0.01 : 0.005)*10)/10 || 1;
 }
 function inferMuscle(n){
   if(/Plank|Pallof|Dead Bug|Knee Raise|Ab Wheel|\bAb\b/.test(n)) return 'Core';
@@ -2671,7 +2909,7 @@ function renderToday(){
   const c=ctx();
   $('today-date').textContent=new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
   $('today-sub').textContent=blockLine(c);
-  $('today-banners').innerHTML=resumeHTML()+blockPromptHTML()+sendNudgeHTML();
+  $('today-banners').innerHTML=resumeHTML()+blockPromptHTML()+deloadBannerHTML()+sendNudgeHTML();
   const todays=realLogs().filter(l=>sameDay(l.date,today()));
   const s=DRAFT? DRAFT.session : nextLift(), meta=SESSION_META[s];
   let liftRow;
@@ -2759,10 +2997,10 @@ function quickZ2(min){ if(guardRO()) return; DB.cond.push({date:today().toISOStr
 const PRINCIPLES = {
   'strength-bulk':[
     ['Lifting principles','steel','evidence-based',[
-      ['Heavy + muscle split.','Two heavy days (3–6 reps) build strength; two muscle days (8–15) build size. Every muscle still gets trained twice a week.'],
+      ['Heavy + muscle split.','Two heavy days (2–6 reps) build strength; two muscle days (8–20) build size. Every muscle still gets trained twice a week.'],
       ['Volume drives growth.','10–20 hard sets per muscle per week, ramped across the block.'],
       ['Proximity to failure.','1–3 reps in reserve — it matters more than the exact rep count.'],
-      ['Double progression.','Hit the top of the range on every set → add load. The app does the math.'],
+      ['Predicted loads.','Each lift has a level — weight × (1 + (reps + reps-in-reserve) ÷ 30) — and the card shows the heaviest weight that should give today\'s reps at today\'s effort. Beat the card to step up.'],
       ['Planned deloads.','Weeks 8 and 12 cut 40% of the sets. Recovery is when the strength shows up.']]],
     ['Built for durability','amber','spine-friendly',[
       ['Heavy without the grind.','Trap bar over straight bar, hack and belt squat over back squat, chest-supported rows — big loads, quiet low back.'],
@@ -2917,17 +3155,14 @@ function saveDraft(){
 function ctxForDraft(d){ return ctxAt(parseYmd(d.day)||today()); }
 function prefVariant(ex){ const p=(DB.variantPref||{})[ex.slot]; return ex.vars.find(v=>v.n===p) || ex.vars[0]; }
 function variantOf(ex, name){ return ex.vars.find(v=>v.n===name) || ex.vars[0]; }
-function slotPx(ex, d){ return prescribe(ex, ctxForDraft(d), {express:!!d.express, readiness:d.readiness||null}); }
-function slotSuggest(ex, v, d){
-  const px=slotPx(ex,d), sg=suggest(ex, v, px, {readiness:d.readiness});
-  let w=sg.w;
-  if(w!=null && d.loadAdj && d.loadAdj<1){ if(v.mode==='assist') w=w+10; else if(v.mode!=='time' && v.mode!=='bw') w=roundLoad(w*d.loadAdj, v.mode); }
-  return Object.assign({}, sg, {w});
-}
+function slotPx(ex, d){ return planFor(ex, d).px; }
+function slotSuggest(ex, v, d){ return planFor(ex, d, v).card; }
+const CARD_KEYS=['w','E','r','aim','pred','rirT','rirShown','rirLow','sets','rl','rh','track','bridge','level','goal','setGoals','buildPlus','establish','opener','deload','test','exit','stalled'];
+function cardSnap(cd){ const o={}; for(const k of CARD_KEYS) if(cd[k]!=null) o[k]=cd[k]; return o; }
 function initSlot(ex, d, v){
-  const px=slotPx(ex,d), sg=slotSuggest(ex,v,d);
-  const w=v.mode==='time'? 0 : (sg.w!=null? sg.w : '');
-  return {variant:v.n, goal:v.mode==='time'? (sg.r||px.rl) : null, sets:Array.from({length:px.sets},()=>({w, r:'', rir:'', done:false, auto:true}))};
+  const pl=planFor(ex, d, v), cd=pl.card, px=pl.px;
+  const w=v.mode==='time'? 0 : (cd.w!=null? cd.w : '');
+  return {variant:v.n, goal:v.mode==='time'? (cd.goal||px.rl) : null, card:cardSnap(cd), sets:Array.from({length:px.sets},()=>({w, r:'', rir:'', done:false, auto:true}))};
 }
 function newDraft(session, o){
   o=o||{};
@@ -2939,8 +3174,8 @@ function draftSlot(d, ex){ if(!d.ex[ex.slot]||!Array.isArray(d.ex[ex.slot].sets)
 function switchVariant(d, ex, v){
   const sl=draftSlot(d, ex); if(sl.variant===v.n) return;
   const fresh=initSlot(ex, d, v);
-  sl.variant=v.n; sl.goal=fresh.goal;
-  sl.sets.forEach(s=>{ if(s.auto && !s.done) s.w=fresh.sets[0]? fresh.sets[0].w : ''; });
+  sl.variant=v.n; sl.goal=fresh.goal; sl.card=fresh.card;
+  sl.sets.forEach(s=>{ if(s.auto && !s.done){ s.w=fresh.sets[0]? fresh.sets[0].w : ''; delete s.rp; delete s.adj; } });
 }
 function draftProgress(d){
   let done=0, total=0;
@@ -2951,20 +3186,24 @@ function draftEntries(d){
   const entries=[];
   for(const ex of PROGRAM[d.session]){
     const sl=d.ex[ex.slot]; if(!sl||!Array.isArray(sl.sets)) continue;
-    const v=variantOf(ex, sl.variant), sets=[];
+    const groups=new Map();
     for(const s of sl.sets){
       const r=parseInt(s.r,10); if(!(r>0)) continue;
+      const v=variantOf(ex, s.vn||sl.variant);
       const o={w: v.mode==='time'? 0 : num(s.w), r};
       if(s.rir!=='' && s.rir!=null && !isNaN(parseInt(s.rir,10))) o.rir=parseInt(s.rir,10);
-      sets.push(o);
+      if(s.adj) o.adj=s.adj;
+      if(!groups.has(v.n)) groups.set(v.n, {v, sets:[]});
+      groups.get(v.n).sets.push(o);
     }
-    if(sets.length) entries.push({exercise:v.n, mode:v.mode, slot:ex.slot, sets});
+    for(const [n,g] of groups){ const en={exercise:n, mode:g.v.mode, slot:ex.slot, sets:g.sets}; if(n===sl.variant && sl.card) en.card=sl.card; if(g.v.mode==='assist') en.bw=currentBodyweight(); entries.push(en); }
   }
   return entries;
 }
 function buildLog(d){
   const c=ctxForDraft(d), day=parseYmd(d.day)||today();
-  const log={date:day.toISOString(), day:d.session, entries:draftEntries(d), v:3, startedAt:d.startedAt, finishedAt:new Date().toISOString()};
+  const log={date:day.toISOString(), day:d.session, entries:draftEntries(d), v:4, startedAt:d.startedAt, finishedAt:new Date().toISOString()};
+  if((d.loadAdj && d.loadAdj<1) || (d.readiness==='red' && d.express)) log.light=true;
   const bid=blockIdForDate(day); if(bid) log.blockId=bid;
   if(c.b && !c.ph.pre){ log.week=c.w; log.phase=c.ph.name; }
   if(c.ph.deload) log.deload=true;
@@ -3009,19 +3248,32 @@ function renderSessionTabs(){
 }
 function selectSession(n){ activeSession=n; if(currentView==='sessions'){ renderSessionTabs(); renderSessionBody(); } }
 function suggestLine(v, sg){
-  if(sg.establish) return `<div class="seed est">◆ ${esc(sg.hint)}</div>`;
-  let w='';
-  if(v.mode==='time') w=sg.r? sg.r+' s' : '';
-  else if(v.mode==='bw') w=num(sg.w)>0? '+'+sg.w+' lb' : 'bodyweight';
-  else if(sg.w!=null) w= v.mode==='assist'? sg.w+' lb help' : sg.w+' '+modeUnit(v.mode);
-  return `<div class="seed">▸ Suggested: ${esc(w)} <span style="color:var(--muted)">${esc(sg.hint)}</span></div>`;
+  let h='';
+  if(sg.quarantine){ const q=sg.quarantine, li=DB.logs.indexOf(q.log), ei=q.log.entries.indexOf(q.e), w=Math.max(0,...workSets(q.e).map(s=>num(s.w)));
+    h+=`<div class="seed est">◆ ${esc(fmtD(q.log.date))} says ${esc(r1(w))} lb on ${esc(v.n)} — per dumbbell, or both together? <button class="btn sm" onclick="confirmEntry(${li},${ei},false)">Per dumbbell</button> <button class="btn sm" onclick="confirmEntry(${li},${ei},true)">Both together</button></div>`; }
+  if(sg.establish && !sg.opener) return h+`<div class="seed est">◆ ${esc(sg.hint)}</div>`;
+  if(v.mode==='time') return h+`<div class="seed">▸ Set 1 goal: ${esc(sg.goal||sg.r||'—')} s <span style="color:var(--muted)">${esc(sg.hint||'')}</span></div>`;
+  if(v.mode==='bw') return h+`<div class="seed">▸ ${num(sg.w)>0? '+'+esc(sg.w)+' lb' : 'Bodyweight'} · aim ${esc(sg.aim||sg.r)} <span style="color:var(--muted)">${esc(sg.hint||'')}</span></div>`;
+  if(sg.w==null) return h+`<div class="seed est">◆ ${esc(sg.hint||'')}</div>`;
+  const main=`${fmtLoad(v, sg.w)} × ${sg.r} @ ${sg.rirShown} RIR${sg.aim>sg.r? ` · aim ${sg.aim}` : ''}`;
+  const notes=[sg.unreachable? 'the nearest loadable weight is still heavy for this range' : '', sg.stalled? 'equipment step too big — a cable or machine version moves in finer steps' : ''].filter(Boolean);
+  return h+`<div class="seed">▸ ${esc(main)} <span style="color:var(--muted)">— ${esc(sg.hint||'')}</span></div>`
+    +(sg.level? `<div class="basis">level ${Math.round(sg.level)} (est. max) → predicts ${sg.pred} reps at ${sg.rirShown} RIR${notes.length? ' · '+esc(notes.join(' · ')) : ''}</div>` : '');
+}
+function confirmEntry(li, ei, asTotal){
+  const l=DB.logs[li], e=l && l.entries[ei]; if(!e || guardRO()) return;
+  if(asTotal) e.sets.forEach(s=>{ s.w=Math.round(num(s.w)/2*100)/100; });
+  e.confirmed=true; save();
+  if(DRAFT){ for(const ex of PROGRAM[DRAFT.session]||[]){ const sl=DRAFT.ex[ex.slot]; if(sl && sl.variant===e.exercise && sl.sets.every(x=>!x.done)){ const v=variantOf(ex, sl.variant), f=initSlot(ex, DRAFT, v); sl.card=f.card; sl.sets.forEach(x=>{ if(x.auto) x.w=f.sets[0].w; }); } } saveDraft(); }
+  toast(asTotal? 'Fixed — halved to per dumbbell ✓' : 'Confirmed per dumbbell ✓');
+  if(GYM_OPEN) renderGym(); else refresh();
 }
 function listCardHTML(name, ex, d, disabled){
   const i=PROGRAM[name].indexOf(ex), sl=draftSlot(d, ex), v=variantOf(ex, sl.variant), px=slotPx(ex,d), sg=slotSuggest(ex,v,d);
   const dis=disabled?'disabled':'';
   const varsel=ex.vars.length>1? `<div class="varsel">${ex.vars.map((x,vi)=>`<button class="varchip${x.n===v.n?' on':''}" ${dis} onclick="listVariant(${i},${vi})">${esc(x.n)}</button>`).join('')}</div>` : '';
   const rows=sl.sets.map((s,si)=>`<div class="setrow"><label>set ${si+1}</label>${v.mode==='time'? '' : `<input type="number" inputmode="decimal" step="0.5" placeholder="${v.mode==='assist'?'help':'wt'}" value="${esc(s.w)}" ${dis} oninput="listInput(${i},${si},'w',this.value)"><span class="mu">${esc(modeUnit(v.mode))}</span><span class="x">×</span>`}<input type="number" inputmode="numeric" placeholder="${v.mode==='time'?(sl.goal||px.rl)+' s':px.rl+'–'+px.rh}" value="${esc(s.r)}" ${dis} oninput="listInput(${i},${si},'r',this.value)">${v.mode==='time'? '<span class="mu">sec</span>' : `<span class="x">@</span><input type="number" inputmode="numeric" placeholder="RIR" title="reps left in the tank" value="${esc(s.rir)}" ${dis} oninput="listInput(${i},${si},'rir',this.value)" style="width:54px">`}${s.done?'<span class="ok">✓</span>':''}</div>`).join('');
-  return `<div class="exhead"><span class="exname">${ex.core?'★ ':''}${esc(v.n)}</span><span class="expx">${px.sets} × ${px.rl}–${px.rh}${v.mode==='time'?' s':''} @ ${rirText(px)}</span></div>
+  return `<div class="exhead"><span class="exname">${ex.core?'★ ':''}${esc(v.n)}</span><span class="expx">${px.sets} × ${px.rl}–${px.rh}${v.mode==='time'?' s · stop before your grip gives':' @ '+rirText(px)}</span></div>
     ${varsel}<div class="exnote">${esc(ex.note)}</div>${suggestLine(v, sg)}${lastTimeHTML(v.n, v.mode)}${rows}`;
 }
 function renderSessionBody(){
@@ -3031,7 +3283,7 @@ function renderSessionBody(){
   const c=ctxForDraft(d), meta=SESSION_META[name];
   const anyDone=mine && draftProgress(d).done>0;
   const phaseTxt=!c.b? 'week-1 targets' : c.ph.pre? 'pre-block · week-1 targets' : `${c.tpl.weeks?'W'+c.w+'/'+c.tpl.weeks:'W'+c.w} · ${c.ph.name}`;
-  const tip=c.ph.deload? "Light week: fewer sets, same loads, stop 4 reps shy. These sessions don't move your progression." : c.ph.test? 'Test week: warm up, then one heavy top set of 1–3 on the main lift. Keep the rest light.' : 'Leave the prescribed reps in reserve on working sets. Gym mode builds the warm-up ramp and runs the rest timer.';
+  const tip=c.ph.deload? "Light week: fewer sets, about the same loads, stop 4 reps shy. These sessions don't move your progression." : c.ph.test? 'Test week: warm up, then one heavy top set of 1–3 on the main lift. Keep the rest light.' : 'Leave the prescribed reps in reserve on working sets. Gym mode builds the warm-up ramp and runs the rest timer.';
   let h='';
   if(other) h+=`<div class="resume"><div><div class="rt">▶ ${esc(DRAFT.session)} is in progress</div><div class="rs">Finish or discard it before starting ${name}.</div></div><div class="ra"><button class="btn sm primary" onclick="selectSession('${DRAFT.session}')">Go to it</button><button class="btn sm ghost" onclick="discardDraft()">Discard</button></div></div>`;
   const rd=d.readiness? ` <span class="pill ${d.readiness==='green'?'green':d.readiness==='yellow'?'amber':'red'}">${d.readiness}</span>` : '';
@@ -3058,6 +3310,7 @@ function listInput(i, si, field, val){
   const name=activeSession; if(!ensureDraftFor(name)) return;
   const ex=PROGRAM[name][i], sl=draftSlot(DRAFT, ex), s=sl.sets[si]; if(!s) return;
   s[field]=val; if(field==='w') s.auto=false;
+  if(field==='r' && val!=='') s.vn=sl.variant;
   if(field==='r' && val==='') s.done=false;
   saveDraft();
 }
@@ -3072,7 +3325,7 @@ function toggleExpress(on){
   if(DRAFT && DRAFT.session===activeSession){
     if(draftProgress(DRAFT).done>0){ toast('Sets already entered — express is locked for this session'); renderSessionBody(); return; }
     DRAFT.express=on;
-    for(const ex of PROGRAM[DRAFT.session]){ const sl=draftSlot(DRAFT,ex), px=slotPx(ex,DRAFT); const w=sl.sets[0]? sl.sets[0].w : ''; sl.sets=Array.from({length:px.sets},()=>({w, r:'', rir:'', done:false, auto:true})); }
+    for(const ex of PROGRAM[DRAFT.session]){ const sl=draftSlot(DRAFT,ex), f=initSlot(ex, DRAFT, variantOf(ex, sl.variant)); sl.card=f.card; sl.sets=f.sets; }
     saveDraft();
   } else EXPRESS_PREVIEW=on;
   renderSessionBody();
@@ -3112,7 +3365,7 @@ function renderLiftChart(){
   const dir=o.t==='assist'? -1 : 1, tk=o.t+':'+o.name, cur=pts[pts.length-1].v;
   let target=DB.targets[tk];
   if(target==null) target = o.t==='assist'? 0 : o.t==='sec'? Math.max(60,cur+15) : o.t==='reps'? cur+3 : Math.max(cur+5, Math.round(cur*1.15/5)*5);
-  const slope=regress(pts), real=slope!=null, rate=real? slope : defaultRate(o.name,o.t);
+  const slope=regress(pts), real=slope!=null, rate=real? slope : defaultRate(o.name,o.t,cur);
   const remaining=(target-cur)*dir;
   let weeks=null;
   if(remaining<=0) weeks=0; else if(rate*dir>0) weeks=Math.ceil(remaining/(rate*dir));
@@ -3226,12 +3479,14 @@ function renderProfileInputs(){
     return `<div style="margin-bottom:11px"><div style="font-size:12.5px;color:var(--muted);margin-bottom:4px">${s.name}</div><div class="setrow" style="margin-top:0">
       <label>wt</label><input type="number" inputmode="decimal" step="0.5" id="sz-${s.key}-w" value="${esc(v.w||'')}" placeholder="lb"><span class="x">×</span><input type="number" inputmode="numeric" id="sz-${s.key}-r" value="${esc(v.r||'')}" placeholder="reps">
       <label style="margin-left:6px">RIR</label><input type="number" inputmode="numeric" id="sz-${s.key}-rir" value="${v.rir!=null?esc(v.rir):''}" placeholder="2"></div></div>`; }).join('');
-  $('pf-w').value=DB.profile.w||''; $('pf-h').value=DB.profile.h||''; $('pf-a').value=DB.profile.a||''; $('pf-notes').value=DB.profile.notes||'';
+  $('pf-w').value=currentBodyweight()||''; $('pf-h').value=DB.profile.h||''; $('pf-a').value=DB.profile.a||''; $('pf-notes').value=DB.profile.notes||'';
   renderSpark();
 }
 function saveProfile(){
   if(guardRO()) return;
-  DB.profile.w=num($('pf-w').value)||DB.profile.w; DB.profile.h=num($('pf-h').value)||DB.profile.h; DB.profile.a=parseInt($('pf-a').value,10)||DB.profile.a;
+  const prevBW=currentBodyweight();
+  DB.profile.w=num($('pf-w').value)||DB.profile.w;
+  if(DB.profile.w && DB.profile.w!==prevBW){ DB.bw=DB.bw.filter(p=>!sameDay(p.date,today())); DB.bw.push({date:today().toISOString(), lb:DB.profile.w}); } DB.profile.h=num($('pf-h').value)||DB.profile.h; DB.profile.a=parseInt($('pf-a').value,10)||DB.profile.a;
   DB.profile.notes=$('pf-notes').value.slice(0,300);
   SZ.forEach(s=>{ const w=num($('sz-'+s.key+'-w').value), r=parseInt($('sz-'+s.key+'-r').value,10), rir=$('sz-'+s.key+'-rir').value; if(w&&r) DB.profile.sz[s.key]={w,r,rir:rir!==''?parseInt(rir,10):2}; });
   save(); toast('Saved ✓');
@@ -3259,6 +3514,7 @@ function renderSettings(){
       <div class="field"><label>Trap bar (lb)</label><input id="set-trap" type="number" inputmode="decimal" value="${s.trapBar}"></div>
     </div>
     <div class="field"><label>Machine stack — lb per plate</label><input id="set-stack" type="number" inputmode="decimal" value="${s.stackStep}"></div>
+    <label class="toggle" style="margin:-4px 0 12px"><input type="checkbox" id="set-addons" ${s.addOns!==false?'checked':''}> Stacks have 2.5 / 5 lb add-on plates</label>
     <p class="why" style="margin:-6px 0 12px">Trap bars run 45–75 lb — check the sticker on yours so the plate math is exact.</p>
     <div class="field"><label>Plates on hand</label><div style="display:flex;gap:12px;flex-wrap:wrap">${[45,35,25,10,5,2.5].map(p=>`<label class="toggle" style="font-size:13px"><input type="checkbox" class="set-plate" value="${p}" ${s.plates.includes(p)?'checked':''}> ${p}</label>`).join('')}</div></div>
     <div class="inline-fields">
@@ -3272,7 +3528,7 @@ function renderSettings(){
 }
 function saveSettings(){
   if(guardRO()) return;
-  DB.settings=normSettings({bar:$('set-bar').value, trapBar:$('set-trap').value, stackStep:$('set-stack').value, plates:[...document.querySelectorAll('.set-plate')].filter(x=>x.checked).map(x=>+x.value), rest:{main:$('set-rm').value, sec:$('set-rs').value, acc:$('set-ra').value}, sound:$('set-sound').checked, offerSend:$('set-send').checked});
+  DB.settings=normSettings({bar:$('set-bar').value, trapBar:$('set-trap').value, stackStep:$('set-stack').value, addOns:$('set-addons').checked, plates:[...document.querySelectorAll('.set-plate')].filter(x=>x.checked).map(x=>+x.value), rest:{main:$('set-rm').value, sec:$('set-rs').value, acc:$('set-ra').value}, sound:$('set-sound').checked, offerSend:$('set-send').checked});
   save(); renderSettings(); toast('Settings saved ✓');
 }
 
@@ -3425,7 +3681,12 @@ function closeGym(){
 function gymToList(){ const s=DRAFT&&DRAFT.session; closeGym(); if(s){ activeSession=s; go('sessions'); } }
 function gymExList(){ return sessionList(DRAFT.session, DRAFT.express); }
 function slotDone(sl){ return sl.sets.length>0 && sl.sets.every(s=>s.done); }
-function restFor(ex){ return num(DB.settings.rest[ex.role])||90; }
+function restFor(ex){
+  const ph=(DRAFT? ctxForDraft(DRAFT) : ctx()).ph;
+  if(ex.scheme==='heavy') return ph.name==='Build II'? 240 : (ph.name==='Peak'||ph.test)? 300 : Math.max(180, num(DB.settings.rest.main)||180);
+  if(ex.scheme==='ladder') return 180;
+  return num(DB.settings.rest[ex.role])||90;
+}
 function gymCur(){
   const d=DRAFT, list=gymExList();
   const i=Math.max(0, Math.min(list.length-1, d.cur.i|0)); d.cur.i=i;
@@ -3436,17 +3697,18 @@ function gymCur(){
   return {d, list, i, ex, sl, v, px, si, set:sl.sets[si]};
 }
 function defaultReps(sl, si, px, v){
-  if(v.mode==='time') return sl.goal||px.rl;
-  for(let k=si-1;k>=0;k--){ const r=parseInt(sl.sets[k].r,10); if(r>0) return r; }
-  const h=histOf(v.n, v.mode, false), last=h[h.length-1];
-  if(last){ const ws=workSets(last.e), s=ws[Math.min(si, ws.length-1)]; if(s) return Math.max(px.rl, Math.min(px.rh, num(s.r))); }
+  if(v.mode==='time') return '';
+  const cur=sl.sets[si]||{};
+  if(num(cur.rp)>0) return num(cur.rp);
+  for(let k=si-1;k>=0;k--){ const r=parseInt(sl.sets[k].r,10); if(r>0 && num(sl.sets[k].w)===num(cur.w)) return r; }
+  if(sl.card && num(sl.card.r)>0) return num(sl.card.r);
   return px.rl;
 }
 function fmtClock(s){ s=Math.max(0,Math.round(s)); return Math.floor(s/60)+':'+pad2(s%60); }
 function stepperHTML(f, val, label){
   return `<div class="stepper"><button onclick="gymStep('${f}',-1)" aria-label="less">−</button><div class="sv"><input id="gym-${f}" type="number" inputmode="decimal" value="${esc(val)}" oninput="gymSet('${f}',this.value,false)" onchange="gymSet('${f}',this.value,true)"><span class="su">${esc(label)}</span></div><button onclick="gymStep('${f}',1)" aria-label="more">+</button></div>`;
 }
-function rirChipsHTML(cur){ return `<div class="rirchips"><span class="rl">RIR</span>${[0,1,2,3,4].map(x=>`<button class="${cur!==''&&cur!=null&&num(cur)===x?'on':''}" onclick="gymRir(${x})">${x===4?'4+':x}</button>`).join('')}</div>`; }
+function rirChipsHTML(cur, tgt){ return `<div class="rirchips"><span class="rl">RIR</span>${[0,1,2,3,4].map(x=>`<button class="${cur!==''&&cur!=null&&num(cur)===x?'on':''}${tgt!=null&&Math.min(4,tgt)===x?' tgt':''}" onclick="gymRir(${x})">${x===4?'4+':x}</button>`).join('')}</div>`; }
 let HANG_GOAL=0;
 function hangTimerHTML(sl){
   const goal=num(sl.goal), elapsed=HANG? (Date.now()-HANG)/1000 : num(sl.sets[DRAFT.cur.s|0] && sl.sets[DRAFT.cur.s|0].r);
@@ -3469,9 +3731,11 @@ function renderGym(){
   const oneSide = v.mode==='plate' && sledKind(v.n)!=='sled';
   const warmPlates = x=> x.w>loadBase(v.mode)? plateMath(oneSide? x.w*2 : x.w, v.mode).side.join('+') : 'empty';
   const warmHTML = wu.length? `<details class="gnote" open><summary>Warm-up to ${num(dispW)}${loaded? (oneSide? ' · plates on the '+(sledKind(v.n)==='belt'?'pin':'sleeve') : ' · plates per side') : ''}</summary><div class="warmup">${wu.map(x=>`<span class="w" title="${esc(x.label)}">${x.w}×${x.r}${loaded? ` <span style="color:var(--dim)">${warmPlates(x)}</span>` : ''}</span>`).join('')}</div></details>` : '';
+  const isLast=si===sl.sets.length-1 && v.mode!=='time' && v.mode!=='bw';
+  const lastLine=isLast && showCard? `<div class="lastset">Last set: keep going until ${sl.card&&sl.card.rirShown!=null? sl.card.rirShown : px.rir} are left, then tap RIR — it sets next time's weight.</div>` : '';
   const card = showCard? `<div class="setcard"><div class="sh"><b>Set ${si+1} of ${sl.sets.length}</b><span class="pill">${v.mode==='time'?'goal '+(sl.goal||px.rl)+' s':'target '+px.rl+'–'+px.rh+' @ '+rirText(px)}</span></div>
       <div class="steps2${v.mode==='time'?' one':''}">${v.mode==='time'?'':stepperHTML('w', dispW, v.mode==='assist'?'lb assistance':modeUnit(v.mode))}${stepperHTML('r', dispR, v.mode==='time'?'seconds':'reps')}</div>
-      ${v.mode==='time'? hangTimerHTML(sl) : rirChipsHTML(set.rir)}
+      ${lastLine}${v.mode==='time'? hangTimerHTML(sl) : rirChipsHTML(set.rir, isLast? (sl.card&&sl.card.rirShown!=null? sl.card.rirShown : px.rir) : null)}
       ${v.mode==='time'? '' : equipViz(v, dispW)}
       <button class="donebtn" onclick="gymDone()">✓ ${set.done?'Update':'Set '+(si+1)+' done'}</button></div>`
     : `<div class="setcard"><div class="sh"><b>All ${sl.sets.length} sets done ✓</b></div><button class="donebtn${i<list.length-1?'':' alt'}" onclick="${i<list.length-1?`gymGo(${i+1})`:'gymFinish()'}">${i<list.length-1?'Next exercise →':'Finish session ✓'}</button></div>`;
@@ -3483,7 +3747,7 @@ function renderGym(){
     <div class="gym-body" id="gym-body">
       <div class="gym-name">${ex.core?'★ ':''}${esc(v.n)}</div>
       ${ex.vars.length>1?`<div class="varsel">${ex.vars.map((x,vi)=>`<button class="varchip${x.n===v.n?' on':''}" onclick="gymVariant(${vi})">${esc(x.n)}</button>`).join('')}</div>`:''}
-      <div class="gym-px">${px.sets} × ${px.rl}–${px.rh}${v.mode==='time'?' s':''} @ ${rirText(px)} · rest ${fmtClock(restFor(ex))}</div>
+      <div class="gym-px">${px.sets} × ${px.rl}–${px.rh}${v.mode==='time'?' s · stop before your grip gives':' @ '+rirText(px)} · rest ${fmtClock(restFor(ex))}</div>
       ${suggestLine(v, sg)}${lastTimeHTML(v.n, v.mode)}
       <details class="gnote"><summary>Coaching note</summary><div>${esc(ex.note)}</div></details>
       ${warmHTML}${card}${setList}
@@ -3530,11 +3794,14 @@ function gymDone(){
     const raw=$('gym-w')? $('gym-w').value : set.w;
     if(raw===''||raw==null){ if(v.mode!=='bw'){ toast(v.mode==='assist'?'Set the assistance first':'Set the weight first'); return; } set.w=0; }
     else set.w=num(raw);
+    if(v.mode!=='plate' && LOADED_MODES.includes(v.mode) && !(num(set.w)>0)){ toast('Set the weight first'); return; }
   }
   const r=parseInt($('gym-r')? $('gym-r').value : set.r, 10);
   if(!(r>0)){ toast(v.mode==='time'?'Enter the seconds':'Enter the reps'); return; }
-  set.r=r; set.done=true; set.auto=false; HANG=null;
-  for(let k=si+1;k<sl.sets.length;k++){ const n=sl.sets[k]; if(!n.done && n.auto) n.w=set.w; }
+  set.r=r; set.done=true; set.auto=false; set.vn=sl.variant; HANG=null;
+  for(let k=si+1;k<sl.sets.length;k++){ const n=sl.sets[k]; if(!n.done && n.auto){ n.w=set.w; delete n.rp; delete n.adj; } }
+  const rp= sl.sets.some((x,k)=>k>si && !x.done)? repredictAfter(ex, sl, v, si) : null;
+  if(rp){ for(let k=si+1;k<sl.sets.length;k++){ const n=sl.sets[k]; if(!n.done && n.auto){ n.w=rp.w; n.adj=rp.dir; n.rp=rp.pred; } } toast(`Next set → ${fmtLoad(v, rp.w)}: that set was ${rp.dir==='up'?'easier':'harder'} than planned`, 3200); }
   DRAFT.cur.edit=false;
   const nextOpen=sl.sets.findIndex(s=>!s.done);
   if(nextOpen>=0) DRAFT.cur.s=nextOpen;
@@ -3580,7 +3847,8 @@ function gymFinish(){ SUMMARY=true; HANG=null; renderGym(); }
 function renderGymSummary(){
   const d=DRAFT, p=previewLog(d), list=gymExList();
   const rows=list.map(ex=>{ const sl=draftSlot(d,ex), v=variantOf(ex,sl.variant), done=sl.sets.filter(s=>parseInt(s.r,10)>0);
-    return `<div class="sum-row"><span>${esc(v.n)}</span><span class="r">${done.length? esc(done.map(s=>fmtSet(s,v.mode)).join(', ')) : '<span style="color:var(--red)">skipped</span>'}</span></div>`; }).join('');
+    const cd=sl.card, lastS=done[done.length-1], vs=(cd && cd.pred!=null && lastS && v.mode!=='time' && v.mode!=='bw')? ` <span style="color:var(--dim)">· card ${cd.r} @${cd.rirShown}, got ${num(lastS.r)}${isNum(lastS.rir)?' @'+lastS.rir:''}</span>` : '';
+    return `<div class="sum-row"><span>${esc(v.n)}</span><span class="r">${done.length? esc(done.map(s=>fmtSet(s,v.mode)).join(', '))+vs : '<span style="color:var(--red)">skipped</span>'}</span></div>`; }).join('');
   const sets=p.log.entries.reduce((a,e)=>a+e.sets.length,0);
   const prs=p.prs.map(x=>`<div class="sum-row"><span class="prline">🏆 ${esc(x.name)}</span><span class="r">${esc(fmtMetric(x.t,x.v,x.mode))} <span style="color:var(--dim)">(was ${esc(fmtMetric(x.t,x.prior,x.mode))})</span></span></div>`).join('');
   const ms=p.newMs.map(m=>`<div class="sum-row"><span class="prline">★ ${esc(m.label)}</span><span class="r">milestone</span></div>`).join('');
@@ -3625,28 +3893,54 @@ function runSelftest(){
     T('plate math — barbell 135/185/225/140', ()=>{ DB=seeded(); return eq([plateMath(135,'bb').side,plateMath(185,'bb').side,plateMath(225,'bb').side,plateMath(140,'bb').side],[[45],[45,25],[45,45],[45,2.5]]); });
     T('plate math — trap bar + plate-loaded + under the bar', ()=>{ DB=seeded(); DB.settings.trapBar=60; return eq([plateMath(240,'trap').side,plateMath(180,'plate').side,plateMath(30,'trap').under],[[45,45],[45,45],true]); });
     T('Epley e1RM', ()=>eq([e1rm(225,5),e1rm(300,1),e1rm(100,0)],[262.5,300,0]));
-    T('assisted pull-up: help drops when every set hits the top', ()=>{ DB=seeded(); const ex=PROGRAM['Upper A'][1], v=ex.vars[0], px={sets:4,rl:3,rh:6,rir:2};
-      DB.logs=[{date:'2026-10-06T05:00:00.000Z',day:'Upper A',entries:[{exercise:v.n,mode:'assist',sets:[{w:120,r:6,rir:2},{w:120,r:6,rir:2},{w:120,r:6,rir:1}]}]}];
-      const a=suggest(ex,v,px).w; DB.logs[0].entries[0].sets.forEach(s=>s.w=30); const b=suggest(ex,v,px).w; DB.logs[0].entries[0].sets.forEach(s=>s.w=5); const c=suggest(ex,v,px).w;
-      return eq([a,b,c],[110,25,0]); });
-    T('assisted pull-up: holds after one short session, adds help after two', ()=>{ DB=seeded(); const ex=PROGRAM['Upper A'][1], v=ex.vars[0], px={sets:4,rl:3,rh:6,rir:2};
-      const L=d=>({date:d,day:'Upper A',entries:[{exercise:v.n,mode:'assist',sets:[{w:100,r:5},{w:100,r:2}]}]});
-      DB.logs=[L('2026-10-06T05:00:00.000Z')]; const a=suggest(ex,v,px).w; DB.logs.push(L('2026-10-13T05:00:00.000Z')); const b=suggest(ex,v,px).w; return eq([a,b],[100,110]); });
-    T('weighted: +10 lower when all sets hit top · hold on a grind · −10% after two misses', ()=>{ DB=seeded(); const ex=PROGRAM['Lower A'][0], v=ex.vars[0], px={sets:4,rl:4,rh:6,rir:2};
-      const L=(sets,d)=>({date:d,day:'Lower A',entries:[{exercise:v.n,mode:'trap',sets}]});
-      DB.logs=[L([{w:245,r:6,rir:2},{w:245,r:6,rir:2}],'2026-10-05T05:00:00.000Z')]; const a=suggest(ex,v,px).w;
-      DB.logs[0].entries[0].sets[1].rir=0; const b=suggest(ex,v,px).w;
-      DB.logs=[L([{w:245,r:3}],'2026-10-05T05:00:00.000Z'),L([{w:245,r:3}],'2026-10-12T05:00:00.000Z')]; const c=suggest(ex,v,px).w;
-      return eq([a,b,c],[255,245,220]); });
-    T('yellow readiness holds the load', ()=>{ DB=seeded(); const ex=PROGRAM['Lower A'][0], v=ex.vars[0], px={sets:4,rl:4,rh:6,rir:2}; DB.logs=[{date:'2026-10-05T05:00:00.000Z',day:'Lower A',entries:[{exercise:v.n,mode:'trap',sets:[{w:245,r:6}]}]}]; return eq(suggest(ex,v,px,{readiness:'yellow'}).w,245); });
-    T('new lift → establish guidance, no invented weight', ()=>{ DB=seeded(); const ex=PROGRAM['Lower A'][0]; const s=suggest(ex,ex.vars[0],{sets:3,rl:5,rh:6,rir:3}); return (s.establish && s.w==null) || JSON.stringify(s); });
-    T('mode change ignores incompatible history (bodyweight leg curl ≠ machine)', ()=>{ DB=migrate(fx()); DB.logs.push({date:'2026-07-04T05:00:00.000Z',day:'Lower B',entries:[{exercise:'Leg Curl',mode:'bw',sets:[{w:0,r:12}]}]}); const ex=PROGRAM['Lower B'][2]; return suggest(ex,ex.vars[0],{sets:3,rl:10,rh:15,rir:2}).establish===true || 'used bodyweight history'; });
+    const engFx=()=>{ const D=seeded(); D.profile.w=200; D.blocks=[{id:'sb',tpl:'strength-bulk',start:'2026-10-05',end:'2027-01-24',status:'active',result:{note:''}}]; D.activeBlockId='sb';
+      D.logs=[
+        {date:'2026-07-08T05:00:00.000Z',day:'Upper B',entries:[{exercise:'Seated Cable Row',mode:'cable',sets:[{w:42.5,r:8},{w:42.5,r:8},{w:42.5,r:8}]},{exercise:'Biceps Curl',mode:'db',sets:[{w:50,r:10},{w:50,r:10}]}]},
+        {date:'2026-09-30T05:00:00.000Z',day:'Upper A',entries:[{exercise:'DB Bench Press',mode:'db',slot:'DB Bench Press',sets:[{w:40,r:12,rir:6},{w:45,r:12,rir:2}]},{exercise:'Lateral Raise',mode:'db',slot:'Lateral Raise',sets:[{w:10,r:20,rir:6},{w:10,r:20,rir:4}]},{exercise:'Dead Hang',mode:'time',slot:'Dead Hang',sets:[{w:0,r:20},{w:0,r:20}]}]},
+        {date:'2026-10-02T05:00:00.000Z',day:'Lower A',readiness:'yellow',entries:[{exercise:'Front Squat',mode:'bb',slot:'Hack Squat',sets:[{w:95,r:10,rir:2},{w:105,r:10,rir:1},{w:115,r:8,rir:1}]},{exercise:'Standing Calf Raise',mode:'mach',slot:'Standing Calf Raise',sets:[{w:115,r:16,rir:2},{w:115,r:16,rir:2},{w:115,r:16,rir:0}]}]},
+        {date:'2026-10-04T05:00:00.000Z',day:'Upper A',entries:[{exercise:'Barbell Bench',mode:'bb',slot:'Barbell Bench',sets:[{w:135,r:7,rir:3},{w:145,r:6},{w:155,r:6}]},{exercise:'Assisted Pull-up',mode:'assist',slot:'Assisted Pull-up',sets:[{w:145,r:8,rir:4},{w:130,r:6,rir:2},{w:130,r:6,rir:1}]},{exercise:'DB Row',mode:'db',slot:'Chest-Supported Row',sets:[{w:40,r:8,rir:2},{w:40,r:8,rir:2},{w:40,r:8,rir:2}]},{exercise:'Dead Hang',mode:'time',slot:'Dead Hang',sets:[{w:0,r:27},{w:0,r:24},{w:0,r:22}]}]},
+        {date:'2026-10-04T05:00:00.000Z',day:'Lower B',entries:[{exercise:'Belt Squat',mode:'plate',slot:'Leg Press',sets:[{w:90,r:8,rir:2},{w:90,r:10,rir:1},{w:90,r:10,rir:1},{w:90,r:10,rir:0}]},{exercise:'Romanian Deadlift',mode:'bb',slot:'Romanian Deadlift',sets:[{w:65,r:10,rir:2},{w:65,r:10,rir:1},{w:65,r:10,rir:1}]},{exercise:'Seated Calf Raise',mode:'mach',slot:'Seated Calf Raise',sets:[{w:50,r:18,rir:2},{w:50,r:13,rir:0},{w:50,r:12,rir:0}]}]}
+      ]; return migrate(D); };
+    const cardOf=(s,slot,vn,o,day)=>{ const ex=PROGRAM[s].find(e=>e.slot===slot), v=vn? ex.vars.find(x=>x.n===vn) : ex.vars[0]; return planFor(ex, Object.assign({day:day||'2026-10-11',ex:{},readiness:null,express:false,loadAdj:1,session:s},o||{}), v).card; };
+    const wra=c=>[c.w, c.r, c.aim];
+    T('predicted loads match the hand-worked examples (ramp sets ignored, RIR counted)', ()=>{ DB=engFx(); return eq([wra(cardOf('Upper A','Barbell Bench')), wra(cardOf('Lower A','Hack Squat','Front Squat')), wra(cardOf('Lower B','Romanian Deadlift')), wra(cardOf('Lower B','Leg Press','Belt Squat')), wra(cardOf('Lower A','Standing Calf Raise')), wra(cardOf('Upper A','Chest-Supported Row','DB Row')), wra(cardOf('Lower B','Seated Calf Raise')), wra(cardOf('Upper B','Lateral Raise'))],
+      [[145,6,6],[110,8,8],[65,8,9],[85,9,10],[122.5,10,11],[40,7,8],[45,16,16],[10,20,20]]); });
+    T('assisted pull-ups predict on bodyweight minus help; the other slot borrows the level safely', ()=>{ DB=engFx(); return eq([wra(cardOf('Upper A','Assisted Pull-up')), wra(cardOf('Upper B','Lat Pulldown','Assisted Pull-up'))],[[135,6,6],[140,10,11]]); });
+    T('new lifts establish; stale lifts open with a check-in; a suspect old entry is held back until confirmed', ()=>{ DB=engFx(); const t=cardOf('Lower A','Trap Bar Deadlift'), r=cardOf('Upper B','Seated Cable Row'), b=cardOf('Upper B','Biceps Curl'); const pre=[!!t.establish, t.w, !!r.opener, r.w, r.r, !!b.quarantine];
+      DB.logs.find(l=>l.day==='Upper B').entries.find(e=>e.exercise==='Biceps Curl').confirmed=true; const b2=cardOf('Upper B','Biceps Curl'); return eq(pre.concat([!!b2.quarantine, !!b2.opener]),[true,null,true,35,10,true,false,true]); });
+    T('blank RIR after following the card never ratchets down; an on-target last set earns one step', ()=>{ DB=engFx(); const cd={w:145,E:145,r:6,aim:6,sets:3,rl:5,rh:6,rirT:3,rirLow:3,track:'P'};
+      DB.logs.push({date:'2026-10-11T05:00:00.000Z',day:'Upper A',entries:[{exercise:'Barbell Bench',mode:'bb',slot:'Barbell Bench',card:cd,sets:[{w:145,r:6},{w:145,r:6},{w:145,r:6}]}]});
+      const a=cardOf('Upper A','Barbell Bench',null,null,'2026-10-14'); DB.logs[DB.logs.length-1].entries[0].sets[2].rir=3; const b=cardOf('Upper A','Barbell Bench',null,null,'2026-10-14');
+      return eq([a.w,a.r,b.w,b.r],[145,6,150,5]); });
+    T('flat/rough days never add weight; express takes 10% off', ()=>{ DB=engFx(); DB.logs.push({date:'2026-10-11T05:00:00.000Z',day:'Upper A',entries:[{exercise:'Barbell Bench',mode:'bb',slot:'Barbell Bench',sets:[{w:145,r:6,rir:3},{w:145,r:6,rir:3},{w:145,r:6,rir:3}]}]});
+      const y=cardOf('Upper A','Barbell Bench',null,{readiness:'yellow'},'2026-10-14'), x=cardOf('Upper A','Barbell Bench',null,{readiness:'red',express:true,loadAdj:0.9},'2026-10-14'); return eq([y.w,y.rirShown,x.w],[140,4,125]); });
+    T('dumbbell jump too big → earn it with reps first', ()=>{ DB=engFx(); DB.logs.push({date:'2026-10-11T05:00:00.000Z',day:'Upper A',entries:[{exercise:'DB Row',mode:'db',slot:'Chest-Supported Row',card:{w:40,E:40,r:7,aim:8,sets:3,rl:6,rh:8,rirT:3,rirLow:3,track:'P'},sets:[{w:40,r:8,rir:3},{w:40,r:8,rir:3},{w:40,r:8,rir:3}]}]});
+      const c=cardOf('Upper A','Chest-Supported Row','DB Row',null,'2026-10-14'); return eq([c.w,c.r,!!c.bridge],[40,9,true]); });
+    T('2+ weeks away → one more rep in the tank and no increase; 8+ weeks → check-in opener', ()=>{ DB=engFx(); const a=cardOf('Lower A','Hack Squat','Front Squat',null,'2026-10-17'), b=cardOf('Lower A','Hack Squat','Front Squat',null,'2026-12-15'); return eq([a.w,a.r,a.rirShown,!!b.opener],[105,8,4,true]); });
+    T('test week: one top set from the level; deload: fewer sets, 4 in the tank, a notch lighter only if the reps need it', ()=>{ DB=engFx(); DB.logs.push({date:'2027-01-12T06:00:00.000Z',day:'Upper A',entries:[{exercise:'Barbell Bench',mode:'bb',slot:'Barbell Bench',sets:[{w:185,r:5,rir:2},{w:185,r:5,rir:2},{w:185,r:5,rir:2}]}]});
+      const t=cardOf('Upper A','Barbell Bench',null,null,'2027-01-19'); DB=engFx(); DB.logs.push({date:'2026-11-17T06:00:00.000Z',day:'Upper A',entries:[{exercise:'Barbell Bench',mode:'bb',slot:'Barbell Bench',sets:[{w:155,r:5,rir:2},{w:155,r:5,rir:2},{w:155,r:5,rir:2}]}]}); const d=cardOf('Upper A','Barbell Bench',null,null,'2026-11-24');
+      DB.logs[DB.logs.length-1].entries[0].sets.forEach(x=>{ x.r=8; }); const d2=cardOf('Upper A','Barbell Bench',null,null,'2026-11-24'); return eq([t.w,t.r,d.w,d.r,d.sets,d.rirShown,d2.w],[205,2,150,4,2,4,155]); });
+    T('hinges never prescribe below 2 RIR; high-rep isolation goes to 1', ()=>{ const t=TEMPLATES['strength-bulk'], C=w=>({b:{},tpl:t,w,ph:phaseAt(t,w)}); const td=PROGRAM['Lower A'][0], rdl=PROGRAM['Lower B'][1], lat=PROGRAM['Upper B'][3], bench=PROGRAM['Upper A'][0];
+      return eq([prescribe(td,C(14)).rir, prescribe(td,C(14)).sets, prescribe(rdl,C(10)).rir, prescribe(lat,C(2)).rir, prescribe(lat,C(5)).sets, prescribe(bench,C(14)).rir, prescribe(bench,C(16)).rh],[2,3,2,1,4,1,2]); });
+    T('working sets: ramp rows and 0-lb machine rows never count', ()=>{ DB=engFx(); const b=classify(DB.logs.find(l=>l.day==='Upper A'&&l.entries[0].exercise==='Barbell Bench').entries[0], null), m=classify({mode:'mach',sets:[{w:0,r:10},{w:50,r:10}]}, null); return eq([b.W.length,b.T0,m.W.length,m.T0],[1,155,1,50]); });
+    T('a set done on another variant logs under that variant; the card rides only with the current one', ()=>{ DB=engFx(); const d=newDraft('Upper A',{}); const sl=d.ex['Barbell Bench']; sl.sets[0].w=145; sl.sets[0].r=6; sl.sets[0].vn='Barbell Bench'; sl.variant='DB Bench Press'; sl.sets[1].w=50; sl.sets[1].r=10; sl.sets[1].vn='DB Bench Press'; for(let k=2;k<sl.sets.length;k++) sl.sets[k].r='';
+      return eq(draftEntries(d).filter(e=>e.slot==='Barbell Bench').map(e=>[e.exercise,e.mode,e.sets.length,!!e.card]),[['Barbell Bench','bb',1,false],['DB Bench Press','db',1,true]]); });
+    T('an establish card with a blank RIR counts 1 in reserve, not the card target', ()=>{ const e={mode:'bb',card:{establish:true,rirT:3,sets:3,r:5},sets:[{w:100,r:5},{w:100,r:5},{w:100,r:5}]}, c=classify(e,null), o=rirOf(c,e); return eq([o.src,o.rir],['assumed',1]); });
+    T('assisted pull-ups: an old weigh-in never knocks the card off the stack', ()=>{ DB=engFx(); DB.logs.find(l=>l.date.startsWith('2026-10-04')&&l.day==='Upper A').entries.find(e=>e.mode==='assist').bw=212.4; const ex=PROGRAM['Upper A'].find(e=>e.slot==='Assisted Pull-up'), lad=makeLadder(ex.vars[0], currentBodyweight()), E=lad.toE(cardOf('Upper A','Assisted Pull-up').w); return eq([Math.abs(lad.ceilL(E)-E)<0.01],[true]); });
+    T('the week after a deload is not a return from a break', ()=>{ DB=engFx(); const bench=r=>({exercise:'Barbell Bench',mode:'bb',slot:'Barbell Bench',sets:[{w:155,r:5,rir:r},{w:155,r:5,rir:r},{w:155,r:5,rir:r}]});
+      DB.logs.push({date:'2026-11-17T06:00:00.000Z',day:'Upper A',entries:[bench(2)]},{date:'2026-11-24T06:00:00.000Z',day:'Upper A',deload:true,entries:[bench(4)]}); const ex=PROGRAM['Upper A'][0], v=ex.vars[0], L=levelOf(ex,v,makeLadder(v,200),parseYmd('2026-12-01')); return eq([L.returning,L.checkIn,L.age],[false,false,7]); });
+    T('a test-week log only overrides the level on the lift that was tested', ()=>{ DB=engFx(); const lr=PROGRAM['Upper B'].find(e=>e.slot==='Lateral Raise'), v=lr.vars[0], en=w=>({exercise:v.n,mode:v.mode,slot:'Lateral Raise',sets:[{w,r:20,rir:1},{w,r:20,rir:1}]});
+      DB.logs=[{date:'2026-10-01T05:00:00.000Z',day:'Upper B',entries:[en(10)]},{date:'2026-10-08T05:00:00.000Z',day:'Upper B',test:true,entries:[en(12.5)]}]; const L=levelOf(lr,v,makeLadder(v,200),parseYmd('2026-10-10')); return eq([Math.round(L.lv*10)/10],[19.1]); });
+    T('a rough-day express session is logged light, so it never moves the numbers', ()=>{ DB=engFx(); return eq([!!buildLog(newDraft('Upper A',{express:true, readiness:'red'})).light, !!buildLog(newDraft('Upper A',{})).light],[true,false]); });
+    T('deload and test cards are never re-predicted mid-session', ()=>{ DB=engFx(); const ex=PROGRAM['Upper A'][0], v=ex.vars[0], mk=f=>({variant:v.n, card:Object.assign({w:155,E:155,r:5,rirT:4,rirShown:4,rl:4,rh:6,track:'P',sets:2},f), sets:[{w:155,r:8,rir:0,vn:v.n},{w:155,r:'',rir:''}]});
+      return eq([!!repredictAfter(ex,mk({}),v,0), repredictAfter(ex,mk({deload:true}),v,0), repredictAfter(ex,mk({test:true}),v,0)],[true,null,null]); });
+    T('after a re-prediction the next set pre-fills the predicted reps', ()=>{ const ex=PROGRAM['Upper A'][0], v=ex.vars[0], sl={variant:v.n, card:{r:5}, sets:[{w:155,r:8},{w:150,r:'',rp:7},{w:150,r:''}]}; return eq([defaultReps(sl,1,{rl:4},v), defaultReps(sl,2,{rl:4},v)],[7,5]); });
     T('pull-up ladder levels', ()=>{ const L=x=>ladderLevel(Object.assign(newStats(),x)).n; return eq([L({hang:25}),L({hang:40,assistFirst:120,assistBest:120,assistNow:120}),L({hang:40,assistFirst:120,assistBest:55,assistNow:60}),L({strict:1}),L({strict:6})],[1,2,3,4,5]); });
     T('phases + header chip', ()=>{ DB=seeded(); DB.blocks=[blk(-14)]; DB.activeBlockId='t'; const c=ctx(), ch=chipText(c), t=TEMPLATES['strength-bulk']; return eq([c.w,ch.n,ch.l,phaseAt(t,8).name,!!phaseAt(t,8).deload,!!phaseAt(t,16).test,!!phaseAt(t,17).complete,phaseAt(TEMPLATES.maintain,8).name,phaseAt(TEMPLATES.maintain,9).name],[3,'W3/16','Groove','Deload',true,true,true,'Deload','Base']); });
     T('no block and pre-block both run week-1 targets', ()=>{ DB=seeded(); const main=PROGRAM['Lower A'][0]; const a=prescribe(main,ctx()); DB.blocks=[blk(5)]; DB.activeBlockId='t'; const c=ctx(), b=prescribe(main,c); return eq([a.sets,a.rl,a.rh,a.rir,b.sets,b.rir,chipText(c).n,!!c.ph.pre],[3,5,6,3,3,3,'5d',true]); });
-    T('prescriptions: build heavy · deload · express · flat day', ()=>{ const t=TEMPLATES['strength-bulk'], main=PROGRAM['Lower A'][0], acc=PROGRAM['Lower A'][3], C=w=>({b:{},tpl:t,w,ph:phaseAt(t,w)}); const a=prescribe(main,C(5)), d=prescribe(main,C(8)), x=prescribe(main,C(5),{express:true}), y=prescribe(acc,C(5),{readiness:'yellow'}), p=prescribe(main,C(14)); return eq([a.sets,a.rl,a.rh,a.rir,d.sets,d.rir,x.sets,y.rir,p.sets,p.rl,p.rh],[4,4,6,2,2,4,3,3,5,2,4]); });
+    T('prescriptions: build heavy · deload · express · flat day', ()=>{ const t=TEMPLATES['strength-bulk'], main=PROGRAM['Lower A'][0], acc=PROGRAM['Lower A'][3], C=w=>({b:{},tpl:t,w,ph:phaseAt(t,w)}); const a=prescribe(main,C(5)), d=prescribe(main,C(8)), x=prescribe(main,C(5),{express:true}), y=prescribe(acc,C(5),{readiness:'yellow'}), p=prescribe(main,C(14)); return eq([a.sets,a.rl,a.rh,a.rir,d.sets,d.rir,x.sets,y.rir,p.sets,p.rl,p.rh],[4,4,6,2,2,4,3,3,3,2,4]); });
     T('default start lands the deloads on Thanksgiving + Christmas', ()=>{ const s=nextMonday(new Date(2026,8,30)); return eq([ymd(s),ymd(thanksgiving(2026)),holidayIn(addDays(s,49),addDays(s,55)),holidayIn(addDays(s,77),addDays(s,83)),makeBlock('strength-bulk',s).end],['2026-10-05','2026-11-26','Thanksgiving week','Christmas week','2027-01-24']); });
-    T('draft round-trip → log entries', ()=>{ DB=seeded(); const d=newDraft('Upper A',{}); const sl=d.ex['Barbell Bench']; sl.sets[0].w=185; sl.sets[0].r=5; sl.sets[0].rir=2; sl.sets[1].w=185; sl.sets[1].r=''; const es=draftEntries(JSON.parse(JSON.stringify(d))); return eq(es,[{exercise:'Barbell Bench',mode:'bb',slot:'Barbell Bench',sets:[{w:185,r:5,rir:2}]}]); });
+    T('draft round-trip → log entries', ()=>{ DB=seeded(); const d=newDraft('Upper A',{}); const sl=d.ex['Barbell Bench']; sl.sets[0].w=185; sl.sets[0].r=5; sl.sets[0].rir=2; sl.sets[1].w=185; sl.sets[1].r=''; const es=draftEntries(JSON.parse(JSON.stringify(d))); const hasCard=!!(es[0]&&es[0].card&&es[0].card.rirT!=null); es.forEach(e=>delete e.card); return eq([es,hasCard],[[{exercise:'Barbell Bench',mode:'bb',slot:'Barbell Bench',sets:[{w:185,r:5,rir:2}]}],true]); });
     T('express keeps the starred lifts, one fewer set', ()=>{ DB=seeded(); const d=newDraft('Lower A',{express:true}); const l=sessionList('Lower A',true); return eq([l.map(e=>e.slot), slotPx(l[0],d).sets],[['Trap Bar Deadlift','Hack Squat'],2]); });
     T('commit: logs, advances the rotation, clears the draft', ()=>{ DB=seeded(); DB.seq=1; DRAFT=newDraft('Upper A',{readiness:'green'}); const sl=DRAFT.ex['Barbell Bench']; sl.sets[0].w=135; sl.sets[0].r=6; const p=commitDraft(); return eq([!!p, DB.logs.length, DB.seq, DRAFT, DB.logs[0].readiness, DB.logs[0].entries.length],[true,1,2,null,'green',1]); });
     T('PRs: first log is a baseline, a better one is a PR', ()=>{ DB=seeded(); const mk=(w,r,d)=>({date:d,day:'Upper A',entries:[{exercise:'Barbell Bench',mode:'bb',sets:[{w,r}]}]}); const a=prsFor(mk(185,5,'2026-10-06T05:00:00.000Z')); DB.logs.push(mk(185,5,'2026-10-06T05:00:00.000Z')); const b=prsFor(mk(190,5,'2026-10-13T05:00:00.000Z')), c=prsFor(mk(185,4,'2026-10-13T05:00:00.000Z')); return eq([a.length,b.length,c.length],[0,1,0]); });
@@ -3676,6 +3970,15 @@ function runSelftest(){
   return {pass, total:results.length, ok, results};
 }
 
+const WHY_CARDS = [{"t": "Strength and size: two jobs, two kinds of day", "b": "Strength is specific. It grows most from heavy sets of about 2–6 reps (roughly 80% of your max or more), practised often. Muscle is far less picky: across hundreds of trials, nearly every sensible way of lifting built muscle about equally well. So the heavy days chase strength, the muscle days pile up growth with joint-friendly loads, and the heavy days count toward growth too.", "r": ["currier2023", "lopez2021", "cumming2025"]}, {"t": "The best reps for muscle growth", "b": "Muscle grows about equally across a wide span of rep counts, from heavy fives to sets of 20–30, as long as each set ends close to failure. Growth climbs a little as sets get closer to failure. The practical sweet spot is 6–12 reps stopping 1–3 short. That's heavy enough to be efficient, light enough to be kind to joints, and in the range where your reps-in-reserve calls are accurate.", "r": ["lopez2021", "cumming2025", "robinson2024"]}, {"t": "High-rep sets have to be hard", "b": "The evidence that light, high-rep sets build as much muscle as heavy ones comes from sets taken all the way to failure. Very light weights, around 20% of max, grew only about half as much even then. Above 12 reps, people's sense of how many reps are left gets much worse, usually on the cautious side. So sets meant to be 15–20+ reps, like calves, lateral raises and rear delts, aim for 1 rep left, and the app never prescribes more than 30 reps.", "r": ["lopez2021", "lasevicius2018", "halperin2022"]}, {"t": "How close to failure", "b": "Growth improves a little as sets end closer to failure: about half a percentage point more muscle for each rep closer, over a couple of months. In trained lifters, stopping 1–2 reps short matched going all the way, with less fatigue. Strength barely cares; the weight on the bar drives it, not the grind. So muscle-day sets end 1–3 reps short, and heavy days never grind.", "r": ["robinson2024", "refalo2023", "refalo2024"]}, {"t": "Failure is a tool, not a rule", "b": "In one trial, bench and squat sets taken to failure needed 48–72 hours for full recovery, against about 6 hours for the same work stopped about 5 reps short. In another, trained men who trained to failure gained slightly less bench strength. The small upside of failure shows up mostly when you do very few sets. So failure is allowed only on the final set of machine and isolation work, from the Build phase on, and never on heavy barbell or hinge lifts.", "r": ["moranNavarro2017", "robinson2025", "hermann2025"]}, {"t": "How your weights are predicted", "b": "Each lift has a level: an estimated max from your working sets in that slot, weight × (1 + (reps + reps-in-reserve) ÷ 30), averaged over your last two sessions. Warm-ups don't count. The card shows the heaviest weight you can actually load that should give today's target reps with today's reps-in-reserve, and the math behind it. On the last set you keep going until you have the planned reps left, so the next prediction learns from a real rep count. The level is a training number for that exercise, not a tested max: how reps fall as weight rises differs between lifts and between people.", "r": ["reynolds2006", "nuzzo2024", "hickmott2022"]}, {"t": "Why the prediction is cautious", "b": "Lifters misjudge reps-in-reserve by about one rep on average, usually thinking they have fewer left than they do, though the calls get better with practice. So the app anchors on your last set, averages two sessions, and adds about one loadable step per session at most — a little more only when a weight was clearly too light. If you do exactly what the card says and skip the reps-in-reserve tap, it assumes you were on target: the weight never drifts down, and it won't step up until the tap (or, on high-rep work, two sessions in a row at the top). Adjusting load by effort like this works at least as well as fixed percentages.", "r": ["halperin2022", "martikainen2025", "hickmott2022"]}, {"t": "Adding reps is progress too", "b": "In trained lifters, adding reps at the same weight built as much muscle as adding weight, and nearly as much strength. So on muscle days the weight holds while the card's aim climbs one rep at a time. Once every set reaches the top of the range at the planned effort, the weight steps up and the reps reset. When the next dumbbell is too big a jump, you earn it with a few extra reps first. If even that can't bridge it, the app says so and suggests a machine or cable with finer steps.", "r": ["plotkin2022", "acsm2009"]}, {"t": "Volume is the main dial for size", "b": "More hard sets per muscle per week means more growth, with diminishing returns. About 10–20 sets per muscle per week is the productive zone; well past 20 added little in trained lifters and cost a lot of fatigue. Strength needs far less: a few heavy sets of a lift per session do most of the work. Volume climbs one set at a time in the Build phases instead of starting high.", "r": ["pelland2026", "bazValle2022", "aube2022"]}, {"t": "Twice a week is enough", "b": "With the same weekly sets, training a muscle once, twice or three times a week grows it about the same. Training each muscle twice, as this split does, keeps any one session from getting too long. Past about 10 hard sets for one muscle in one session, extra sets stop adding measurable growth. A missed session's sets are better made up on the next similar day than with an extra day.", "r": ["schoenfeld2019freq", "pelland2026", "remmert2025"]}, {"t": "Rest long enough to lift well", "b": "Resting more than about a minute between sets grows slightly more muscle, mostly because you keep your reps up. Beyond about 90 seconds, more rest adds little for size. For heavy strength work, trained lifters do better with two minutes or more. Heavy lifts get 3 minutes early in the block and up to 5 near the peak; accessories get 90 seconds.", "r": ["singer2024", "grgic2018rest"]}, {"t": "Load the stretch", "b": "In two MRI trials, loading a muscle in its stretched position grew it more than the shortened-position version of the same move. A seated leg curl beat a lying curl for the hamstrings, and overhead triceps extensions beat neutral-arm extensions, even with about a third less weight. So the seated curl and the overhead extension are the defaults, each with its own weight history, and the old versions stay as alternatives if a position doesn't agree with you.", "r": ["maeo2021", "maeo2023"]}, {"t": "Full range stays the default", "b": "Half-reps in the stretched part of the range built about as much muscle as full reps in trained lifters. Training at longer muscle lengths gives at most a small edge. Strength stays specific to the range you train, and the end-of-block test is full range. So every lift is full range, with a one-second pause in the stretch on muscle-day work. Partials aren't prescribed.", "r": ["wolf2025", "varovic2025"]}, {"t": "Phases and effort ramps", "b": "Reps-in-reserve steps down across the block on the heavy lifts, from 3 to 2 to 1. Ramping like this gave the same strength and size as training near failure every week, with less effort, and reps-in-reserve calls got more accurate along the way. Alternating heavy days with lighter muscle days beat a straight-line plan for strength in trained lifters.", "r": ["martikainen2025", "moesgaard2022"]}, {"t": "Deloads: fewer sets, same weight", "b": "Deloads cut sets, not weight. In the only trial, a full week off added no muscle and cost a little strength. Strength and physique athletes report a lighter week about every 3–8 weeks, 5.6 on average. A coach consensus panel agreed deloads can be planned, triggered by fatigue, or both, and that the weight can stay the same when volume drops. Here they're planned for holiday weeks, and the app offers an earlier one if your lifts slide two sessions running.", "r": ["coleman2024", "rogerson2024", "bell2023"]}, {"t": "Spine-friendly by design", "b": "Compared with a straight bar, the trap bar cut lower-back load by about 8–15% at light-to-moderate weights. At 70–80% of max the difference was no longer significant, and heavier loads weren't tested, so heavy trap-bar sets still need a hard brace and at least two reps in reserve. Belt and hack squats load the legs without a bar on the spine, and chest-supported rows take the lower back out of rowing. Planned variation between days works as well as fixed exercises, and each variant keeps its own weight history.", "r": ["swinton2011", "ramirez2022", "kassiano2024"]}, {"t": "The pull-up ladder", "b": "For heavier lifters, the real load on a pull-up is bodyweight minus assistance, so that's what the app tracks, using the bodyweight in your Profile — no weigh-ins required. The same prediction rules apply as for the barbell. No study has tested pull-up progressions specifically, so this applies the general load evidence, and the app learns your own reps-versus-load curve from your logs.", "r": ["currier2023", "nuzzo2024"]}, {"t": "Protein & creatine", "b": "1.6–2.2 g/kg/day of protein is the well-replicated range for maximizing muscle gain, spread across meals. Creatine monohydrate (5 g/day) is the most researched supplement there is — strength, size, cheap and safe.", "r": [], "outside": true}, {"t": "Zone 2 + the sauna", "b": "Cardiorespiratory fitness is among the strongest predictors of long-term health, and frequent sauna use is linked to lower cardiovascular risk in large cohorts. A small, steady dose of both keeps that work going while the lifting does the building.", "r": [], "outside": true}, {"t": "Bulk without a scale", "b": "A modest surplus plus enough protein builds muscle; the scoreboard is the bar, not the scale. Four real meals with protein at each covers it without counting anything.", "r": [], "outside": true}];
+const WHY_REFS = [{"k": "currier2023", "f": "Currier BS, Mcleod JC, Banfield L, Beyene J, Welton NJ, D'Souza AC, et al. Resistance training prescription for muscle strength and hypertrophy in healthy adults: a systematic review and Bayesian network meta-analysis. Br J Sports Med. 2023;57(18):1211-1220. doi:10.1136/bjsports-2023-106807", "u": "https://doi.org/10.1136/bjsports-2023-106807"}, {"k": "lopez2021", "f": "Lopez P, Radaelli R, Taaffe DR, Newton RU, Galvão DA, Trajano GS, et al. Resistance Training Load Effects on Muscle Hypertrophy and Strength Gain: Systematic Review and Network Meta-analysis. Med Sci Sports Exerc. 2021;53(6):1206-1216. doi:10.1249/MSS.0000000000002585", "u": "https://doi.org/10.1249/MSS.0000000000002585"}, {"k": "robinson2024", "f": "Robinson ZP, Pelland JC, Remmert JF, Refalo MC, Jukic I, Steele J, Zourdos MC. Exploring the Dose-Response Relationship Between Estimated Resistance Training Proximity to Failure, Strength Gain, and Muscle Hypertrophy: A Series of Meta-Regressions. Sports Med. 2024;54(9):2209-2231. doi:10.1007/s40279-024-02069-2", "u": "https://doi.org/10.1007/s40279-024-02069-2"}, {"k": "refalo2023", "f": "Refalo MC, Helms ER, Trexler ET, Hamilton DL, Fyfe JJ. Influence of Resistance Training Proximity-to-Failure on Skeletal Muscle Hypertrophy: A Systematic Review with Meta-analysis. Sports Med. 2023;53(3):649-665. doi:10.1007/s40279-022-01784-y", "u": "https://doi.org/10.1007/s40279-022-01784-y"}, {"k": "refalo2024", "f": "Refalo MC, Helms ER, Robinson ZP, Hamilton DL, Fyfe JJ. Similar muscle hypertrophy following eight weeks of resistance training to momentary muscular failure or with repetitions-in-reserve in resistance-trained individuals. J Sports Sci. 2024;42(1):85-101. doi:10.1080/02640414.2024.2321021", "u": "https://doi.org/10.1080/02640414.2024.2321021"}, {"k": "cumming2025", "f": "Cumming KT, Elvatun IC, Kalenius R, Divljak G, Raastad T, Psilander N, Horwath O. Divergent strength gains but similar hypertrophy after low-load and high-load resistance exercise training in trained individuals: many roads lead to Rome. J Appl Physiol. 2025;139(3):685-697. doi:10.1152/japplphysiol.00353.2025", "u": "https://doi.org/10.1152/japplphysiol.00353.2025"}, {"k": "lasevicius2018", "f": "Lasevicius T, Ugrinowitsch C, Schoenfeld BJ, Roschel H, Tavares LD, De Souza EO, et al. Effects of different intensities of resistance training with equated volume load on muscle strength and hypertrophy. Eur J Sport Sci. 2018;18(6):772-780. doi:10.1080/17461391.2018.1450898", "u": "https://doi.org/10.1080/17461391.2018.1450898"}, {"k": "halperin2022", "f": "Halperin I, Malleron T, Har-Nir I, Androulakis-Korakakis P, Wolf M, Fisher J, Steele J. Accuracy in Predicting Repetitions to Task Failure in Resistance Exercise: A Scoping Review and Exploratory Meta-analysis. Sports Med. 2022;52(2):377-390. doi:10.1007/s40279-021-01559-x", "u": "https://doi.org/10.1007/s40279-021-01559-x"}, {"k": "plotkin2022", "f": "Plotkin D, Coleman M, Van Every D, Maldonado J, Oberlin D, Israetel M, et al. Progressive overload without progressing load? The effects of load or repetition progression on muscular adaptations. PeerJ. 2022;10:e14142. doi:10.7717/peerj.14142", "u": "https://doi.org/10.7717/peerj.14142"}, {"k": "hermann2025", "f": "Hermann T, Mohan AE, Enes A, Sapuppo M, Piñero A, Zamanzadeh A, et al. Without Fail: Muscular Adaptations in Single-Set Resistance Training Performed to Failure or with Repetitions-in-Reserve. Med Sci Sports Exerc. 2025;57(9):2021-2031. doi:10.1249/MSS.0000000000003728", "u": "https://doi.org/10.1249/MSS.0000000000003728"}, {"k": "robinson2025", "f": "Robinson Z, Macarilla C, Juber M, Cerminaro R, Benitez B, Pelland J, et al. The Effect of Resistance Training Proximity to Failure on Muscular Adaptations and Longitudinal Fatigue in Trained Men. Int J Strength Cond. 2025;5(1). doi:10.47206/ijsc.v5i1.393", "u": "https://doi.org/10.47206/ijsc.v5i1.393"}, {"k": "martikainen2025", "f": "Martikainen O, Niiranen H, Rytkönen T, Schoenfeld BJ, Ahtiainen JP, Hulmi JJ. Influence of Varying Proximity-to-Failure on Muscular Adaptations and Repetitions-in-Reserve Estimation Accuracy in Resistance-Trained Individuals. J Sci Sport Exerc. 2025 (early online). doi:10.1007/s42978-025-00338-8", "u": "https://doi.org/10.1007/s42978-025-00338-8"}, {"k": "moranNavarro2017", "f": "Morán-Navarro R, Pérez CE, Mora-Rodríguez R, de la Cruz-Sánchez E, González-Badillo JJ, Sánchez-Medina L, Pallarés JG. Time course of recovery following resistance training leading or not to failure. Eur J Appl Physiol. 2017;117(12):2387-2399. doi:10.1007/s00421-017-3725-7", "u": "https://doi.org/10.1007/s00421-017-3725-7"}, {"k": "pelland2026", "f": "Pelland JC, Remmert JF, Robinson ZP, Hinson SR, Zourdos MC. The Resistance Training Dose Response: Meta-Regressions Exploring the Effects of Weekly Volume and Frequency on Muscle Hypertrophy and Strength Gains. Sports Med. 2026;56(2):481-505. doi:10.1007/s40279-025-02344-w", "u": "https://doi.org/10.1007/s40279-025-02344-w"}, {"k": "remmert2025", "f": "Remmert JF, Pelland JC, Robinson ZP, Hinson SR, Zourdos MC. Is There Too Much of a Good Thing? Meta-Regressions of the Effect of Per-Session Volume on Hypertrophy and Strength. SportRxiv [preprint, not peer reviewed]. 2025. doi:10.51224/SRXIV.537", "u": "https://sportrxiv.org/index.php/server/preprint/view/537"}, {"k": "schoenfeld2019freq", "f": "Schoenfeld BJ, Grgic J, Krieger J. How many times per week should a muscle be trained to maximize muscle hypertrophy? A systematic review and meta-analysis of studies examining the effects of resistance training frequency. J Sports Sci. 2019;37(11):1286-1295. doi:10.1080/02640414.2018.1555906", "u": "https://doi.org/10.1080/02640414.2018.1555906"}, {"k": "grgic2018freq", "f": "Grgic J, Schoenfeld BJ, Davies TB, Lazinica B, Krieger JW, Pedisic Z. Effect of Resistance Training Frequency on Gains in Muscular Strength: A Systematic Review and Meta-Analysis. Sports Med. 2018;48(5):1207-1220. doi:10.1007/s40279-018-0872-x", "u": "https://doi.org/10.1007/s40279-018-0872-x"}, {"k": "bazValle2022", "f": "Baz-Valle E, Balsalobre-Fernández C, Alix-Fages C, Santos-Concejero J. A Systematic Review of The Effects of Different Resistance Training Volumes on Muscle Hypertrophy. J Hum Kinet. 2022;81:199-210. doi:10.2478/hukin-2022-0017", "u": "https://doi.org/10.2478/hukin-2022-0017"}, {"k": "schoenfeld2019vol", "f": "Schoenfeld BJ, Contreras B, Krieger J, Grgic J, Delcastillo K, Belliard R, Alto A. Resistance Training Volume Enhances Muscle Hypertrophy but Not Strength in Trained Men. Med Sci Sports Exerc. 2019;51(1):94-103. doi:10.1249/MSS.0000000000001764", "u": "https://doi.org/10.1249/MSS.0000000000001764"}, {"k": "aube2022", "f": "Aube D, Wadhi T, Rauch J, Anand A, Barakat C, Pearson J, et al. Progressive Resistance Training Volume: Effects on Muscle Thickness, Mass, and Strength Adaptations in Resistance-Trained Individuals. J Strength Cond Res. 2022;36(3):600-607. doi:10.1519/JSC.0000000000003524", "u": "https://doi.org/10.1519/JSC.0000000000003524"}, {"k": "camargo2026", "f": "Camargo JBB, Bittencourt D, Michel JM, Silva DG, Bergamasco JGA, Berry AC, et al. Large increases in resistance training volume do not impair muscle hypertrophy or anabolic-catabolic molecular signaling in trained individuals. J Appl Physiol. 2026;141(2):477-493. doi:10.1152/japplphysiol.00284.2026", "u": "https://doi.org/10.1152/japplphysiol.00284.2026"}, {"k": "rantila2026", "f": "Räntilä A, Ahtiainen JP. Exploring the Upper Limits of Resistance Training Volume for Muscle Hypertrophy and Strength in Trained Athletes. J Sci Sport Exerc. 2026 (online 28 Jul 2026):1-11. doi:10.1007/s42978-026-00387-7", "u": "https://doi.org/10.1007/s42978-026-00387-7"}, {"k": "acsm2026", "f": "Currier BS, D'Souza AC, Singh MAF, Lowisz CV, Rawson ES, Schoenfeld BJ, et al. American College of Sports Medicine Position Stand. Resistance Training Prescription for Muscle Function, Hypertrophy, and Physical Performance in Healthy Adults: An Overview of Reviews. Med Sci Sports Exerc. 2026;58(4):851-872. doi:10.1249/MSS.0000000000003897", "u": "https://doi.org/10.1249/MSS.0000000000003897"}, {"k": "huang2025", "f": "Huang Z, Sun J, Li D, Chen C, Wang D. Autoregulated resistance training for maximal strength enhancement: A systematic review and network meta-analysis. J Exerc Sci Fit. 2025;23(4):360-369. doi:10.1016/j.jesf.2025.07.006", "u": "https://doi.org/10.1016/j.jesf.2025.07.006"}, {"k": "hickmott2022", "f": "Hickmott LM, Chilibeck PD, Shaw KA, Butcher SJ. The Effect of Load and Volume Autoregulation on Muscular Strength and Hypertrophy: A Systematic Review and Meta-Analysis. Sports Med Open. 2022;8(1):9. doi:10.1186/s40798-021-00404-9", "u": "https://doi.org/10.1186/s40798-021-00404-9"}, {"k": "nuzzo2024", "f": "Nuzzo JL, Pinto MD, Nosaka K, Steele J. Maximal Number of Repetitions at Percentages of the One Repetition Maximum: A Meta-Regression and Moderator Analysis of Sex, Age, Training Status, and Exercise. Sports Med. 2024;54(2):303-321. doi:10.1007/s40279-023-01937-7", "u": "https://doi.org/10.1007/s40279-023-01937-7"}, {"k": "reynolds2006", "f": "Reynolds JM, Gordon TJ, Robergs RA. Prediction of one repetition maximum strength from multiple repetition maximum testing and anthropometry. J Strength Cond Res. 2006;20(3):584-592. doi:10.1519/R-15304.1", "u": "https://doi.org/10.1519/R-15304.1"}, {"k": "moesgaard2022", "f": "Moesgaard L, Beck MM, Christiansen L, Aagaard P, Lundbye-Jensen J. Effects of Periodization on Strength and Muscle Hypertrophy in Volume-Equated Resistance Training Programs: A Systematic Review and Meta-analysis. Sports Med. 2022;52(7):1647-1666. doi:10.1007/s40279-021-01636-1", "u": "https://doi.org/10.1007/s40279-021-01636-1"}, {"k": "acsm2009", "f": "American College of Sports Medicine (Ratamess NA, Alvar BA, Evetoch TK, Housh TJ, Kibler WB, Kraemer WJ, Triplett NT). American College of Sports Medicine position stand. Progression models in resistance training for healthy adults. Med Sci Sports Exerc. 2009;41(3):687-708. doi:10.1249/MSS.0b013e3181915670", "u": "https://doi.org/10.1249/MSS.0b013e3181915670"}, {"k": "varovic2025", "f": "Varovic D, Wolf M, Schoenfeld BJ, Steele J, Grgic J, Mikulic P. Does Muscle Length Influence Regional Hypertrophy? A Systematic Review and Meta-Analysis. Int J Sports Med. 2025;46(14):1027-1036. doi:10.1055/a-2615-4935", "u": "https://doi.org/10.1055/a-2615-4935"}, {"k": "wolf2025", "f": "Wolf M, Androulakis Korakakis P, Piñero A, Mohan AE, Hermann T, Augustin F, et al. Lengthened partial repetitions elicit similar muscular adaptations as full range of motion repetitions during resistance training in trained individuals. PeerJ. 2025;13:e18904. doi:10.7717/peerj.18904", "u": "https://doi.org/10.7717/peerj.18904"}, {"k": "maeo2021", "f": "Maeo S, Huang M, Wu Y, Sakurai H, Kusagawa Y, Sugiyama T, et al. Greater Hamstrings Muscle Hypertrophy but Similar Damage Protection after Training at Long versus Short Muscle Lengths. Med Sci Sports Exerc. 2021;53(4):825-837. doi:10.1249/MSS.0000000000002523", "u": "https://doi.org/10.1249/MSS.0000000000002523"}, {"k": "maeo2023", "f": "Maeo S, Wu Y, Huang M, Sakurai H, Kusagawa Y, Sugiyama T, Kanehisa H, Isaka T. Triceps brachii hypertrophy is substantially greater after elbow extension training performed in the overhead versus neutral arm position. Eur J Sport Sci. 2023;23(7):1240-1250. doi:10.1080/17461391.2022.2100279", "u": "https://doi.org/10.1080/17461391.2022.2100279"}, {"k": "singer2024", "f": "Singer A, Wolf M, Generoso L, Arias E, Delcastillo K, Echevarria E, et al. Give it a rest: a systematic review with Bayesian meta-analysis on the effect of inter-set rest interval duration on muscle hypertrophy. Front Sports Act Living. 2024;6:1429789. doi:10.3389/fspor.2024.1429789", "u": "https://doi.org/10.3389/fspor.2024.1429789"}, {"k": "grgic2018rest", "f": "Grgic J, Schoenfeld BJ, Skrepnik M, Davies TB, Mikulic P. Effects of Rest Interval Duration in Resistance Training on Measures of Muscular Strength: A Systematic Review. Sports Med. 2018;48(1):137-151. doi:10.1007/s40279-017-0788-x", "u": "https://doi.org/10.1007/s40279-017-0788-x"}, {"k": "coleman2024", "f": "Coleman M, Burke R, Augustin F, Piñero A, Maldonado J, Fisher JP, et al. Gaining more from doing less? The effects of a one-week deload period during supervised resistance training on muscular adaptations. PeerJ. 2024;12:e16777. doi:10.7717/peerj.16777", "u": "https://doi.org/10.7717/peerj.16777"}, {"k": "rogerson2024", "f": "Rogerson D, Nolan D, Androulakis Korakakis P, Immonen V, Wolf M, Bell L. Deloading Practices in Strength and Physique Sports: A Cross-sectional Survey. Sports Med Open. 2024;10:26. doi:10.1186/s40798-024-00691-y", "u": "https://doi.org/10.1186/s40798-024-00691-y"}, {"k": "bell2023", "f": "Bell L, Strafford BW, Coleman M, Androulakis Korakakis P, Nolan D. Integrating Deloading into Strength and Physique Sports Training Programmes: An International Delphi Consensus Approach. Sports Med Open. 2023;9(1):87. doi:10.1186/s40798-023-00633-0", "u": "https://doi.org/10.1186/s40798-023-00633-0"}, {"k": "kassiano2024", "f": "Kassiano W, Costa B, Kunevaliki G, Nunes JP, Castro-e-Souza P, de Paula Felipe J, et al. Muscle hypertrophy and strength adaptations to systematically varying resistance exercises. Res Q Exerc Sport. 2025;96(2):371-381 (online Oct 2024). doi:10.1080/02701367.2024.2409961", "u": "https://doi.org/10.1080/02701367.2024.2409961"}, {"k": "swinton2011", "f": "Swinton PA, Stewart A, Agouris I, Keogh JW, Lloyd R. A biomechanical analysis of straight and hexagonal barbell deadlifts using submaximal loads. J Strength Cond Res. 2011;25(7):2000-2009. doi:10.1519/JSC.0b013e3181e73f87", "u": "https://doi.org/10.1519/JSC.0b013e3181e73f87"}, {"k": "ramirez2022", "f": "Ramirez VJ, Bazrgari B, Gao F, Samaan M. Low Back Biomechanics during Repetitive Deadlifts: A Narrative Review. IISE Trans Occup Ergon Hum Factors. 2022;10(1):34-46. doi:10.1080/24725838.2021.2015642", "u": "https://doi.org/10.1080/24725838.2021.2015642"}];
+function refLabel(k){ const r=WHY_REFS.find(x=>x.k===k); if(!r) return k; const who=/^American College/.test(r.f)? 'ACSM' : r.f.split(/[ ,]/)[0]; const yr=(/\b(?:19|20)\d{2}\b/.exec(r.f)||[''])[0]; return who+(yr?' '+yr:''); }
+function renderWhy(){
+  const el=$('why-cards'); if(!el) return;
+  el.innerHTML=WHY_CARDS.map(c=>`<div class="card"><h4>${esc(c.t)}${c.outside?' <span class="pill">outside this review</span>':''}</h4><p class="why">${esc(c.b)}</p>${c.r.length? `<div class="refk">${c.r.map(k=>{ const i=WHY_REFS.findIndex(x=>x.k===k); return `<a href="#ref-${esc(k)}" onclick="document.getElementById('ref-${esc(k)}').scrollIntoView({behavior:'smooth',block:'center'});return false">[${i+1}] ${esc(refLabel(k))}</a>`; }).join(' · ')}</div>` : ''}</div>`).join('');
+  $('why-refs').innerHTML=WHY_REFS.map(r=>`<li id="ref-${esc(r.k)}">${esc(r.f)} <a href="${esc(r.u)}" target="_blank" rel="noopener">${esc(r.u.replace(/^https?:\/\//,''))}</a></li>`).join('');
+}
+
 /* ================= boot ================= */
 let DB=load();
 loadDraft();
@@ -3683,7 +3986,7 @@ let LAST_DAY=todayKey();
 function init(){
   buildTabs();
   $('app-ver').textContent='v'+APP_VERSION;
-  renderGlobalBanners(); renderSettings(); loadNutrition();
+  renderGlobalBanners(); renderSettings(); loadNutrition(); renderWhy();
   activeSession=DRAFT? DRAFT.session : nextLift();
   go(currentView||'today');
 }
@@ -3695,7 +3998,7 @@ document.addEventListener('visibilitychange',()=>{
   if(GYM_OPEN){ wakeOn(); tick(); }
   if(LAST_DAY!==todayKey()){ LAST_DAY=todayKey(); if(!GYM_OPEN) refresh(); }
 });
-window.__train={ get DB(){ return DB; }, get draft(){ return DRAFT; }, version:APP_VERSION, readonly:()=>READONLY, migrate, loadFrom, plateMath, e1rm, suggest, prescribe, ladderLevel, liftStats, ctx, chipText, prBoard, milestoneDates, selftest:runSelftest, PROGRAM, TEMPLATES };
+window.__train={ get DB(){ return DB; }, get draft(){ return DRAFT; }, version:APP_VERSION, readonly:()=>READONLY, migrate, loadFrom, plateMath, e1rm, planFor, cardFor, levelOf, makeLadder, classify, est, prescribe, ladderLevel, liftStats, ctx, chipText, prBoard, milestoneDates, selftest:runSelftest, PROGRAM, TEMPLATES };
 if(SELFTEST) setTimeout(runSelftest, 30);
 if('serviceWorker' in navigator && location.protocol!=='file:'){ window.addEventListener('load',()=>{ navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).catch(()=>{}); }); }
 try{ if(!NOSAVE && navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(()=>{}); }catch(e){}
