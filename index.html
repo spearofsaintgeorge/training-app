@@ -653,7 +653,7 @@
     </div>
     <div class="card" style="margin-top:16px">
       <h4>Data</h4>
-      <p class="why"><b>Send to OneDrive</b> shares a full, timestamped log to your training Logs folder — that's how Argus sees your sessions. Export saves a backup file anywhere. Import replaces this device's data with a backup; the current data is kept so you can undo it.</p>
+      <p class="why"><b>Send to OneDrive</b> shares a full, timestamped log to your Training folder — that's how Argus sees your sessions. Export saves a backup file anywhere. Import replaces this device's data with a backup; the current data is kept so you can undo it.</p>
       <div class="minirow"><span class="l">Last sent</span><span class="r" id="send-status">—</span></div>
       <div style="display:flex;gap:9px;margin-top:10px;flex-wrap:wrap" id="data-actions">
         <button class="btn sm primary" onclick="sendLog()">Send to OneDrive</button>
@@ -847,7 +847,7 @@
 <script>
 'use strict';
 /* ================= core constants ================= */
-const APP_VERSION = '3.1.0';
+const APP_VERSION = '3.1.1';
 const KEY = 'argus_training_v1';
 const DRAFT_KEY = KEY + ':draft';
 const SNAP_KEY = 'argus_training_v2_snapshot';
@@ -3308,8 +3308,8 @@ function sendLog(){
   if(!canShare(file)) file=make('txt','text/plain');
   if(!canShare(file)){ PENDING_FILE={text, name:logFileName('json'), stamp}; askSaved(''); return; }
   SENDING=true;
-  navigator.share({files:[file], title:'Training log'})
-    .then(()=>{ markSent(stamp); toast('Sent ✓ — first time, pick your training Logs folder; the phone remembers it', 3600); })
+  navigator.share({files:[file]})
+    .then(()=>{ markSent(stamp); toast('Sent ✓ — first time, pick your Training folder; the phone remembers it', 3600); })
     .catch(e=>{
       if(e && (e.name==='AbortError'||e.name==='InvalidStateError')){ toast('Not sent'); return; }
       PENDING_FILE={text, name:file.name, stamp}; askSaved("Couldn't open the share sheet.");
@@ -3318,8 +3318,8 @@ function sendLog(){
 }
 /* no share sheet available: save the file on a fresh tap, and only count it once it's in the folder */
 function askSaved(why){
-  sheet(`<div class="st">${why? esc(why)+' ' : ''}Save the log as a file</div><div class="why">This browser can't hand the file to OneDrive directly. Save it, move it into your training Logs folder, then mark it sent.</div>
-    <div class="readi"><button class="g" onclick="savePending()"><b>●</b> Save the file<small>${esc(PENDING_FILE.name)}</small></button><button class="y" onclick="confirmPending()"><b>●</b> It's in the Logs folder<small>mark this log as sent</small></button></div>
+  sheet(`<div class="st">${why? esc(why)+' ' : ''}Save the log as a file</div><div class="why">This browser can't hand the file to OneDrive directly. Save it, move it into your Training folder, then mark it sent.</div>
+    <div class="readi"><button class="g" onclick="savePending()"><b>●</b> Save the file<small>${esc(PENDING_FILE.name)}</small></button><button class="y" onclick="confirmPending()"><b>●</b> It's in the Training folder<small>mark this log as sent</small></button></div>
     <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap"><button class="btn ghost" onclick="closeSheet()">Not now</button></div>`);
 }
 function savePending(){ if(PENDING_FILE) downloadBlob(PENDING_FILE.text, PENDING_FILE.name); }
@@ -3327,7 +3327,7 @@ function confirmPending(){ if(!PENDING_FILE) return; const st=PENDING_FILE.stamp
 function offerSend(){
   if(!DB.settings.offerSend || READONLY) return;
   const u=unsentCount(); if(!u) return;
-  sheet(`<div class="st">Logged ✓ — send it to OneDrive?</div><div class="why">One tap shares the full log to your training Logs folder so Argus can read it. First time: choose OneDrive (iPhone: Save to Files → OneDrive) and the Logs folder — after that your phone remembers it.</div>
+  sheet(`<div class="st">Logged ✓ — send it to OneDrive?</div><div class="why">One tap shares the full log to your Training folder so Argus can read it. First time: choose OneDrive (iPhone: Save to Files → OneDrive) and your Training folder — after that your phone remembers it.</div>
     <div class="readi"><button class="g" onclick="sendLog()"><b>●</b> Send to OneDrive<small>${u} session${u===1?'':'s'} not sent yet</small></button></div>
     <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap"><button class="btn ghost" onclick="closeSheet()">Not now</button></div>`);
 }
