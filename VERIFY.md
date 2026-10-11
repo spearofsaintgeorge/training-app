@@ -59,11 +59,13 @@ window.__train = { DB, draft, version, readonly(), migrate, loadFrom, plateMath,
 | `argus_training_v1:pre-import` | data from before the last import (Logbook → Undo) |
 | `argus_training_v1:unreadable` | raw copy of data that failed to load (safe mode) |
 
+Sent logs land in the owner's OneDrive training Logs folder (outside this repo); the newest `training-log-*.json` is the current truth.
+
 ---
 
 ## Feature map
 
-Confirmed 2026-09-30 (v3.0.0). **A stale row is a defect.**
+Confirmed 2026-09-30 (v3.0.0); rows marked v3.1 added 2026-10-10. **A stale row is a defect.**
 
 | Concept | Control | Source | Proof |
 |---|---|---|---|
@@ -77,6 +79,9 @@ Confirmed 2026-09-30 (v3.0.0). **A stale row is a defect.**
 | Gym mode | Start / Resume | `openGym`, `renderGym`, `gymDone`, `gymStep`, `gymRir`, `gymVariant` | ✓ Set done → set recorded, weight carried to the next set, rest timer running |
 | Rest timer | after ✓ Set done | `startRest`, `tick`, `restAlarm` | set `draft.rest.endAt` to now+1 s: "Rest over — go", flash, 3 oscillator tones, `fired` persisted |
 | Plate math + warm-up | gym set card | `plateMath`, `plateViz`, `warmup` | 225 on a 60 lb trap bar = 45 + 35 + 2.5 per side |
+| Equipment drawings (v3.1) | gym set card, under the steppers | `equipViz` dispatcher → `plateViz` (barbell), `vizTrap`, `vizSled`, `vizDB`, `vizKB`, `vizStack`, `vizAssist`, `vizBW`, `vizHang`/`vizHangTick` | self-test rows "every variant draws without NaN…" and "drawings exist for every loaded mode"; then open gym mode on one exercise per mode at 375 px and look |
+| Implement count (v3.1) | — | `V(name, mode, count)`, `VARIANT_INDEX`, `implCount` | DB Row / Goblet Squat draw one implement, bench/RDL draw a pair; tonnage counts pairs ×2 |
+| Send to OneDrive (v3.1) | Logbook → Send to OneDrive; sheet after each log; Today nudge | `sendLog`, `askSaved`, `confirmPending`, `offerSend`, `unsentCount`, `logStamp`, `logFileName` | share sheet gets `training-log-YYYY-MM-DD-HHMM.json` (iPhone) or the same JSON as `.txt` (Chrome/Android refuse .json); cancel = not sent; no share support or a share error = save-file sheet, counted as sent only after "It's in the Logs folder"; unsent = logs finished after the last send (deletes can't hide new ones); the file embeds its own `lastSent` and re-imports as up to date |
 | Readiness + Express | sheet on Start, Express toggle | `askReadiness`, `pickReady`, `prescribe` opts | Wrecked → Express −10%: two starred lifts, +2 RIR |
 | Scoreboard | Progress tab | `prBoard`, `prsFor`, `milestoneDates`, `ladderLevel`, `regress` | a heavier second session → PR in the finish summary and the toast; first-ever session never toasts |
 | Today | Today tab | `renderToday`, `isDone`, `isRest`, `eatList` | tower shows "gym day — rests" once a lift is logged; Zone 2 shows n / target for the week |
