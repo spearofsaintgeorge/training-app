@@ -292,6 +292,10 @@
   .steps2{display:grid;grid-template-columns:1.4fr 1fr;gap:8px;margin-top:12px}
   .steps2.one{grid-template-columns:1fr}
   .rirchips{display:flex;gap:6px;margin-top:10px;align-items:center}
+  .stepchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;align-items:center;font-size:11.5px;color:var(--muted)}
+  .stepchips .sl2{margin-right:2px}
+  .stepchips button{font-family:var(--mono);font-size:11px;color:var(--muted);background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:5px 10px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .stepchips button.on{color:var(--bg);background:var(--txt);border-color:var(--txt)}
   .rirchips .rl{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;min-width:30px}
   .rirchips button{flex:1;min-height:44px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--muted);font-family:var(--mono);font-size:14px;font-weight:650;cursor:pointer;touch-action:manipulation}
   .rirchips button.on{background:var(--steel);color:var(--bg);border-color:var(--steel)}
@@ -845,7 +849,7 @@
 <script>
 'use strict';
 /* ================= core constants ================= */
-const APP_VERSION = '3.2.2';
+const APP_VERSION = '3.2.3';
 const KEY = 'argus_training_v1';
 const DRAFT_KEY = KEY + ':draft';
 const SNAP_KEY = 'argus_training_v2_snapshot';
@@ -878,7 +882,7 @@ function num(v){ const n=parseFloat(v); return isFinite(n)?n:0; }
 function byDate(a,b){ return new Date(a.date)-new Date(b.date); }
 
 /* ================= state: load / migrate / save ================= */
-function defaultSettings(){ return {bar:45, trapBar:60, stackStep:10, plates:[45,35,25,10,5,2.5], rest:{main:180,sec:150,acc:90}, sound:true, offerSend:true, addOns:true}; }
+function defaultSettings(){ return {bar:45, trapBar:60, stackStep:10, plates:[45,35,25,10,5,2.5], rest:{main:180,sec:150,acc:90}, sound:true, offerSend:true, addOns:true, assistStep:5, steps:{}}; }
 function normSettings(x){
   const d=defaultSettings();
   if(!x||typeof x!=='object'||Array.isArray(x)) return d;
@@ -890,7 +894,9 @@ function normSettings(x){
     rest: Object.assign({}, d.rest, (x.rest&&typeof x.rest==='object')?x.rest:{}),
     sound: x.sound!==false,
     offerSend: x.offerSend!==false,
-    addOns: x.addOns!==false
+    addOns: x.addOns!==false,
+    assistStep: num(x.assistStep)>0? num(x.assistStep) : d.assistStep,
+    steps: Object.fromEntries(Object.entries((x.steps&&typeof x.steps==='object'&&!Array.isArray(x.steps))? x.steps : {}).filter(([k,v])=>typeof k==='string' && [2.5,5,10].includes(num(v))).map(([k,v])=>[k,num(v)]))
   };
   if(!o.plates.length) o.plates=d.plates;
   for(const k of ['main','sec','acc']) o.rest[k]=Math.max(15,Math.min(600,num(o.rest[k])||d.rest[k]));
@@ -1251,14 +1257,14 @@ function plateViz(total, mode){
   return `<div class="plates"><div class="bar"></div><div class="sleeve"></div>${pl}</div>
     <div class="warmup">per side: <b style="color:var(--txt)">${m.side.length?m.side.join(' + '):'nothing'}</b>${m.rem?` <span style="color:var(--red)">· ${m.rem} lb won't load</span>`:''} · ${mode==='plate'?'sled not counted':what+' '+m.base+' lb'}</div>`;
 }
-function warmup(ex, mode, work){
+function warmup(ex, mode, work, v){
   work=num(work);
   if(ex.role!=='main' || !(work>0) || mode==='assist' || mode==='time' || mode==='bw') return [];
   const base=loadBase(mode), out=[], seen=new Set();
   const loaded=(mode==='bb'||mode==='trap'||mode==='plate');
   const plan = loaded? [[0,mode==='plate'?10:8],[.4,5],[.6,3],[.75,2],[.85,1]] : [[.5,8],[.7,4],[.85,2]];
   for(const [p,r] of plan){
-    const w = p===0? base : Math.floor(work*p/5)*5;
+    const w = p===0? base : (!loaded && v && mode!=='kb')? num(snapLoad(v, work*p)) : Math.floor(work*p/5)*5;
     if(p>0 && loaded && w<=base) continue;
     if(w>=work || w<0) continue;
     if(seen.has(w)) continue; seen.add(w);
@@ -1284,8 +1290,8 @@ function equipViz(v, w, o){
       case 'plate': return vizSled(w, sledKind(v.n), cfg);
       case 'db': return vizDB(w, v.count||2, cfg);
       case 'kb': return vizKB(w, v.count||2, cfg);
-      case 'mach': case 'cable': return vizStack(w, v.mode, cfg);
-      case 'assist': return vizAssist(w, Object.assign(cfg, {assistFirst:liftStats().assistFirst}));
+      case 'mach': case 'cable': { const ov=num((DB.settings.steps||{})[v.n]); return vizStack(w, v.mode, ov>0? Object.assign(cfg, {stackStep:ov, addOns:false}) : cfg); }
+      case 'assist': return vizAssist(w, Object.assign(cfg, {assistFirst:liftStats().assistFirst, stackStep: num((DB.settings.steps||{})[v.n]) || num(DB.settings.assistStep) || 5, addOns:false}));
       case 'bw': return vizBW(w, bwKind(v.n), cfg);
       case 'time': return vizHang(num(o.goal), num(o.best), num(o.elapsed), !!o.running);
     }
@@ -1933,9 +1939,9 @@ function ivAssist_fmt(n) {
 }
 
 // Steps of `step` from w down to 0; a partial step still counts as one rung.
-function ivAssist_rungs(w) {
-  let n = 0;
-  for (w = +w || 0; w > 1e-9 && n < 1000; n++) w -= w <= 30 ? 5 : 10;
+function ivAssist_rungs(w, step) {
+  let n = 0; step = +step || 0;
+  for (w = +w || 0; w > 1e-9 && n < 1000; n++) w -= step > 0 ? step : (w <= 30 ? 5 : 10);
   return n;
 }
 
@@ -2375,6 +2381,7 @@ const PK=30, TRUST_T=12, RIR_CAP=4, RAMP_RIR=5, MISSING_RIR=1, GAP_D=14, STALE_D
       UP_PCT={lower:0.05, upper:0.025}, LIGHT_UP_PCT=0.10, DOWN_PCT=0.10, BRIDGE_D=3, BRIDGE_H=2, REP_CEIL=30;
 const LOADED_MODES=['bb','trap','plate','db','kb','mach','cable'];
 const KB_RUNGS=[18,26,35,44,53,62,70,79,88,97,106];
+const STEP_MODES=['mach','cable','assist','db'], STEP_CHOICES=[2.5,5,10];
 const ISO_DB=['Biceps Curl','Hammer Curl','Lateral Raise'];
 const DB_PRESSES=['DB Bench Press','Incline DB Press','DB Shoulder Press'];
 function isNum(x){ return x!=='' && x!=null && isFinite(+x); }
@@ -2386,13 +2393,17 @@ function rirLowOf(px){ return px.rirLabel? +String(px.rirLabel).split('–')[0] 
 function makeLadder(v, bw){
   const s=DB.settings, p=Math.min(...s.plates.map(Number).filter(x=>x>0)) || 2.5, raw=[];
   const st=num(s.stackStep)||10, adds=s.addOns===false? [0] : [0,2.5,5,7.5].filter(a=>a<st);
-  if(v.mode==='bb') for(let w=num(s.bar)||45; w<=1000; w+=2*p) raw.push(w);
+  const ov=STEP_MODES.includes(v.mode)? num((s.steps||{})[v.n]) : 0;
+  if(ov>0) for(let w=(v.mode==='assist'? 0 : ov); w<=1000; w+=ov) raw.push(w);
+  else if(v.mode==='assist') for(let w=0; w<=600; w+=num(s.assistStep)||5) raw.push(w);
+  else if(v.mode==='bb') for(let w=num(s.bar)||45; w<=1000; w+=2*p) raw.push(w);
   else if(v.mode==='trap') for(let w=num(s.trapBar)||60; w<=1100; w+=2*p) raw.push(w);
   else if(v.mode==='plate') for(let w=0; w<=1000; w+=2*p) raw.push(w);
   else if(v.mode==='db'){ for(let w=2.5; w<20; w+=2.5) raw.push(w); for(let w=20; w<=200; w+=5) raw.push(w); }
   else if(v.mode==='kb') raw.push(...KB_RUNGS);
-  else { for(let k=1;k<=60;k++) for(const a of adds) raw.push(k*st+a); if(v.mode==='assist') raw.push(0); }
-  for(const h of histOf(v.n, v.mode, false)) for(const x of workSets(h.e)) if(num(x.w)>0) raw.push(num(x.w));
+  else { for(let k=1;k<=100;k++) for(const a of adds) raw.push(k*st+a); }
+  const grid=new Set(raw.map(x=>Math.round(x*100)/100)), on=x=> v.mode==='kb' || grid.has(Math.round(x*100)/100);
+  for(const h of histOf(v.n, v.mode, false)) for(const x of workSets(h.e)) if(num(x.w)>0 && on(num(x.w))) raw.push(num(x.w));
   const assist=v.mode==='assist';
   const toE=w=> assist? Math.round((bw-w)*100)/100 : w, toW=E=> assist? Math.round((bw-E)*100)/100 : E;
   const E=[...new Set(raw.map(x=>Math.round(x*100)/100))].map(toE).filter(e=> assist? e>0 : e>=0).sort((a,b)=>a-b);
@@ -2515,7 +2526,7 @@ function cardFor(ex, v, px, Lv, lad, d){
   let L, repTarget=null, aim=null, bridge=false, stalled=false, holdAim=false, why='', unreachable=false, exit=false, exitHold=false;
   const out=(extra)=>Object.assign(base, extra);
   if(px.deload){
-    let T0= Lv.cross? (track==='P'? pickP(lad, x=>reps(x,4), px, px.rh) : pickD(lad, x=>reps(x,4), px).L) : (lad.assist? Math.max(lad.toE(num(Lv.last.c.best.s.w)), lad.toE(num(Lv.last.c.anchor.w))) : Lv.last.c.T0);
+    let T0= Lv.cross? (track==='P'? pickP(lad, x=>reps(x,4), px, px.rh) : pickD(lad, x=>reps(x,4), px).L) : lad.floorL(lad.assist? Math.max(lad.toE(num(Lv.last.c.best.s.w)), lad.toE(num(Lv.last.c.anchor.w))) : Lv.last.c.T0);
     if(reps(T0,4)<px.rl){ const alt=pickP(lad, x=>reps(x,4), px, px.rl); if(alt<T0) T0=alt; }
     const r=Math.max(1, Math.min(px.rh, reps(T0,4)));
     return out({w:lad.toW(T0), E:T0, r, aim:r, pred:reps(T0,4), level:lv, rirShown:4, deload:true, hint:'Deload week — fewer sets, finish every set with 4 in the tank. It doesn\'t move your numbers.'});
@@ -2529,7 +2540,7 @@ function cardFor(ex, v, px, Lv, lad, d){
     L= track==='P'? pickP(lad, reps, px, px.rh) : (()=>{ const p=pickD(lad, reps, px); unreachable=p.unreachable; return p.L; })();
     why='from your level on this lift in another session';
   } else {
-    J=judgeSession(Lv.last, Lv.prev, ex, v, track); T0= lad.assist? Math.max(lad.toE(num(J.c.best.s.w)), lad.toE(num(J.c.anchor.w))) : J.c.T0;
+    J=judgeSession(Lv.last, Lv.prev, ex, v, track); T0= lad.floorL(lad.assist? Math.max(lad.toE(num(J.c.best.s.w)), lad.toE(num(J.c.anchor.w))) : J.c.T0);
     const lc=Lv.last.e.card;
     exitHold= !Lv.checkIn && !!(lc && lc.exit && J.c.W.every(s=>num(s.r)>=num(lc.r) && (!isNum(s.rir) || +s.rir>=num(lc.rirShown))));
     Jp= Lv.prev? judgeSession(Lv.prev, null, ex, v, track) : null;
@@ -3575,7 +3586,8 @@ function renderSettings(){
       <div class="field"><label>Trap bar (lb)</label><input id="set-trap" type="number" inputmode="decimal" value="${s.trapBar}"></div>
     </div>
     <div class="field"><label>Machine stack — lb per plate</label><input id="set-stack" type="number" inputmode="decimal" value="${s.stackStep}"></div>
-    <label class="toggle" style="margin:-4px 0 12px"><input type="checkbox" id="set-addons" ${s.addOns!==false?'checked':''}> Stacks take 2.5 and 5 lb add-on plates (both = 7.5)</label>
+    <label class="toggle" style="margin:-4px 0 12px"><input type="checkbox" id="set-addons" ${s.addOns!==false?'checked':''}> Selector machines and cables take 2.5 and 5 lb add-on plates (both = 7.5)</label>
+    <p class="why" style="margin:-6px 0 12px">Selector machines, cables, dumbbells and the assisted pull-up can each be set on their gym card (“Moves in”). The assisted pull-up starts at 5-lb steps.</p>
     <p class="why" style="margin:-6px 0 12px">Trap bars run 45–75 lb — check the sticker on yours so the plate math is exact.</p>
     <div class="field"><label>Plates on hand</label><div style="display:flex;gap:12px;flex-wrap:wrap">${[45,35,25,10,5,2.5].map(p=>`<label class="toggle" style="font-size:13px"><input type="checkbox" class="set-plate" value="${p}" ${s.plates.includes(p)?'checked':''}> ${p}</label>`).join('')}</div></div>
     <div class="inline-fields">
@@ -3589,7 +3601,7 @@ function renderSettings(){
 }
 function saveSettings(){
   if(guardRO()) return;
-  DB.settings=normSettings({bar:$('set-bar').value, trapBar:$('set-trap').value, stackStep:$('set-stack').value, addOns:$('set-addons').checked, plates:[...document.querySelectorAll('.set-plate')].filter(x=>x.checked).map(x=>+x.value), rest:{main:$('set-rm').value, sec:$('set-rs').value, acc:$('set-ra').value}, sound:$('set-sound').checked, offerSend:$('set-send').checked});
+  DB.settings=normSettings({bar:$('set-bar').value, trapBar:$('set-trap').value, stackStep:$('set-stack').value, addOns:$('set-addons').checked, plates:[...document.querySelectorAll('.set-plate')].filter(x=>x.checked).map(x=>+x.value), rest:{main:$('set-rm').value, sec:$('set-rs').value, acc:$('set-ra').value}, sound:$('set-sound').checked, offerSend:$('set-send').checked, assistStep:DB.settings.assistStep, steps:DB.settings.steps});
   save(); renderSettings(); toast('Settings saved ✓');
 }
 
@@ -3790,7 +3802,7 @@ function renderGym(){
   const dispR = (set.r!==''&&set.r!=null)? set.r : defaultReps(sl, si, px, v);
   const loaded = v.mode==='bb'||v.mode==='trap'||v.mode==='plate';
   const phaseTxt = !c.b? 'week-1 targets' : c.ph.pre? 'pre-block' : (c.tpl.weeks?`W${c.w}/${c.tpl.weeks}`:`W${c.w}`)+' '+c.ph.name;
-  const wu = !sl.sets.some(s=>s.done)? warmup(ex, v.mode, num(dispW)) : [];
+  const wu = !sl.sets.some(s=>s.done)? warmup(ex, v.mode, num(dispW), v) : [];
   const oneSide = v.mode==='plate' && sledKind(v.n)!=='sled';
   const warmPlates = x=> x.w>loadBase(v.mode)? plateMath(oneSide? x.w*2 : x.w, v.mode).side.join('+') : 'empty';
   const warmHTML = wu.length? `<details class="gnote" open><summary>Warm-up to ${num(dispW)}${loaded? (oneSide? ' · plates on the '+(sledKind(v.n)==='belt'?'pin':'sleeve') : ' · plates per side') : ''}</summary><div class="warmup">${wu.map(x=>`<span class="w" title="${esc(x.label)}">${x.w}×${x.r}${loaded? ` <span style="color:var(--dim)">${warmPlates(x)}</span>` : ''}</span>`).join('')}</div></details>` : '';
@@ -3798,7 +3810,7 @@ function renderGym(){
   const lastLine=isLast && showCard? `<div class="lastset">Last set: keep going until ${sl.card&&sl.card.rirShown!=null? sl.card.rirShown : px.rir} are left, then tap RIR — it sets next time's weight.</div>` : '';
   const card = showCard? `<div class="setcard"><div class="sh"><b>Set ${si+1} of ${sl.sets.length}</b><span class="pill">${v.mode==='time'?'goal '+(sl.goal||px.rl)+' s':'target '+px.rl+'–'+px.rh+' @ '+rirText(px)}</span></div>
       <div class="steps2${v.mode==='time'?' one':''}">${v.mode==='time'?'':stepperHTML('w', dispW, v.mode==='assist'?'lb assistance':modeUnit(v.mode))}${stepperHTML('r', dispR, v.mode==='time'?'seconds':'reps')}</div>
-      ${lastLine}${v.mode==='time'? hangTimerHTML(sl) : rirChipsHTML(set.rir, isLast? (sl.card&&sl.card.rirShown!=null? sl.card.rirShown : px.rir) : null)}
+      ${stepChipsHTML(v)}${lastLine}${v.mode==='time'? hangTimerHTML(sl) : rirChipsHTML(set.rir, isLast? (sl.card&&sl.card.rirShown!=null? sl.card.rirShown : px.rir) : null)}
       ${v.mode==='time'? '' : equipViz(v, dispW)}
       <button class="donebtn" onclick="gymDone()">✓ ${set.done?'Update':'Set '+(si+1)+' done'}</button></div>`
     : `<div class="setcard"><div class="sh"><b>All ${sl.sets.length} sets done ✓</b></div><button class="donebtn${i<list.length-1?'':' alt'}" onclick="${i<list.length-1?`gymGo(${i+1})`:'gymFinish()'}">${i<list.length-1?'Next exercise →':'Finish session ✓'}</button></div>`;
@@ -3834,15 +3846,38 @@ function gymSet(f, val, rerender){
   const {set}=gymCur(); set[f]=val; if(f==='w') set.auto=false;
   saveDraft(); if(rerender) renderGym();
 }
+/* the loadable weights for this exercise, as the numbers you type (help for the assisted machine) */
+function loadables(v){ const bw=currentBodyweight(); if(v.mode==='assist' && !bw) return []; const lad=makeLadder(v, bw); return [...new Set(lad.E.map(e=>Math.round(lad.toW(e)*100)/100))].filter(w=>w>=0).sort((a,b)=>a-b); }
+function stepLoad(v, cur, dir){
+  const c=num(cur), Ws= (LOADED_MODES.includes(v.mode)||v.mode==='assist')? loadables(v) : [];
+  if(!Ws.length){ const floor=(v.mode==='bb'||v.mode==='trap')? loadBase(v.mode) : 0; return Math.round(Math.max(floor, c+dir*5)*100)/100; }
+  if(dir>0){ const n=Ws.find(w=>w>c+1e-9); if(n!=null) return n; const gap= Ws.length>1? Ws[Ws.length-1]-Ws[Ws.length-2] : 5; return Math.round((Math.max(c, Ws[Ws.length-1])+gap)*100)/100; }
+  const b=Ws.filter(w=>w<c-1e-9); return b.length? b[b.length-1] : Ws[0];
+}
+/* an off-step weight moved to the nearest loadable one on the easier side */
+function snapLoad(v, w){ const bw=currentBodyweight(), lad=makeLadder(v, bw); if(!lad.E.length || w==='' || w==null) return w; return Math.round(lad.toW(lad.floorL(lad.toE(num(w))))*100)/100; }
+function stepChipsHTML(v){
+  if(!STEP_MODES.includes(v.mode) || READONLY) return '';
+  const cur=num((DB.settings.steps||{})[v.n]);
+  return `<div class="stepchips"><span class="sl2">${v.mode==='db'? 'Dumbbells go up by' : 'Moves in'}</span>${[0].concat(STEP_CHOICES).map(x=>`<button class="${(x===0&&!cur)||x===cur?'on':''}" onclick="setLoadStep(${x})" aria-label="${x===0?'automatic steps':'steps of '+x+' pounds'}">${x===0?'auto':x}</button>`).join('')}<span class="sl2">lb</span></div>`;
+}
+function setLoadStep(x){
+  if(guardRO()) return;
+  const {ex, sl, v}=gymCur(); DB.settings.steps=DB.settings.steps||{};
+  if(x>0) DB.settings.steps[v.n]=x; else delete DB.settings.steps[v.n]; save();
+  const started=t=> t.done || parseInt(t.r,10)>0;
+  if(!sl.sets.some(started)){ const f=initSlot(ex, DRAFT, v); sl.card=f.card; sl.goal=f.goal; sl.sets.forEach(t=>{ if(t.auto){ t.w=f.sets[0]? f.sets[0].w : t.w; delete t.rp; delete t.adj; } }); }
+  else { sl.sets.forEach(t=>{ if(!started(t) && t.auto) t.w=snapLoad(v, t.w); });
+    if(sl.card && isNum(sl.card.w)){ sl.card.w=snapLoad(v, sl.card.w); sl.card.E=makeLadder(v, currentBodyweight()).toE(num(sl.card.w)); } }
+  saveDraft(); renderGym(); toast(x>0? `${v.n}: steps of ${x} lb ✓` : `${v.n}: steps back to auto ✓`);
+}
 function gymStep(f, dir){
   const {v, set}=gymCur(); const el=$('gym-'+f);
   const cur=num(el? el.value : set[f]);
   let nv;
   if(f==='r'){ nv=Math.max(0, cur+dir*(v.mode==='time'?5:1)); set.r=nv; }
   else {
-    const step=(v.mode==='mach'||v.mode==='cable')? 2.5 : 5;
-    const floor=(v.mode==='bb'||v.mode==='trap')? loadBase(v.mode) : 0;
-    nv=Math.round(Math.max(floor, cur+dir*step)*100)/100; set.w=nv; set.auto=false;
+    nv=stepLoad(v, cur, dir); set.w=nv; set.auto=false;
   }
   saveDraft(); renderGym();
 }
@@ -3968,7 +4003,7 @@ function runSelftest(){
     const wra=c=>[c.w, c.r, c.aim];
     T('predicted loads match the hand-worked examples (ramp sets ignored, RIR counted)', ()=>{ DB=engFx(); return eq([wra(cardOf('Upper A','Barbell Bench')), wra(cardOf('Lower A','Hack Squat','Front Squat')), wra(cardOf('Lower B','Romanian Deadlift')), wra(cardOf('Lower B','Leg Press','Belt Squat')), wra(cardOf('Lower A','Standing Calf Raise')), wra(cardOf('Upper A','Chest-Supported Row','DB Row')), wra(cardOf('Lower B','Seated Calf Raise')), wra(cardOf('Upper B','Lateral Raise'))],
       [[145,6,6],[110,8,8],[65,9,10],[90,8,9],[125,11,12],[40,7,8],[45,16,16],[10,20,20]]); });
-    T('assisted pull-ups predict on bodyweight minus help; the other slot borrows the level safely', ()=>{ DB=engFx(); return eq([wra(cardOf('Upper A','Assisted Pull-up')), wra(cardOf('Upper B','Lat Pulldown','Assisted Pull-up'))],[[132.5,6,6],[137.5,10,11]]); });
+    T('assisted pull-ups predict on bodyweight minus help; the other slot borrows the level safely', ()=>{ DB=engFx(); return eq([wra(cardOf('Upper A','Assisted Pull-up')), wra(cardOf('Upper B','Lat Pulldown','Assisted Pull-up'))],[[130,5,6],[140,11,12]]); });
     T('new lifts establish; stale lifts open with a check-in; a suspect old entry is held back until confirmed', ()=>{ DB=engFx(); const t=cardOf('Lower A','Trap Bar Deadlift'), r=cardOf('Upper B','Seated Cable Row'), b=cardOf('Upper B','Biceps Curl'); const pre=[!!t.establish, t.w, !!r.opener, r.w, r.r, !!b.quarantine];
       DB.logs.find(l=>l.day==='Upper B').entries.find(e=>e.exercise==='Biceps Curl').confirmed=true; const b2=cardOf('Upper B','Biceps Curl'); return eq(pre.concat([!!b2.quarantine, !!b2.opener]),[true,null,true,32.5,12,true,false,true]); });
     T('blank RIR after following the card never ratchets down; an on-target last set earns one step', ()=>{ DB=engFx(); const cd={w:145,E:145,r:6,aim:6,sets:3,rl:5,rh:6,rirT:3,rirLow:3,track:'P'};
@@ -4061,6 +4096,25 @@ function runSelftest(){
       const sl={variant:v.n, card:{w:100,E:100,r:10,aim:11,rirT:2,rirShown:2,rl:10,rh:12,track:'D',sets:3}, sets:[{w:100,r:10,rir:3,vn:v.n},{w:100,r:'',rir:''}]}, rp=repredictAfter(ex,sl,v,0); return eq([!rp || rp.dir==='up'],[true]); });
     T('a lifting layoff filled with yoga still resets the early-deload check', ()=>{ DB=seeded(); DB.blocks=[blk(-35)]; DB.activeBlockId='t'; const B=(n,rd)=>({date:addDays(today(),n).toISOString(),day:'Upper A',readiness:rd,entries:[{exercise:'Barbell Bench',mode:'bb',slot:'Barbell Bench',sets:[{w:155,r:5,rir:2}]}]});
       DB.logs=[B(-26,'red'),B(-24,'red')]; DB.activities=[-20,-15,-10,-5].map(n=>({date:addDays(today(),n).toISOString(),label:'Yoga'})); return eq([deloadSignal()],[null]); });
+    T('+/- step to the next weight you can load: assisted machine in 5s, barbell in plate pairs, stacks with add-ons', ()=>{ DB=seeded(); DB.profile.w=235; const as={n:'Assisted Pull-up',mode:'assist'}, bb={n:'Barbell Bench',mode:'bb'}, cb={n:'Seated Cable Row',mode:'cable'};
+      return eq([stepLoad(as,157.5,1), stepLoad(as,157.5,-1), stepLoad(as,145,1), stepLoad(bb,157.5,1), stepLoad(bb,157.5,-1), stepLoad(bb,45,-1), stepLoad(cb,42.5,1), loadables(as).every(w=>w%5===0)],[160,155,150,160,155,45,45,true]); });
+    T('a machine set to "moves in 5" only ever gets 5-lb weights, old odd weights included', ()=>{ DB=engFx(); DB.settings.steps={'Seated Cable Row':5}; const v={n:'Seated Cable Row',mode:'cable'}, W=loadables(v), c=cardOf('Upper B','Seated Cable Row');
+      DB.settings=normSettings(Object.assign({}, DB.settings, {steps:{'Seated Cable Row':5, 'X':3, 'Y':'bad'}})); return eq([W.every(w=>w%5===0), c.w%5===0, stepLoad(v,42.5,1), stepLoad(v,42.5,-1), snapLoad(v,47.5), DB.settings.steps],[true,true,45,40,45,{'Seated Cable Row':5}]); });
+    T('a machine set to its own steps draws that stack, chips fit one line of text', ()=>{ DB=seeded(); DB.settings.steps={'Seated Cable Row':5}; const v={n:'Seated Cable Row',mode:'cable'}, h=equipViz(v,55), c=stepChipsHTML(v); return eq([(h.match(/class="ivs-add"/g)||[]).length, /won/.test(h), /Moves in/.test(c), (c.match(/<button/g)||[]).length],[0,false,true,4]); });
+    T('saving Settings keeps each machine\'s steps', ()=>{ DB=seeded(); DB.settings.steps={'Seated Cable Row':5}; renderSettings(); saveSettings(); return eq([DB.settings.steps, DB.settings.assistStep],[{'Seated Cable Row':5},5]); });
+    T('assisted pull-up cards only ask for help the machine can set', ()=>{ DB=engFx(); DB.profile.w=235; const a=cardOf('Upper A','Assisted Pull-up'), b=cardOf('Upper B','Lat Pulldown','Assisted Pull-up'); return eq([a.w%5, b.w%5],[0,0]); });
+    T('old off-step weights in history never come back as cards or +/- stops', ()=>{ DB=engFx(); DB.profile.w=235; DB.logs.push({date:isoD('2026-10-16'),day:'Upper A',entries:[{exercise:'Assisted Pull-up',mode:'assist',slot:'Assisted Pull-up',bw:235,sets:[{w:157.5,r:6,rir:3},{w:157.5,r:6,rir:3},{w:157.5,r:6,rir:3}]},{exercise:'DB Row',mode:'db',slot:'Chest-Supported Row',sets:[{w:22.5,r:8,rir:3},{w:22.5,r:8,rir:3},{w:22.5,r:8,rir:3}]}]});
+      const as={n:'Assisted Pull-up',mode:'assist'}, a=cardOf('Upper A','Assisted Pull-up',null,null,'2026-10-19'), r=cardOf('Upper A','Chest-Supported Row','DB Row',null,'2026-10-19');
+      const dbW=loadables({n:'DB Row',mode:'db'}); return eq([loadables(as).every(w=>w%5===0), stepLoad(as,160,-1), a.w%5, dbW.includes(22.5), dbW.some(w=>Math.abs(w-r.w)<0.01)],[true,155,0,false,true]); });
+    T('hold, flat-day and deload cards land on the machine\'s steps', ()=>{ DB=engFx(); DB.settings.steps={'Lat Pulldown':5}; const lp=(d)=>({date:isoD(d),day:'Upper B',entries:[{exercise:'Lat Pulldown',mode:'mach',slot:'Lat Pulldown',sets:[1,2,3,4].map(()=>({w:117.5,r:10,rir:2}))}]});
+      DB.logs.push(lp('2026-10-12'), lp('2026-10-19')); const h=cardOf('Upper B','Lat Pulldown',null,null,'2026-10-22'), y=cardOf('Upper B','Lat Pulldown',null,{readiness:'yellow'},'2026-10-22');
+      DB.logs.push(lp('2026-11-19')); const dl=cardOf('Upper B','Lat Pulldown',null,null,'2026-11-24'); return eq([h.w%5, y.w%5, dl.w%5, !!dl.deload],[0,0,0,true]); });
+    T('warm-ups use the machine\'s steps', ()=>{ DB=seeded(); DB.settings.steps={'Lat Pulldown':10}; const ex=PROGRAM['Upper B'].find(e=>e.slot==='Lat Pulldown'), v=ex.vars[0], wu=warmup(ex, v.mode, 150, v); return eq([wu.length>0, wu.every(x=>x.w%10===0 && x.w<150)],[true,true]); });
+    T('assisted drawing: 5-lb steps, no add-on plate, rungs counted in 5s', ()=>{ DB=seeded(); DB.profile.w=235; const h=equipViz({n:'Assisted Pull-up',mode:'assist'},55); return eq([/class="iva-pl on"[^>]*width="8" height="3"/.test(h), ivAssist_rungs(55,5), ivAssist_rungs(40)],[false,11,7]); });
+    T('a step change mid-exercise keeps done and list-typed sets, and moves the saved plan onto the new steps', ()=>{ const keep=DRAFT, kc=GYM_OPEN; DB=engFx(); const d=newDraft('Upper B',{}); DRAFT=d; const ex=PROGRAM['Upper B'].find(e=>e.slot==='Seated Cable Row'), sl=d.ex[ex.slot];
+      sl.card=Object.assign({}, sl.card, {w:47.5, E:47.5}); sl.sets[0]={w:47.5,r:10,rir:2,done:false,auto:true}; sl.sets[1].w=47.5; sl.sets[1].auto=true; d.cur.i=gymExList().findIndex(e=>e.slot==='Seated Cable Row'); d.cur.s=1;
+      try{ setLoadStep(5); }catch(e){} const out=[sl.sets[0].w, sl.sets[1].w, sl.card.w, sl.card.E]; DRAFT=keep; GYM_OPEN=kc; return eq(out,[47.5,45,45,45]); });
+    T('+/- never dead-end: under the bar goes to the empty bar, above the top keeps going', ()=>{ DB=seeded(); const bb={n:'Barbell Bench',mode:'bb'}, lp={n:'Leg Press',mode:'mach'}, top=loadables(lp).slice(-1)[0]; return eq([stepLoad(bb,0,-1), stepLoad(bb,40,-1), stepLoad(lp,top,1)>top],[45,45,true]); });
     T('pull-up ladder levels', ()=>{ const L=x=>ladderLevel(Object.assign(newStats(),x)).n; return eq([L({hang:25}),L({hang:40,assistFirst:120,assistBest:120,assistNow:120}),L({hang:40,assistFirst:120,assistBest:55,assistNow:60}),L({strict:1}),L({strict:6})],[1,2,3,4,5]); });
     T('phases + header chip', ()=>{ DB=seeded(); DB.blocks=[blk(-14)]; DB.activeBlockId='t'; const c=ctx(), ch=chipText(c), t=TEMPLATES['strength-bulk']; return eq([c.w,ch.n,ch.l,phaseAt(t,8).name,!!phaseAt(t,8).deload,!!phaseAt(t,16).test,!!phaseAt(t,17).complete,phaseAt(TEMPLATES.maintain,8).name,phaseAt(TEMPLATES.maintain,9).name],[3,'W3/16','Groove','Deload',true,true,true,'Deload','Base']); });
     T('no block and pre-block both run week-1 targets', ()=>{ DB=seeded(); const main=PROGRAM['Lower A'][0]; const a=prescribe(main,ctx()); DB.blocks=[blk(5)]; DB.activeBlockId='t'; const c=ctx(), b=prescribe(main,c); return eq([a.sets,a.rl,a.rh,a.rir,b.sets,b.rir,chipText(c).n,!!c.ph.pre],[3,5,6,3,3,3,'5d',true]); });
