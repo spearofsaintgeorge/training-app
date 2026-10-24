@@ -1,5 +1,5 @@
 /* Foundation Training System — offline service worker (v3) */
-const CACHE = 'argus-training-shell-v3.3.0';
+const CACHE = 'argus-training-shell-v3.3.1';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon.svg'];
 const NET_TIMEOUT_MS = 3000;
 

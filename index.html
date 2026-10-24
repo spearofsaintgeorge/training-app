@@ -865,7 +865,7 @@
 <script>
 'use strict';
 /* ================= core constants ================= */
-const APP_VERSION = '3.3.0';
+const APP_VERSION = '3.3.1';
 const KEY = 'argus_training_v1';
 const DRAFT_KEY = KEY + ':draft';
 const SNAP_KEY = 'argus_training_v2_snapshot';
@@ -4496,7 +4496,7 @@ function closeMob(){
 }
 function mobCur(){ return MOB && MOB.plan.steps[MOB.i]; }
 function mobTimed(s){ return s.kind!=='reps'; }
-function mobBuzz(){ try{ if(navigator.vibrate) navigator.vibrate(200); }catch(e){} }
+function mobBuzz(){ try{ const ua=navigator.userActivation; if(navigator.vibrate && (!ua || ua.hasBeenActive)) navigator.vibrate(200); }catch(e){} }
 function mobStart(){ unlockAudio(); mobStartUnit(); }
 function mobStartUnit(){ const s=mobCur(); if(!s) return; if(mobTimed(s)){ MOB.phase='run'; MOB.endAt=Date.now()+s.dose*1000; } else MOB.phase='reps'; renderMob(); }
 function mobUnitDone(){
