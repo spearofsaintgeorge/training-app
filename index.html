@@ -293,6 +293,19 @@
   .steps2.one{grid-template-columns:1fr}
   .rirchips{display:flex;gap:6px;margin-top:10px;align-items:center}
   .setcard.wucard{border-style:dashed}
+  .mob-cue{font-size:17px;line-height:1.4;margin:8px 0 4px}
+  .mob-stage{display:flex;flex-direction:column;align-items:stretch}
+  .mob-ring{--p:0;--c:var(--amber);width:220px;height:220px;margin:6px auto 0;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--c) calc(var(--p)*1%), var(--line) 0);cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .mob-ring>div{width:192px;height:192px;border-radius:50%;background:var(--panel);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 10px}
+  .mob-ring.mob-reps{background:var(--line);cursor:default}
+  .mob-digits{font-family:var(--mono);font-size:64px;font-weight:700;line-height:1}
+  .mob-side{font-size:13px;color:var(--muted);margin-top:6px}
+  .mob-big{font-size:15px;font-weight:700;margin-bottom:4px}
+  .mob-done{font-size:16px;line-height:1.45;margin-bottom:10px}
+  .mob-bar{height:6px;background:var(--panel2);border-radius:6px;overflow:hidden;margin-top:4px}
+  .mob-bar i{display:block;height:100%;background:var(--green)}
+  .gym-dots i.mb-relief.done,.gym-dots i.mb-back.done{background:var(--green)}
+  .gym-dots i.mb-strength.done,.gym-dots i.mb-desk.done{background:var(--steel)}
   .setlist .sl.wu .k{color:var(--muted)}
   .stepchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;align-items:center;font-size:11.5px;color:var(--muted)}
   .stepchips .sl2{margin-right:2px}
@@ -753,46 +766,46 @@
   <!-- MOBILITY -->
   <section class="view" data-view="mobility">
     <h2 class="vh">Durability</h2>
-    <h1 class="vt">Mobility, Yoga & Warm-up</h1>
-    <p class="lead">Full-range lifting builds flexibility under load. These keep the hips, hamstrings, upper back and neck from becoming the thing that breaks down at 60.</p>
+    <h1 class="vt">Mobility &amp; Desk Reset</h1>
+    <p class="lead">A few minutes a day, picked for you. Mild stretches for what's tight, easy work for what's sore, two minutes of neck and shoulder strength, and a quick reset for desk days. Press Start and follow the cards.</p>
+    <div id="mob-today"></div>
     <div class="grid g2">
       <div class="card">
-        <h4>Pre-lift warm-up <span class="pill">~8 min</span></h4>
+        <h4>Before you lift <span class="pill">in gym mode · ~8 min</span></h4>
         <ul class="clean">
-          <li><b>5 min easy cardio</b> — bike, rower or incline walk; break a light sweat.</li>
-          <li><b>Dynamic flow</b> — 10 bodyweight squats, 10 leg swings a side, 10 band pull-aparts, 10 chin tucks.</li>
-          <li><b>Ramp-up sets</b> — gym mode builds the ramp for your main lift: empty bar → 40% → 60% → 75% → 85%.</li>
+          <li><b>5 min easy cardio:</b> bike, rower or incline walk. Break a light sweat.</li>
+          <li><b>Three moves matched to the day:</b> leg swings, hip rocks and squats before lower days; arm swings, pass-throughs and pull-aparts before upper days.</li>
+          <li><b>Ramp-up sets:</b> gym mode builds the ramp for your main lift: empty bar → 40% → 60% → 75% → 85%.</li>
+          <li><b>Feel tight?</b> A hold of 30 seconds or less is fine, before the moves. Skip long holds right before heavy sets; they cost a little strength.</li>
         </ul>
       </div>
       <div class="card">
-        <h4>Mobility 2× a week <span class="pill">non-lifting days</span></h4>
+        <h4>Longer sessions <span class="pill">off days, optional</span></h4>
         <ul class="clean">
-          <li><b>Hips & hamstrings:</b> 90-90 switches, hamstring floss, couch stretch. 15–20 min.</li>
-          <li><b>Upper back:</b> T-spine rotations and extensions over a roller — the antidote to the desk.</li>
-          <li><b>Restorative:</b> longer holds and slow breathing. A yoga class counts — add it on Today.</li>
+          <li>A yoga class or 15–20 minutes of longer holds on a day off counts as that day's mobility. On Today, tap Mobility, then <b>I did yoga or a class</b>.</li>
         </ul>
       </div>
       <div class="card">
-        <h4>Back & core <span class="pill steel">before lower days</span></h4>
+        <h4>Back &amp; core <span class="pill steel">stiff-back routine</span></h4>
         <ul class="clean">
-          <li><b>The big three:</b> curl-up, side plank, bird dog — 5 minutes, builds a stiff, quiet trunk.</li>
+          <li><b>Back feels stiff?</b> Moving beats resting. The stiff-back routine is an easy walk, then bird dogs, side planks and a hip stretch.</li>
+          <li><b>Your lifting is back training too.</b> Strength work is among the best-supported things for a stiff back.</li>
           <li><b>Brace, don't arch:</b> ribs down on every hinge and squat. Stop a set the rep your back takes over.</li>
-          <li><b>Hamstrings:</b> strong, long hamstrings take load off the low back — that's why curls and RDLs are in every week.</li>
         </ul>
       </div>
       <div class="card">
-        <h4>Neck & traps <span class="pill steel">daily, 3 min</span></h4>
+        <h4>Neck &amp; traps <span class="pill steel">2 min, daily</span></h4>
         <ul class="clean">
-          <li><b>Chin tucks</b> 2×10 and a doorway pec stretch, 30 s a side.</li>
+          <li><b>Strength beats stretching here:</b> the daily routine includes two minutes of band raises or pull-aparts (face-down raises without a band), shoulders down, except on days you've already done an Upper session.</li>
+          <li><b>Chin tucks and a gentle side lean</b> are in the desk reset and the routine, for comfort.</li>
           <li><b>Press seated and supported;</b> no heavy shrugging. If the hack-squat pads bite, switch to the belt squat.</li>
-          <li><b>Face pulls</b> every Upper B — the posture work that keeps the neck long.</li>
         </ul>
       </div>
     </div>
     <div class="card" style="margin-top:16px">
       <h4>Daily threads</h4>
       <div class="grid g4" style="gap:12px;margin-top:6px">
-        <div><div class="pill steel">Walks</div><p class="why" style="margin-top:7px">Morning steps, post-meal strolls. Free recovery — keep moving on rest days.</p></div>
+        <div><div class="pill steel">Walks</div><p class="why" style="margin-top:7px">Build to 30 minutes, most days. Walking works about as well as other exercise for a stiff back, and it's the easiest to keep doing. Walks between desk blocks count.</p></div>
         <div><div class="pill steel">Pull-up tower</div><p class="why" style="margin-top:7px">Grease the groove on non-lifting days. The Today tab scales it to your ladder level and switches it off on gym days.</p></div>
         <div><div class="pill amber">Sauna</div><p class="why" style="margin-top:7px">15–20 min, most days. Recovery and cardiovascular adaptation. Hydrate around it.</p></div>
         <div><div class="pill green">Sleep</div><p class="why" style="margin-top:7px">7–9 h. It's when the bulk actually turns into muscle — protect it like a board meeting.</p></div>
@@ -843,6 +856,7 @@
 </div>
 
 <div class="gym hidden" id="gym"></div>
+<div class="gym hidden" id="mob"></div>
 <div id="sheet"></div>
 <div class="toast" id="toast"></div>
 
@@ -851,7 +865,7 @@
 <script>
 'use strict';
 /* ================= core constants ================= */
-const APP_VERSION = '3.2.4';
+const APP_VERSION = '3.3.0';
 const KEY = 'argus_training_v1';
 const DRAFT_KEY = KEY + ':draft';
 const SNAP_KEY = 'argus_training_v2_snapshot';
@@ -904,7 +918,7 @@ function normSettings(x){
   for(const k of ['main','sec','acc']) o.rest[k]=Math.max(15,Math.min(600,num(o.rest[k])||d.rest[k]));
   return o;
 }
-function blank(){ return {v:DATA_VERSION, profile:{sz:{}}, logs:[], bw:[], sauna:[], cond:[], nutrition:{}, seq:0, checklist:{}, activities:[], variantPref:{}, targets:{}, timePref:{}, blocks:[], activeBlockId:null, settings:defaultSettings(), readiness:{}}; }
+function blank(){ return {v:DATA_VERSION, profile:{sz:{}}, logs:[], bw:[], sauna:[], cond:[], nutrition:{}, seq:0, checklist:{}, activities:[], mobLog:[], mobGear:{}, variantPref:{}, targets:{}, timePref:{}, blocks:[], activeBlockId:null, settings:defaultSettings(), readiness:{}}; }
 function seeded(){ return blank(); }
 
 const OLD_NAMES = {'Leg Press or Hack Squat':'Leg Press','Triceps Pushdown / Dips':'Triceps Pushdown','Pull-up / Lat Pulldown':'Lat Pulldown'};
@@ -927,8 +941,9 @@ function blockIdIn(blocks, date){
 /* Idempotent: runs on every load, so data touched by an older cached copy of the app gets repaired too. */
 function migrate(s){
   if(!s || typeof s!=='object' || Array.isArray(s)) throw new Error('saved data has the wrong shape');
-  for(const k of ['logs','bw','sauna','cond','activities','blocks']) if(!Array.isArray(s[k])) s[k]=[];
-  for(const k of ['profile','nutrition','checklist','variantPref','targets','timePref','readiness']) if(!s[k]||typeof s[k]!=='object'||Array.isArray(s[k])) s[k]={};
+  for(const k of ['logs','bw','sauna','cond','activities','blocks','mobLog']) if(!Array.isArray(s[k])) s[k]=[];
+  s.mobLog=s.mobLog.filter(x=> x && typeof x==='object' && isFinite(new Date(x.date))).slice(-400);
+  for(const k of ['profile','nutrition','checklist','variantPref','targets','timePref','readiness','mobGear']) if(!s[k]||typeof s[k]!=='object'||Array.isArray(s[k])) s[k]={};
   if(!s.profile.sz||typeof s.profile.sz!=='object') s.profile.sz={};
   if(typeof s.seq!=='number'||!isFinite(s.seq)) s.seq=0;
   s.settings=normSettings(s.settings);
@@ -2829,7 +2844,7 @@ function inferMuscle(n){
   return 'Other';
 }
 /* ================= navigation ================= */
-const VIEWS=[['today','Today'],['dashboard','Dashboard'],['season','Season'],['sessions','Sessions'],['progress','Progress'],['logbook','Logbook'],['conditioning','Conditioning'],['nutrition','Nutrition'],['mobility','Mobility & Yoga'],['why','The Why'],['profile','Profile']];
+const VIEWS=[['today','Today'],['dashboard','Dashboard'],['season','Season'],['sessions','Sessions'],['progress','Progress'],['logbook','Logbook'],['conditioning','Conditioning'],['nutrition','Nutrition'],['mobility','Mobility'],['why','The Why'],['profile','Profile']];
 let currentView='today';
 function buildTabs(){
   const t=$('tabs'); t.innerHTML='';
@@ -2851,6 +2866,7 @@ function renderView(id){
   if(id==='sessions') renderSessions();
   if(id==='progress') renderProgress();
   if(id==='logbook') renderLogbook();
+  if(id==='mobility') renderMobility();
   if(id==='profile') renderProfileInputs();
 }
 function refresh(){ tidyStaleDraft(); renderGlobalBanners(); renderHeader(); renderView(currentView); }
@@ -2934,6 +2950,7 @@ function isRest(id){ return id==='tower' && liftLoggedToday(); }
 function isDone(id){
   const c=getChecklist();
   if(id==='lift') return liftLoggedToday();
+  if(id==='desk') return deskCountToday()>=DESK_GOAL;
   if(id==='sauna') return DB.sauna.some(s=>sameDay(s,today()));
   if(id==='zone2') return z2Today() || z2Week()>=z2Target();
   if(id==='walk') return c.walk===true || DB.cond.some(x=>/walk/i.test(x.type||'') && sameDay(x.date,today()));
@@ -2943,6 +2960,8 @@ function isDone(id){
 function isSkipped(id){ return !isDone(id) && (isRest(id) || getChecklist()[id]==='skip'); }
 function toggleChecklist(id){
   if(id==='lift'){ if(liftLoggedToday()) go('logbook'); else if(DRAFT) showGym(); else openGym(nextLift()); return; }
+  if(id==='desk'){ openMob('desk'); return; }
+  if(id==='mobility' && !isDone('mobility')){ openMobSheet(); return; }
   if(guardRO()) return;
   if(isRest(id)) return;
   const c=getChecklist();
@@ -2972,7 +2991,7 @@ function addActivity(){
 }
 function removeActivity(i){ if(guardRO()) return; DB.activities.splice(i,1); save(); renderToday(); }
 const TIMES=[['morning','☀ Morning'],['midday','◐ Midday'],['evening','☾ Evening'],['anytime','· Anytime']];
-const TIME_DEFAULT={lift:'midday', walk:'morning', zone2:'anytime', tower:'anytime', sauna:'evening', mobility:'evening'};
+const TIME_DEFAULT={lift:'midday', walk:'morning', zone2:'anytime', tower:'anytime', sauna:'evening', mobility:'evening', desk:'midday'};
 function timeOf(id){ const t=(DB.timePref||{})[id]; return TIMES.some(x=>x[0]===t)? t : (TIME_DEFAULT[id]||'anytime'); }
 function cycleTime(id){ const order=TIMES.map(t=>t[0]); DB.timePref[id]=order[(order.indexOf(timeOf(id))+1)%order.length]; save(); renderToday(); }
 function chkRow(it){
@@ -3006,9 +3025,9 @@ function renderToday(){
   const doItems=[liftRow,
     {id:'zone2', t:'Zone 2', s:`${Math.min(z2n,z2t)}/${z2t} this week${z2n>=z2t&&!z2Today()?' ✓ — more is optional':''} · 30–40 min easy`},
     {id:'tower', t:'Pull-up tower', s: liftLoggedToday()? 'gym day — the tower rests' : `L${lv.n} · ${TOWER[lv.n]}`},
-    {id:'walk', t:'Walk', s:'easy steps · 20–40 min'},
+    {id:'walk', t:'Walk', s:'easy steps · build to 30 min, most days'},
     {id:'sauna', t:'Sauna', s:'15–20 min · hydrate around it'},
-    {id:'mobility', t:'Mobility', s:'10 min — neck & back routine, or a class'}];
+    mobTodayRow(), deskTodayRow()];
   doItems.forEach(it=>it.timed=true);
   const eatItems=eatList(c);
   const acts=(DB.activities||[]).map((a,i)=>({a,i})).filter(x=>sameDay(x.a.date,today()));
@@ -3778,7 +3797,7 @@ function openGym(session){
   if(DRAFT){ showGym(); return; }
   askReadiness(session);
 }
-function startSession(session, o){ closeSheet(); DRAFT=newDraft(session, o); saveDraft(); activeSession=session; showGym(); }
+function startSession(session, o){ closeSheet(); DRAFT=newDraft(session, o); saveDraft(); activeSession=session; openMob('warm', {session, after:'gym'}); }
 function showGym(){
   if(!DRAFT) return;
   if(staleBlocked()) return;
@@ -4204,6 +4223,39 @@ function runSelftest(){
       DB.logs.push(L('2026-10-18',0,12,undefined)); delete DB.logs[DB.logs.length-1].entries[0].sets[0].rir; delete DB.logs[DB.logs.length-1].entries[0].sets[1].rir; const c=cardOf('Lower B','Walking Lunge',null,null,'2026-10-25');
       const ex=PROGRAM['Lower B'].find(e=>e.slot==='Walking Lunge'), v=ex.vars[0], sl={variant:v.n, card:{w:20,E:20,r:10,rirT:3,rirShown:3,rl:10,rh:12,track:'D',sets:2}, sets:[{w:0,r:12,rir:4,vn:v.n},{w:20,r:'',rir:''}]};
       const kv={n:'KB Walking Lunge',mode:'kb'}; return eq([c.w, isNum(c.rl)&&isNum(c.rh), repredictAfter(ex,sl,v,0), /kettlebell/.test(equipViz(kv,0)), fmtSet({w:0,r:12},'db','Lateral Raise')],[0,true,null,true,'0×12']); });
+    const mobDay=(n,day,ents)=>({date:addDays(today(),-n).toISOString(),day,entries:ents.map(([x,k])=>({exercise:x,mode:'bb',slot:x,sets:Array.from({length:k},()=>({w:100,r:8,rir:2}))}))});
+    const mobFx=(logs)=>{ DB=seeded(); DB.profile.w=200; DB.mobLog=[]; DB.mobGear={}; DB.logs=logs||[]; MOB_CACHE={}; };
+    T('mobility: an empty week gets 2-round holds, neck & shoulder strength, breathing last, within 12 min', ()=>{ mobFx(); const p=buildPlan('full'); const tg=p.steps.filter(s=>s.block==='target');
+      return eq([p.steps.some(s=>s.block==='relief'), tg.length, p.steps.filter(s=>s.block==='strength').length, p.steps[p.steps.length-1].id, p.secs<=720],[false,3,1,'belly-breathing',true]); });
+    T('mobility: the day after a familiar Lower B the hamstrings get rolling, not holds; a new lift flags on 3 sets', ()=>{ const lb=[['Romanian Deadlift',3],['Leg Curl',3],['Leg Press',4],['Seated Calf Raise',3]];
+      mobFx([mobDay(4,'Lower B',lb),mobDay(8,'Lower B',lb),mobDay(12,'Lower B',lb),mobDay(1,'Lower B',lb)]); const p=buildPlan('full'), S=p.S, ids=p.steps.map(s=>s.id), hip=p.steps.find(s=>s.d.area==='hips'), line=mobSoreLines(S)[0];
+      mobFx([mobDay(1,'Upper A',[['KB Row',3]])]); const n=soreInfo();
+      return eq([S.hot.includes('Posterior'), S.hot.includes('Quads'), S.hot.includes('Calves'), ids.some(x=>/^ham-strap|^ham-chair/.test(x)), ids.includes('roll-hams'), hip? hip.rounds : 0, n.hot, n.fresh && n.fresh.exercise, /^Likely sore: hamstrings & glutes from Lower B yesterday\./.test(line)],[true,false,false,false,true,2,['Back'],'KB Row',true]); });
+    T('mobility: an Upper day logged today skips the band work; the week\'s minutes cap the holds', ()=>{ mobFx([mobDay(0,'Upper A',[['Barbell Bench',3]])]); const a=buildPlan('full').steps.some(s=>s.block==='strength');
+      mobFx(); DB.mobLog=[{date:new Date().toISOString(),kind:'full',done:[],skipped:[],secs:600,holds:{hams:600,hips:300,calves:0}}]; MOB_CACHE={}; const p=buildPlan('full'), h=p.steps.find(s=>s.d.area==='hams'), hp=p.steps.find(s=>s.d.area==='hips');
+      return eq([a, !!h, hp? hp.rounds : 0],[false,false,1]); });
+    T('mobility: short fits 6 min, desk resets 2.5, warm-up 9, stiff back 12; no cat-cow before 10 am', ()=>{ mobFx();
+      return eq([buildPlan('short').secs<=345, buildReset('stand').secs<=150, buildReset('seated').secs<=150, buildWarm('Lower A').secs<=540, buildBack().secs<=720, buildPlan('full',{hour:8}).steps.some(s=>s.id==='cat-cow'), buildBack({hour:8}).steps.some(s=>s.id==='cat-cow')],[true,true,true,true,true,false,false]); });
+    T('mobility: no roller or band means no move that needs them', ()=>{ const lb=[['Romanian Deadlift',3],['Leg Press',4]]; mobFx([mobDay(1,'Lower B',lb)]); DB.mobGear={roller:false,band:false}; MOB_CACHE={};
+      const all=['full','short'].flatMap(k=>buildPlan(k).steps).concat(buildWarm('Upper A').steps); return eq([all.some(s=>s.d.equipment==='roller'||s.d.equipment==='band'), all.find(s=>s.block==='strength').id, buildWarm('Upper A').steps.some(s=>s.id==='wall-slide')],[false,'prone-y',true]); });
+    T('mobility: desk reset counts at 3 a day; data survives migrate', ()=>{ mobFx(); const d=()=>({date:new Date().toISOString(),kind:'desk',done:['walk-break','hip-flexor-stand','chair-extension','chin-tuck'],skipped:[],secs:120,holds:{}}); DB.mobLog=[d(),d()]; const a=isDone('desk'); DB.mobLog.push(d()); const b=isDone('desk');
+      const m=migrate({logs:[],mobLog:[{date:'nope'},d()],settings:{}}); return eq([a,b,m.mobLog.length, typeof m.mobGear],[false,true,1,'object']); });
+    T('mobility: every move is named, cued in 18 words or fewer, guard-safe, and every routine id exists', ()=>{ const bad=MOB_DRILLS.filter(d=> !d.name || d.cue.split(/\s+/).length>18 || /\b(pain|injur|diagnos|therap|MRI|medication|surgery)/i.test(d.name+' '+d.cue+' '+(d.avoid||'')));
+      const ids=[].concat(...Object.values(MOB_RELIEF), ...MOB_TARGETS.map(t=>t.ids), MOB_COMFORT, ...Object.values(MOB_RESET).map(r=>r.map(x=>x[0])), ...Object.values(MOB_WARM).map(r=>r.map(x=>x[0])), MOB_BACK.map(x=>x[0])).filter(Boolean);
+      return eq([bad.length, ids.every(x=>!!MOB_BY[x])],[0,true]); });
+    T('mobility player: a desk reset runs card by card, logs once, and credits the hip hold', ()=>{ mobFx(); const keepG=GYM_OPEN; GYM_OPEN=false; openMob('desk'); const P=MOB.plan;
+      for(let k=0;k<40 && MOB && MOB.phase!=='done';k++){ if(MOB.phase==='ready') mobStartUnit(); else if(MOB.phase==='reps') mobUnitDone(); else { MOB.endAt=Date.now()-1; mobTick(); } }
+      const out=[MOB && MOB.phase, DB.mobLog.length, DB.mobLog[0].kind, DB.mobLog[0].holds.hips, DB.mobLog[0].done.length, P.steps.length]; closeMob(); GYM_OPEN=keepG; return eq(out,['done',1,'desk',20,4,4]); });
+    T('mobility player: skipping to the end neither ticks Today nor counts a desk reset; a partial desk close logs nothing', ()=>{ mobFx(); const keepG=GYM_OPEN; GYM_OPEN=false;
+      openMob('full'); const t=MOB.plan.steps.length; for(let k=0;k<t+2 && MOB && MOB.phase!=='done';k++) mobSkip(); const a=[MOB.phase, !!MOB.ticked, DB.mobLog.length, getChecklist().mobility===true]; closeMob();
+      openMob('desk'); mobStartUnit(); MOB.endAt=Date.now()-1; mobTick(); mobClose(); const b=[DB.mobLog.length, deskCountToday()]; GYM_OPEN=keepG; return eq([a,b],[['done',false,0,false],[0,0]]); });
+    T('mobility player: during Up next, Skip skips the move on screen; the Count-it sheet pauses the clock and logs once', ()=>{ mobFx(); const keepG=GYM_OPEN; GYM_OPEN=false; openMob('full');
+      mobStartUnit(); const first=MOB.i; MOB.endAt=Date.now()-1; for(let k=0;k<6 && MOB.phase!=='next';k++){ if(MOB.phase==='reps') mobUnitDone(); else { MOB.endAt=Date.now()-1; mobTick(); } }
+      const shown=MOB.i+1; mobSkip(); const after=MOB.i;
+      const t=MOB.plan.steps.length; MOB.prog.forEach((p,i)=>{ if(i<Math.ceil(t/2)) p.done=true; }); MOB.phase='run'; MOB.endAt=Date.now()+30000; mobClose(); const paused=MOB.phase;
+      mobCountIt(true); const n=DB.mobLog.length; closeSheet(); GYM_OPEN=keepG; return eq([after, paused, n],[shown+1, 'paused', 1]); });
+    T('mobility: the new-lift note only shows when its area is flagged; the sheet names only the areas it eases', ()=>{ mobFx([mobDay(1,'Upper A',[['KB Row',1]])]); const a=soreInfo();
+      mobFx([mobDay(1,'Upper A',[['KB Row',3]])]); const p=buildPlan('full'), line=mobSoreLines(p.S, p)[0]; return eq([a.hot.length, a.fresh, /eases upper back & lats with rolling/.test(line)],[0,null,true]); });
     T('pull-up ladder levels', ()=>{ const L=x=>ladderLevel(Object.assign(newStats(),x)).n; return eq([L({hang:25}),L({hang:40,assistFirst:120,assistBest:120,assistNow:120}),L({hang:40,assistFirst:120,assistBest:55,assistNow:60}),L({strict:1}),L({strict:6})],[1,2,3,4,5]); });
     T('phases + header chip', ()=>{ DB=seeded(); DB.blocks=[blk(-14)]; DB.activeBlockId='t'; const c=ctx(), ch=chipText(c), t=TEMPLATES['strength-bulk']; return eq([c.w,ch.n,ch.l,phaseAt(t,8).name,!!phaseAt(t,8).deload,!!phaseAt(t,16).test,!!phaseAt(t,17).complete,phaseAt(TEMPLATES.maintain,8).name,phaseAt(TEMPLATES.maintain,9).name],[3,'W3/16','Groove','Deload',true,true,true,'Deload','Base']); });
     T('no block and pre-block both run week-1 targets', ()=>{ DB=seeded(); const main=PROGRAM['Lower A'][0]; const a=prescribe(main,ctx()); DB.blocks=[blk(5)]; DB.activeBlockId='t'; const c=ctx(), b=prescribe(main,c); return eq([a.sets,a.rl,a.rh,a.rir,b.sets,b.rir,chipText(c).n,!!c.ph.pre],[3,5,6,3,3,3,'5d',true]); });
@@ -4239,14 +4291,390 @@ function runSelftest(){
   return {pass, total:results.length, ok, results};
 }
 
-const WHY_CARDS = [{"t": "Strength and size: two jobs, two kinds of day", "b": "Strength is specific. It grows most from heavy sets of about 2–6 reps (roughly 80% of your max or more), practised often. Muscle is far less picky: across hundreds of trials, nearly every sensible way of lifting built muscle about equally well. So the heavy days chase strength, the muscle days pile up growth with joint-friendly loads, and the heavy days count toward growth too.", "r": ["currier2023", "lopez2021", "cumming2025"]}, {"t": "The best reps for muscle growth", "b": "Muscle grows about equally across a wide span of rep counts, from heavy fives to sets of 20–30, as long as each set ends close to failure. Growth climbs a little as sets get closer to failure. The practical sweet spot is 6–12 reps stopping 1–3 short. That's heavy enough to be efficient, light enough to be kind to joints, and in the range where your reps-in-reserve calls are accurate.", "r": ["lopez2021", "cumming2025", "robinson2024"]}, {"t": "High-rep sets have to be hard", "b": "The evidence that light, high-rep sets build as much muscle as heavy ones comes from sets taken all the way to failure. Very light weights, around 20% of max, grew only about half as much even then. Above 12 reps, people's sense of how many reps are left gets much worse, usually on the cautious side. So sets meant to be 15–20+ reps, like calves, lateral raises and rear delts, aim for 1 rep left, and the app never prescribes more than 30 reps.", "r": ["lopez2021", "lasevicius2018", "halperin2022"]}, {"t": "How close to failure", "b": "Growth improves a little as sets end closer to failure: about half a percentage point more muscle for each rep closer, over a couple of months. In trained lifters, stopping 1–2 reps short matched going all the way, with less fatigue. Strength barely cares; the weight on the bar drives it, not the grind. So muscle-day sets end 1–3 reps short, and heavy days never grind.", "r": ["robinson2024", "refalo2023", "refalo2024"]}, {"t": "Failure is a tool, not a rule", "b": "In one trial, bench and squat sets taken to failure needed 48–72 hours for full recovery, against about 6 hours for the same work stopped about 5 reps short. In another, trained men who trained to failure gained slightly less bench strength. The small upside of failure shows up mostly when you do very few sets. So failure is allowed only on the final set of machine and isolation work, from the Build phase on, and never on heavy barbell or hinge lifts.", "r": ["moranNavarro2017", "robinson2025", "hermann2025"]}, {"t": "How your weights are predicted", "b": "Each lift has a level: an estimated max from your working sets in that slot, weight × (1 + (reps + reps-in-reserve) ÷ 30), averaged over your last two sessions. Warm-ups don't count. The card shows the heaviest weight you can actually load that should give today's target reps with today's reps-in-reserve, and the math behind it. On the last set you keep going until you have the planned reps left, so the next prediction learns from a real rep count. The level is a training number for that exercise, not a tested max: how reps fall as weight rises differs between lifts and between people.", "r": ["reynolds2006", "nuzzo2024", "hickmott2022"]}, {"t": "Why the prediction is cautious", "b": "Lifters misjudge reps-in-reserve by about one rep on average, usually thinking they have fewer left than they do, though the calls get better with practice. So the app reads your strongest working set that ended within three reps of failure (calls that close are the most accurate, and later sets carry fatigue), averages two sessions, and adds about one loadable step per session at most — a little more only when a weight was clearly too light. If you do exactly what the card says and skip the reps-in-reserve tap, it assumes you were on target: the weight never drifts down, and it won't step up until the tap (or, on high-rep work, two sessions in a row at the top). Adjusting load by effort like this works at least as well as fixed percentages.", "r": ["halperin2022", "martikainen2025", "hickmott2022"]}, {"t": "Adding reps is progress too", "b": "In trained lifters, adding reps at the same weight built as much muscle as adding weight, and nearly as much strength. So on muscle days the weight holds while the card's aim climbs one rep at a time. Once every set reaches the top of the range at the planned effort, the weight steps up and the reps reset. When the next dumbbell is too big a jump, you earn it with a few extra reps first. If even that can't bridge it, the app says so and suggests a machine or cable with finer steps.", "r": ["plotkin2022", "acsm2009"]}, {"t": "Volume is the main dial for size", "b": "More hard sets per muscle per week means more growth, with diminishing returns. About 10–20 sets per muscle per week is the productive zone; well past 20 added little in trained lifters and cost a lot of fatigue. Strength needs far less: a few heavy sets of a lift per session do most of the work. Volume climbs one set at a time in the Build phases instead of starting high.", "r": ["pelland2026", "bazValle2022", "aube2022"]}, {"t": "Twice a week is enough", "b": "With the same weekly sets, training a muscle once, twice or three times a week grows it about the same. Training each muscle twice, as this split does, keeps any one session from getting too long. Past about 10 hard sets for one muscle in one session, extra sets stop adding measurable growth. A missed session's sets are better made up on the next similar day than with an extra day.", "r": ["schoenfeld2019freq", "pelland2026", "remmert2025"]}, {"t": "Rest long enough to lift well", "b": "Resting more than about a minute between sets grows slightly more muscle, mostly because you keep your reps up. Beyond about 90 seconds, more rest adds little for size. For heavy strength work, trained lifters do better with two minutes or more. Heavy lifts get 3 minutes early in the block and up to 5 near the peak; accessories get 90 seconds.", "r": ["singer2024", "grgic2018rest"]}, {"t": "Load the stretch", "b": "In two MRI trials, loading a muscle in its stretched position grew it more than the shortened-position version of the same move. A seated leg curl beat a lying curl for the hamstrings, and overhead triceps extensions beat neutral-arm extensions, even with about a third less weight. So the seated curl and the overhead extension are the defaults, each with its own weight history, and the old versions stay as alternatives if a position doesn't agree with you.", "r": ["maeo2021", "maeo2023"]}, {"t": "Full range stays the default", "b": "Half-reps in the stretched part of the range built about as much muscle as full reps in trained lifters. Training at longer muscle lengths gives at most a small edge. Strength stays specific to the range you train, and the end-of-block test is full range. So every lift is full range, with a one-second pause in the stretch on muscle-day work. Partials aren't prescribed.", "r": ["wolf2025", "varovic2025"]}, {"t": "Phases and effort ramps", "b": "Reps-in-reserve steps down across the block on the heavy lifts, from 3 to 2 to 1. Ramping like this gave the same strength and size as training near failure every week, with less effort, and reps-in-reserve calls got more accurate along the way. Alternating heavy days with lighter muscle days beat a straight-line plan for strength in trained lifters.", "r": ["martikainen2025", "moesgaard2022"]}, {"t": "Deloads: fewer sets, same weight", "b": "Deloads cut sets, not weight. In the only trial, a full week off added no muscle and cost a little strength. Strength and physique athletes report a lighter week about every 3–8 weeks, 5.6 on average. A coach consensus panel agreed deloads can be planned, triggered by fatigue, or both, and that the weight can stay the same when volume drops. Here they're planned for holiday weeks, and the app offers an earlier one if your lifts slide two sessions running.", "r": ["coleman2024", "rogerson2024", "bell2023"]}, {"t": "Spine-friendly by design", "b": "Compared with a straight bar, the trap bar cut lower-back load by about 8–15% at light-to-moderate weights. At 70–80% of max the difference was no longer significant, and heavier loads weren't tested, so heavy trap-bar sets still need a hard brace and at least two reps in reserve. Belt and hack squats load the legs without a bar on the spine, and chest-supported rows take the lower back out of rowing. Planned variation between days works as well as fixed exercises, and each variant keeps its own weight history.", "r": ["swinton2011", "ramirez2022", "kassiano2024"]}, {"t": "The pull-up ladder", "b": "For heavier lifters, the real load on a pull-up is bodyweight minus assistance, so that's what the app tracks, using the bodyweight in your Profile — no weigh-ins required. The same prediction rules apply as for the barbell. No study has tested pull-up progressions specifically, so this applies the general load evidence, and the app learns your own reps-versus-load curve from your logs.", "r": ["currier2023", "nuzzo2024"]}, {"t": "Protein & creatine", "b": "1.6–2.2 g/kg/day of protein is the well-replicated range for maximizing muscle gain, spread across meals. Creatine monohydrate (5 g/day) is the most researched supplement there is — strength, size, cheap and safe.", "r": [], "outside": true}, {"t": "Zone 2 + the sauna", "b": "Cardiorespiratory fitness is among the strongest predictors of long-term health, and frequent sauna use is linked to lower cardiovascular risk in large cohorts. A small, steady dose of both keeps that work going while the lifting does the building.", "r": [], "outside": true}, {"t": "Bulk without a scale", "b": "A modest surplus plus enough protein builds muscle; the scoreboard is the bar, not the scale. Four real meals with protein at each covers it without counting anything.", "r": [], "outside": true}];
-const WHY_REFS = [{"k": "currier2023", "f": "Currier BS, Mcleod JC, Banfield L, Beyene J, Welton NJ, D'Souza AC, et al. Resistance training prescription for muscle strength and hypertrophy in healthy adults: a systematic review and Bayesian network meta-analysis. Br J Sports Med. 2023;57(18):1211-1220. doi:10.1136/bjsports-2023-106807", "u": "https://doi.org/10.1136/bjsports-2023-106807"}, {"k": "lopez2021", "f": "Lopez P, Radaelli R, Taaffe DR, Newton RU, Galvão DA, Trajano GS, et al. Resistance Training Load Effects on Muscle Hypertrophy and Strength Gain: Systematic Review and Network Meta-analysis. Med Sci Sports Exerc. 2021;53(6):1206-1216. doi:10.1249/MSS.0000000000002585", "u": "https://doi.org/10.1249/MSS.0000000000002585"}, {"k": "robinson2024", "f": "Robinson ZP, Pelland JC, Remmert JF, Refalo MC, Jukic I, Steele J, Zourdos MC. Exploring the Dose-Response Relationship Between Estimated Resistance Training Proximity to Failure, Strength Gain, and Muscle Hypertrophy: A Series of Meta-Regressions. Sports Med. 2024;54(9):2209-2231. doi:10.1007/s40279-024-02069-2", "u": "https://doi.org/10.1007/s40279-024-02069-2"}, {"k": "refalo2023", "f": "Refalo MC, Helms ER, Trexler ET, Hamilton DL, Fyfe JJ. Influence of Resistance Training Proximity-to-Failure on Skeletal Muscle Hypertrophy: A Systematic Review with Meta-analysis. Sports Med. 2023;53(3):649-665. doi:10.1007/s40279-022-01784-y", "u": "https://doi.org/10.1007/s40279-022-01784-y"}, {"k": "refalo2024", "f": "Refalo MC, Helms ER, Robinson ZP, Hamilton DL, Fyfe JJ. Similar muscle hypertrophy following eight weeks of resistance training to momentary muscular failure or with repetitions-in-reserve in resistance-trained individuals. J Sports Sci. 2024;42(1):85-101. doi:10.1080/02640414.2024.2321021", "u": "https://doi.org/10.1080/02640414.2024.2321021"}, {"k": "cumming2025", "f": "Cumming KT, Elvatun IC, Kalenius R, Divljak G, Raastad T, Psilander N, Horwath O. Divergent strength gains but similar hypertrophy after low-load and high-load resistance exercise training in trained individuals: many roads lead to Rome. J Appl Physiol. 2025;139(3):685-697. doi:10.1152/japplphysiol.00353.2025", "u": "https://doi.org/10.1152/japplphysiol.00353.2025"}, {"k": "lasevicius2018", "f": "Lasevicius T, Ugrinowitsch C, Schoenfeld BJ, Roschel H, Tavares LD, De Souza EO, et al. Effects of different intensities of resistance training with equated volume load on muscle strength and hypertrophy. Eur J Sport Sci. 2018;18(6):772-780. doi:10.1080/17461391.2018.1450898", "u": "https://doi.org/10.1080/17461391.2018.1450898"}, {"k": "halperin2022", "f": "Halperin I, Malleron T, Har-Nir I, Androulakis-Korakakis P, Wolf M, Fisher J, Steele J. Accuracy in Predicting Repetitions to Task Failure in Resistance Exercise: A Scoping Review and Exploratory Meta-analysis. Sports Med. 2022;52(2):377-390. doi:10.1007/s40279-021-01559-x", "u": "https://doi.org/10.1007/s40279-021-01559-x"}, {"k": "plotkin2022", "f": "Plotkin D, Coleman M, Van Every D, Maldonado J, Oberlin D, Israetel M, et al. Progressive overload without progressing load? The effects of load or repetition progression on muscular adaptations. PeerJ. 2022;10:e14142. doi:10.7717/peerj.14142", "u": "https://doi.org/10.7717/peerj.14142"}, {"k": "hermann2025", "f": "Hermann T, Mohan AE, Enes A, Sapuppo M, Piñero A, Zamanzadeh A, et al. Without Fail: Muscular Adaptations in Single-Set Resistance Training Performed to Failure or with Repetitions-in-Reserve. Med Sci Sports Exerc. 2025;57(9):2021-2031. doi:10.1249/MSS.0000000000003728", "u": "https://doi.org/10.1249/MSS.0000000000003728"}, {"k": "robinson2025", "f": "Robinson Z, Macarilla C, Juber M, Cerminaro R, Benitez B, Pelland J, et al. The Effect of Resistance Training Proximity to Failure on Muscular Adaptations and Longitudinal Fatigue in Trained Men. Int J Strength Cond. 2025;5(1). doi:10.47206/ijsc.v5i1.393", "u": "https://doi.org/10.47206/ijsc.v5i1.393"}, {"k": "martikainen2025", "f": "Martikainen O, Niiranen H, Rytkönen T, Schoenfeld BJ, Ahtiainen JP, Hulmi JJ. Influence of Varying Proximity-to-Failure on Muscular Adaptations and Repetitions-in-Reserve Estimation Accuracy in Resistance-Trained Individuals. J Sci Sport Exerc. 2025 (early online). doi:10.1007/s42978-025-00338-8", "u": "https://doi.org/10.1007/s42978-025-00338-8"}, {"k": "moranNavarro2017", "f": "Morán-Navarro R, Pérez CE, Mora-Rodríguez R, de la Cruz-Sánchez E, González-Badillo JJ, Sánchez-Medina L, Pallarés JG. Time course of recovery following resistance training leading or not to failure. Eur J Appl Physiol. 2017;117(12):2387-2399. doi:10.1007/s00421-017-3725-7", "u": "https://doi.org/10.1007/s00421-017-3725-7"}, {"k": "pelland2026", "f": "Pelland JC, Remmert JF, Robinson ZP, Hinson SR, Zourdos MC. The Resistance Training Dose Response: Meta-Regressions Exploring the Effects of Weekly Volume and Frequency on Muscle Hypertrophy and Strength Gains. Sports Med. 2026;56(2):481-505. doi:10.1007/s40279-025-02344-w", "u": "https://doi.org/10.1007/s40279-025-02344-w"}, {"k": "remmert2025", "f": "Remmert JF, Pelland JC, Robinson ZP, Hinson SR, Zourdos MC. Is There Too Much of a Good Thing? Meta-Regressions of the Effect of Per-Session Volume on Hypertrophy and Strength. SportRxiv [preprint, not peer reviewed]. 2025. doi:10.51224/SRXIV.537", "u": "https://sportrxiv.org/index.php/server/preprint/view/537"}, {"k": "schoenfeld2019freq", "f": "Schoenfeld BJ, Grgic J, Krieger J. How many times per week should a muscle be trained to maximize muscle hypertrophy? A systematic review and meta-analysis of studies examining the effects of resistance training frequency. J Sports Sci. 2019;37(11):1286-1295. doi:10.1080/02640414.2018.1555906", "u": "https://doi.org/10.1080/02640414.2018.1555906"}, {"k": "grgic2018freq", "f": "Grgic J, Schoenfeld BJ, Davies TB, Lazinica B, Krieger JW, Pedisic Z. Effect of Resistance Training Frequency on Gains in Muscular Strength: A Systematic Review and Meta-Analysis. Sports Med. 2018;48(5):1207-1220. doi:10.1007/s40279-018-0872-x", "u": "https://doi.org/10.1007/s40279-018-0872-x"}, {"k": "bazValle2022", "f": "Baz-Valle E, Balsalobre-Fernández C, Alix-Fages C, Santos-Concejero J. A Systematic Review of The Effects of Different Resistance Training Volumes on Muscle Hypertrophy. J Hum Kinet. 2022;81:199-210. doi:10.2478/hukin-2022-0017", "u": "https://doi.org/10.2478/hukin-2022-0017"}, {"k": "schoenfeld2019vol", "f": "Schoenfeld BJ, Contreras B, Krieger J, Grgic J, Delcastillo K, Belliard R, Alto A. Resistance Training Volume Enhances Muscle Hypertrophy but Not Strength in Trained Men. Med Sci Sports Exerc. 2019;51(1):94-103. doi:10.1249/MSS.0000000000001764", "u": "https://doi.org/10.1249/MSS.0000000000001764"}, {"k": "aube2022", "f": "Aube D, Wadhi T, Rauch J, Anand A, Barakat C, Pearson J, et al. Progressive Resistance Training Volume: Effects on Muscle Thickness, Mass, and Strength Adaptations in Resistance-Trained Individuals. J Strength Cond Res. 2022;36(3):600-607. doi:10.1519/JSC.0000000000003524", "u": "https://doi.org/10.1519/JSC.0000000000003524"}, {"k": "camargo2026", "f": "Camargo JBB, Bittencourt D, Michel JM, Silva DG, Bergamasco JGA, Berry AC, et al. Large increases in resistance training volume do not impair muscle hypertrophy or anabolic-catabolic molecular signaling in trained individuals. J Appl Physiol. 2026;141(2):477-493. doi:10.1152/japplphysiol.00284.2026", "u": "https://doi.org/10.1152/japplphysiol.00284.2026"}, {"k": "rantila2026", "f": "Räntilä A, Ahtiainen JP. Exploring the Upper Limits of Resistance Training Volume for Muscle Hypertrophy and Strength in Trained Athletes. J Sci Sport Exerc. 2026 (online 28 Jul 2026):1-11. doi:10.1007/s42978-026-00387-7", "u": "https://doi.org/10.1007/s42978-026-00387-7"}, {"k": "acsm2026", "f": "Currier BS, D'Souza AC, Singh MAF, Lowisz CV, Rawson ES, Schoenfeld BJ, et al. American College of Sports Medicine Position Stand. Resistance Training Prescription for Muscle Function, Hypertrophy, and Physical Performance in Healthy Adults: An Overview of Reviews. Med Sci Sports Exerc. 2026;58(4):851-872. doi:10.1249/MSS.0000000000003897", "u": "https://doi.org/10.1249/MSS.0000000000003897"}, {"k": "huang2025", "f": "Huang Z, Sun J, Li D, Chen C, Wang D. Autoregulated resistance training for maximal strength enhancement: A systematic review and network meta-analysis. J Exerc Sci Fit. 2025;23(4):360-369. doi:10.1016/j.jesf.2025.07.006", "u": "https://doi.org/10.1016/j.jesf.2025.07.006"}, {"k": "hickmott2022", "f": "Hickmott LM, Chilibeck PD, Shaw KA, Butcher SJ. The Effect of Load and Volume Autoregulation on Muscular Strength and Hypertrophy: A Systematic Review and Meta-Analysis. Sports Med Open. 2022;8(1):9. doi:10.1186/s40798-021-00404-9", "u": "https://doi.org/10.1186/s40798-021-00404-9"}, {"k": "nuzzo2024", "f": "Nuzzo JL, Pinto MD, Nosaka K, Steele J. Maximal Number of Repetitions at Percentages of the One Repetition Maximum: A Meta-Regression and Moderator Analysis of Sex, Age, Training Status, and Exercise. Sports Med. 2024;54(2):303-321. doi:10.1007/s40279-023-01937-7", "u": "https://doi.org/10.1007/s40279-023-01937-7"}, {"k": "reynolds2006", "f": "Reynolds JM, Gordon TJ, Robergs RA. Prediction of one repetition maximum strength from multiple repetition maximum testing and anthropometry. J Strength Cond Res. 2006;20(3):584-592. doi:10.1519/R-15304.1", "u": "https://doi.org/10.1519/R-15304.1"}, {"k": "moesgaard2022", "f": "Moesgaard L, Beck MM, Christiansen L, Aagaard P, Lundbye-Jensen J. Effects of Periodization on Strength and Muscle Hypertrophy in Volume-Equated Resistance Training Programs: A Systematic Review and Meta-analysis. Sports Med. 2022;52(7):1647-1666. doi:10.1007/s40279-021-01636-1", "u": "https://doi.org/10.1007/s40279-021-01636-1"}, {"k": "acsm2009", "f": "American College of Sports Medicine (Ratamess NA, Alvar BA, Evetoch TK, Housh TJ, Kibler WB, Kraemer WJ, Triplett NT). American College of Sports Medicine position stand. Progression models in resistance training for healthy adults. Med Sci Sports Exerc. 2009;41(3):687-708. doi:10.1249/MSS.0b013e3181915670", "u": "https://doi.org/10.1249/MSS.0b013e3181915670"}, {"k": "varovic2025", "f": "Varovic D, Wolf M, Schoenfeld BJ, Steele J, Grgic J, Mikulic P. Does Muscle Length Influence Regional Hypertrophy? A Systematic Review and Meta-Analysis. Int J Sports Med. 2025;46(14):1027-1036. doi:10.1055/a-2615-4935", "u": "https://doi.org/10.1055/a-2615-4935"}, {"k": "wolf2025", "f": "Wolf M, Androulakis Korakakis P, Piñero A, Mohan AE, Hermann T, Augustin F, et al. Lengthened partial repetitions elicit similar muscular adaptations as full range of motion repetitions during resistance training in trained individuals. PeerJ. 2025;13:e18904. doi:10.7717/peerj.18904", "u": "https://doi.org/10.7717/peerj.18904"}, {"k": "maeo2021", "f": "Maeo S, Huang M, Wu Y, Sakurai H, Kusagawa Y, Sugiyama T, et al. Greater Hamstrings Muscle Hypertrophy but Similar Damage Protection after Training at Long versus Short Muscle Lengths. Med Sci Sports Exerc. 2021;53(4):825-837. doi:10.1249/MSS.0000000000002523", "u": "https://doi.org/10.1249/MSS.0000000000002523"}, {"k": "maeo2023", "f": "Maeo S, Wu Y, Huang M, Sakurai H, Kusagawa Y, Sugiyama T, Kanehisa H, Isaka T. Triceps brachii hypertrophy is substantially greater after elbow extension training performed in the overhead versus neutral arm position. Eur J Sport Sci. 2023;23(7):1240-1250. doi:10.1080/17461391.2022.2100279", "u": "https://doi.org/10.1080/17461391.2022.2100279"}, {"k": "singer2024", "f": "Singer A, Wolf M, Generoso L, Arias E, Delcastillo K, Echevarria E, et al. Give it a rest: a systematic review with Bayesian meta-analysis on the effect of inter-set rest interval duration on muscle hypertrophy. Front Sports Act Living. 2024;6:1429789. doi:10.3389/fspor.2024.1429789", "u": "https://doi.org/10.3389/fspor.2024.1429789"}, {"k": "grgic2018rest", "f": "Grgic J, Schoenfeld BJ, Skrepnik M, Davies TB, Mikulic P. Effects of Rest Interval Duration in Resistance Training on Measures of Muscular Strength: A Systematic Review. Sports Med. 2018;48(1):137-151. doi:10.1007/s40279-017-0788-x", "u": "https://doi.org/10.1007/s40279-017-0788-x"}, {"k": "coleman2024", "f": "Coleman M, Burke R, Augustin F, Piñero A, Maldonado J, Fisher JP, et al. Gaining more from doing less? The effects of a one-week deload period during supervised resistance training on muscular adaptations. PeerJ. 2024;12:e16777. doi:10.7717/peerj.16777", "u": "https://doi.org/10.7717/peerj.16777"}, {"k": "rogerson2024", "f": "Rogerson D, Nolan D, Androulakis Korakakis P, Immonen V, Wolf M, Bell L. Deloading Practices in Strength and Physique Sports: A Cross-sectional Survey. Sports Med Open. 2024;10:26. doi:10.1186/s40798-024-00691-y", "u": "https://doi.org/10.1186/s40798-024-00691-y"}, {"k": "bell2023", "f": "Bell L, Strafford BW, Coleman M, Androulakis Korakakis P, Nolan D. Integrating Deloading into Strength and Physique Sports Training Programmes: An International Delphi Consensus Approach. Sports Med Open. 2023;9(1):87. doi:10.1186/s40798-023-00633-0", "u": "https://doi.org/10.1186/s40798-023-00633-0"}, {"k": "kassiano2024", "f": "Kassiano W, Costa B, Kunevaliki G, Nunes JP, Castro-e-Souza P, de Paula Felipe J, et al. Muscle hypertrophy and strength adaptations to systematically varying resistance exercises. Res Q Exerc Sport. 2025;96(2):371-381 (online Oct 2024). doi:10.1080/02701367.2024.2409961", "u": "https://doi.org/10.1080/02701367.2024.2409961"}, {"k": "swinton2011", "f": "Swinton PA, Stewart A, Agouris I, Keogh JW, Lloyd R. A biomechanical analysis of straight and hexagonal barbell deadlifts using submaximal loads. J Strength Cond Res. 2011;25(7):2000-2009. doi:10.1519/JSC.0b013e3181e73f87", "u": "https://doi.org/10.1519/JSC.0b013e3181e73f87"}, {"k": "ramirez2022", "f": "Ramirez VJ, Bazrgari B, Gao F, Samaan M. Low Back Biomechanics during Repetitive Deadlifts: A Narrative Review. IISE Trans Occup Ergon Hum Factors. 2022;10(1):34-46. doi:10.1080/24725838.2021.2015642", "u": "https://doi.org/10.1080/24725838.2021.2015642"}];
+const WHY_CARDS = [{"t": "Strength and size: two jobs, two kinds of day", "b": "Strength is specific. It grows most from heavy sets of about 2–6 reps (roughly 80% of your max or more), practised often. Muscle is far less picky: across hundreds of trials, nearly every sensible way of lifting built muscle about equally well. So the heavy days chase strength, the muscle days pile up growth with joint-friendly loads, and the heavy days count toward growth too.", "r": ["currier2023", "lopez2021", "cumming2025"]}, {"t": "The best reps for muscle growth", "b": "Muscle grows about equally across a wide span of rep counts, from heavy fives to sets of 20–30, as long as each set ends close to failure. Growth climbs a little as sets get closer to failure. The practical sweet spot is 6–12 reps stopping 1–3 short. That's heavy enough to be efficient, light enough to be kind to joints, and in the range where your reps-in-reserve calls are accurate.", "r": ["lopez2021", "cumming2025", "robinson2024"]}, {"t": "High-rep sets have to be hard", "b": "The evidence that light, high-rep sets build as much muscle as heavy ones comes from sets taken all the way to failure. Very light weights, around 20% of max, grew only about half as much even then. Above 12 reps, people's sense of how many reps are left gets much worse, usually on the cautious side. So sets meant to be 15–20+ reps, like calves, lateral raises and rear delts, aim for 1 rep left, and the app never prescribes more than 30 reps.", "r": ["lopez2021", "lasevicius2018", "halperin2022"]}, {"t": "How close to failure", "b": "Growth improves a little as sets end closer to failure: about half a percentage point more muscle for each rep closer, over a couple of months. In trained lifters, stopping 1–2 reps short matched going all the way, with less fatigue. Strength barely cares; the weight on the bar drives it, not the grind. So muscle-day sets end 1–3 reps short, and heavy days never grind.", "r": ["robinson2024", "refalo2023", "refalo2024"]}, {"t": "Failure is a tool, not a rule", "b": "In one trial, bench and squat sets taken to failure needed 48–72 hours for full recovery, against about 6 hours for the same work stopped about 5 reps short. In another, trained men who trained to failure gained slightly less bench strength. The small upside of failure shows up mostly when you do very few sets. So failure is allowed only on the final set of machine and isolation work, from the Build phase on, and never on heavy barbell or hinge lifts.", "r": ["moranNavarro2017", "robinson2025", "hermann2025"]}, {"t": "How your weights are predicted", "b": "Each lift has a level: an estimated max from your working sets in that slot, weight × (1 + (reps + reps-in-reserve) ÷ 30), averaged over your last two sessions. Warm-ups don't count. The card shows the heaviest weight you can actually load that should give today's target reps with today's reps-in-reserve, and the math behind it. On the last set you keep going until you have the planned reps left, so the next prediction learns from a real rep count. The level is a training number for that exercise, not a tested max: how reps fall as weight rises differs between lifts and between people.", "r": ["reynolds2006", "nuzzo2024", "hickmott2022"]}, {"t": "Why the prediction is cautious", "b": "Lifters misjudge reps-in-reserve by about one rep on average, usually thinking they have fewer left than they do, though the calls get better with practice. So the app reads your strongest working set that ended within three reps of failure (calls that close are the most accurate, and later sets carry fatigue), averages two sessions, and adds about one loadable step per session at most — a little more only when a weight was clearly too light. If you do exactly what the card says and skip the reps-in-reserve tap, it assumes you were on target: the weight never drifts down, and it won't step up until the tap (or, on high-rep work, two sessions in a row at the top). Adjusting load by effort like this works at least as well as fixed percentages.", "r": ["halperin2022", "martikainen2025", "hickmott2022"]}, {"t": "Adding reps is progress too", "b": "In trained lifters, adding reps at the same weight built as much muscle as adding weight, and nearly as much strength. So on muscle days the weight holds while the card's aim climbs one rep at a time. Once every set reaches the top of the range at the planned effort, the weight steps up and the reps reset. When the next dumbbell is too big a jump, you earn it with a few extra reps first. If even that can't bridge it, the app says so and suggests a machine or cable with finer steps.", "r": ["plotkin2022", "acsm2009"]}, {"t": "Volume is the main dial for size", "b": "More hard sets per muscle per week means more growth, with diminishing returns. About 10–20 sets per muscle per week is the productive zone; well past 20 added little in trained lifters and cost a lot of fatigue. Strength needs far less: a few heavy sets of a lift per session do most of the work. Volume climbs one set at a time in the Build phases instead of starting high.", "r": ["pelland2026", "bazValle2022", "aube2022"]}, {"t": "Twice a week is enough", "b": "With the same weekly sets, training a muscle once, twice or three times a week grows it about the same. Training each muscle twice, as this split does, keeps any one session from getting too long. Past about 10 hard sets for one muscle in one session, extra sets stop adding measurable growth. A missed session's sets are better made up on the next similar day than with an extra day.", "r": ["schoenfeld2019freq", "pelland2026", "remmert2025"]}, {"t": "Rest long enough to lift well", "b": "Resting more than about a minute between sets grows slightly more muscle, mostly because you keep your reps up. Beyond about 90 seconds, more rest adds little for size. For heavy strength work, trained lifters do better with two minutes or more. Heavy lifts get 3 minutes early in the block and up to 5 near the peak; accessories get 90 seconds.", "r": ["singer2024", "grgic2018rest"]}, {"t": "Load the stretch", "b": "In two trials that measured muscle size with scans, loading a muscle in its stretched position grew it more than the shortened-position version of the same move. A seated leg curl beat a lying curl for the hamstrings, and overhead triceps extensions beat neutral-arm extensions, even with about a third less weight. So the seated curl and the overhead extension are the defaults, each with its own weight history, and the old versions stay as alternatives if a position doesn't agree with you.", "r": ["maeo2021", "maeo2023"]}, {"t": "Full range stays the default", "b": "Half-reps in the stretched part of the range built about as much muscle as full reps in trained lifters. Training at longer muscle lengths gives at most a small edge. Strength stays specific to the range you train, and the end-of-block test is full range. So every lift is full range, with a one-second pause in the stretch on muscle-day work. Partials aren't prescribed.", "r": ["wolf2025", "varovic2025"]}, {"t": "Phases and effort ramps", "b": "Reps-in-reserve steps down across the block on the heavy lifts, from 3 to 2 to 1. Ramping like this gave the same strength and size as training near failure every week, with less effort, and reps-in-reserve calls got more accurate along the way. Alternating heavy days with lighter muscle days beat a straight-line plan for strength in trained lifters.", "r": ["martikainen2025", "moesgaard2022"]}, {"t": "Deloads: fewer sets, same weight", "b": "Deloads cut sets, not weight. In the only trial, a full week off added no muscle and cost a little strength. Strength and physique athletes report a lighter week about every 3–8 weeks, 5.6 on average. A coach consensus panel agreed deloads can be planned, triggered by fatigue, or both, and that the weight can stay the same when volume drops. Here they're planned for holiday weeks, and the app offers an earlier one if your lifts slide two sessions running.", "r": ["coleman2024", "rogerson2024", "bell2023"]}, {"t": "Spine-friendly by design", "b": "Compared with a straight bar, the trap bar cut lower-back load by about 8–15% at light-to-moderate weights. At 70–80% of max the difference was no longer significant, and heavier loads weren't tested, so heavy trap-bar sets still need a hard brace and at least two reps in reserve. Belt and hack squats load the legs without a bar on the spine, and chest-supported rows take the lower back out of rowing. Planned variation between days works as well as fixed exercises, and each variant keeps its own weight history.", "r": ["swinton2011", "ramirez2022", "kassiano2024"]}, {"t": "The pull-up ladder", "b": "For heavier lifters, the real load on a pull-up is bodyweight minus assistance, so that's what the app tracks, using the bodyweight in your Profile — no weigh-ins required. The same prediction rules apply as for the barbell. No study has tested pull-up progressions specifically, so this applies the general load evidence, and the app learns your own reps-versus-load curve from your logs.", "r": ["currier2023", "nuzzo2024"]}, {"t": "Mobility: what stretching does, and what it doesn't", "b": "Stretching doesn't stop next-day soreness: before or after lifting, it cut soreness by about one point on a 100-point scale. Massage helps sore muscles feel better, and foam rolling helps a little, so sore areas get a roller or your hands plus easy movement instead of a stretch. A lift you're new to, or back to after a few weeks, leaves you sorer than a familiar one, so it counts extra. Stretching does loosen tight spots over weeks. Mild 30-second holds are enough; about 5 minutes a week per area does the job and gains level off near 10, so the app tracks your minutes per side and stops adding holds at 10. Daily stretching won't cost you strength. Right before lifting, a movement warm-up and ramp-up sets work best; holds under a minute are fine, longer ones cost a little strength. For a stiff neck and traps, strength work for the neck, shoulders and upper back has the best evidence, so the daily routine includes 2 minutes of it, except on days you've already done an Upper session. The desk reset, the time cutoffs and the exact seconds per move are design choices.", "r": ["herbert2011", "guo2017", "wiewelhove2019", "mchugh2003", "thomas2018", "ingram2025", "arntz2023", "fradkin2010", "kay2012", "gross2015"]}, {"t": "Protein & creatine", "b": "1.6–2.2 g/kg/day of protein is the well-replicated range for maximizing muscle gain, spread across meals. Creatine monohydrate (5 g/day) is the most researched supplement there is — strength, size, cheap and safe.", "r": [], "outside": true}, {"t": "Zone 2 + the sauna", "b": "Cardiorespiratory fitness is among the strongest predictors of long-term health, and frequent sauna use is linked to lower cardiovascular risk in large cohorts. A small, steady dose of both keeps that work going while the lifting does the building.", "r": [], "outside": true}, {"t": "Bulk without a scale", "b": "A modest surplus plus enough protein builds muscle; the scoreboard is the bar, not the scale. Four real meals with protein at each covers it without counting anything.", "r": [], "outside": true}];
+const WHY_REFS = [{"k": "currier2023", "f": "Currier BS, Mcleod JC, Banfield L, Beyene J, Welton NJ, D'Souza AC, et al. Resistance training prescription for muscle strength and hypertrophy in healthy adults: a systematic review and Bayesian network meta-analysis. Br J Sports Med. 2023;57(18):1211-1220. doi:10.1136/bjsports-2023-106807", "u": "https://doi.org/10.1136/bjsports-2023-106807"}, {"k": "lopez2021", "f": "Lopez P, Radaelli R, Taaffe DR, Newton RU, Galvão DA, Trajano GS, et al. Resistance Training Load Effects on Muscle Hypertrophy and Strength Gain: Systematic Review and Network Meta-analysis. Med Sci Sports Exerc. 2021;53(6):1206-1216. doi:10.1249/MSS.0000000000002585", "u": "https://doi.org/10.1249/MSS.0000000000002585"}, {"k": "robinson2024", "f": "Robinson ZP, Pelland JC, Remmert JF, Refalo MC, Jukic I, Steele J, Zourdos MC. Exploring the Dose-Response Relationship Between Estimated Resistance Training Proximity to Failure, Strength Gain, and Muscle Hypertrophy: A Series of Meta-Regressions. Sports Med. 2024;54(9):2209-2231. doi:10.1007/s40279-024-02069-2", "u": "https://doi.org/10.1007/s40279-024-02069-2"}, {"k": "refalo2023", "f": "Refalo MC, Helms ER, Trexler ET, Hamilton DL, Fyfe JJ. Influence of Resistance Training Proximity-to-Failure on Skeletal Muscle Hypertrophy: A Systematic Review with Meta-analysis. Sports Med. 2023;53(3):649-665. doi:10.1007/s40279-022-01784-y", "u": "https://doi.org/10.1007/s40279-022-01784-y"}, {"k": "refalo2024", "f": "Refalo MC, Helms ER, Robinson ZP, Hamilton DL, Fyfe JJ. Similar muscle hypertrophy following eight weeks of resistance training to momentary muscular failure or with repetitions-in-reserve in resistance-trained individuals. J Sports Sci. 2024;42(1):85-101. doi:10.1080/02640414.2024.2321021", "u": "https://doi.org/10.1080/02640414.2024.2321021"}, {"k": "cumming2025", "f": "Cumming KT, Elvatun IC, Kalenius R, Divljak G, Raastad T, Psilander N, Horwath O. Divergent strength gains but similar hypertrophy after low-load and high-load resistance exercise training in trained individuals: many roads lead to Rome. J Appl Physiol. 2025;139(3):685-697. doi:10.1152/japplphysiol.00353.2025", "u": "https://doi.org/10.1152/japplphysiol.00353.2025"}, {"k": "lasevicius2018", "f": "Lasevicius T, Ugrinowitsch C, Schoenfeld BJ, Roschel H, Tavares LD, De Souza EO, et al. Effects of different intensities of resistance training with equated volume load on muscle strength and hypertrophy. Eur J Sport Sci. 2018;18(6):772-780. doi:10.1080/17461391.2018.1450898", "u": "https://doi.org/10.1080/17461391.2018.1450898"}, {"k": "halperin2022", "f": "Halperin I, Malleron T, Har-Nir I, Androulakis-Korakakis P, Wolf M, Fisher J, Steele J. Accuracy in Predicting Repetitions to Task Failure in Resistance Exercise: A Scoping Review and Exploratory Meta-analysis. Sports Med. 2022;52(2):377-390. doi:10.1007/s40279-021-01559-x", "u": "https://doi.org/10.1007/s40279-021-01559-x"}, {"k": "plotkin2022", "f": "Plotkin D, Coleman M, Van Every D, Maldonado J, Oberlin D, Israetel M, et al. Progressive overload without progressing load? The effects of load or repetition progression on muscular adaptations. PeerJ. 2022;10:e14142. doi:10.7717/peerj.14142", "u": "https://doi.org/10.7717/peerj.14142"}, {"k": "hermann2025", "f": "Hermann T, Mohan AE, Enes A, Sapuppo M, Piñero A, Zamanzadeh A, et al. Without Fail: Muscular Adaptations in Single-Set Resistance Training Performed to Failure or with Repetitions-in-Reserve. Med Sci Sports Exerc. 2025;57(9):2021-2031. doi:10.1249/MSS.0000000000003728", "u": "https://doi.org/10.1249/MSS.0000000000003728"}, {"k": "robinson2025", "f": "Robinson Z, Macarilla C, Juber M, Cerminaro R, Benitez B, Pelland J, et al. The Effect of Resistance Training Proximity to Failure on Muscular Adaptations and Longitudinal Fatigue in Trained Men. Int J Strength Cond. 2025;5(1). doi:10.47206/ijsc.v5i1.393", "u": "https://doi.org/10.47206/ijsc.v5i1.393"}, {"k": "martikainen2025", "f": "Martikainen O, Niiranen H, Rytkönen T, Schoenfeld BJ, Ahtiainen JP, Hulmi JJ. Influence of Varying Proximity-to-Failure on Muscular Adaptations and Repetitions-in-Reserve Estimation Accuracy in Resistance-Trained Individuals. J Sci Sport Exerc. 2025 (early online). doi:10.1007/s42978-025-00338-8", "u": "https://doi.org/10.1007/s42978-025-00338-8"}, {"k": "moranNavarro2017", "f": "Morán-Navarro R, Pérez CE, Mora-Rodríguez R, de la Cruz-Sánchez E, González-Badillo JJ, Sánchez-Medina L, Pallarés JG. Time course of recovery following resistance training leading or not to failure. Eur J Appl Physiol. 2017;117(12):2387-2399. doi:10.1007/s00421-017-3725-7", "u": "https://doi.org/10.1007/s00421-017-3725-7"}, {"k": "pelland2026", "f": "Pelland JC, Remmert JF, Robinson ZP, Hinson SR, Zourdos MC. The Resistance Training Dose Response: Meta-Regressions Exploring the Effects of Weekly Volume and Frequency on Muscle Hypertrophy and Strength Gains. Sports Med. 2026;56(2):481-505. doi:10.1007/s40279-025-02344-w", "u": "https://doi.org/10.1007/s40279-025-02344-w"}, {"k": "remmert2025", "f": "Remmert JF, Pelland JC, Robinson ZP, Hinson SR, Zourdos MC. Is There Too Much of a Good Thing? Meta-Regressions of the Effect of Per-Session Volume on Hypertrophy and Strength. SportRxiv [preprint, not peer reviewed]. 2025. doi:10.51224/SRXIV.537", "u": "https://sportrxiv.org/index.php/server/preprint/view/537"}, {"k": "schoenfeld2019freq", "f": "Schoenfeld BJ, Grgic J, Krieger J. How many times per week should a muscle be trained to maximize muscle hypertrophy? A systematic review and meta-analysis of studies examining the effects of resistance training frequency. J Sports Sci. 2019;37(11):1286-1295. doi:10.1080/02640414.2018.1555906", "u": "https://doi.org/10.1080/02640414.2018.1555906"}, {"k": "grgic2018freq", "f": "Grgic J, Schoenfeld BJ, Davies TB, Lazinica B, Krieger JW, Pedisic Z. Effect of Resistance Training Frequency on Gains in Muscular Strength: A Systematic Review and Meta-Analysis. Sports Med. 2018;48(5):1207-1220. doi:10.1007/s40279-018-0872-x", "u": "https://doi.org/10.1007/s40279-018-0872-x"}, {"k": "bazValle2022", "f": "Baz-Valle E, Balsalobre-Fernández C, Alix-Fages C, Santos-Concejero J. A Systematic Review of The Effects of Different Resistance Training Volumes on Muscle Hypertrophy. J Hum Kinet. 2022;81:199-210. doi:10.2478/hukin-2022-0017", "u": "https://doi.org/10.2478/hukin-2022-0017"}, {"k": "schoenfeld2019vol", "f": "Schoenfeld BJ, Contreras B, Krieger J, Grgic J, Delcastillo K, Belliard R, Alto A. Resistance Training Volume Enhances Muscle Hypertrophy but Not Strength in Trained Men. Med Sci Sports Exerc. 2019;51(1):94-103. doi:10.1249/MSS.0000000000001764", "u": "https://doi.org/10.1249/MSS.0000000000001764"}, {"k": "aube2022", "f": "Aube D, Wadhi T, Rauch J, Anand A, Barakat C, Pearson J, et al. Progressive Resistance Training Volume: Effects on Muscle Thickness, Mass, and Strength Adaptations in Resistance-Trained Individuals. J Strength Cond Res. 2022;36(3):600-607. doi:10.1519/JSC.0000000000003524", "u": "https://doi.org/10.1519/JSC.0000000000003524"}, {"k": "camargo2026", "f": "Camargo JBB, Bittencourt D, Michel JM, Silva DG, Bergamasco JGA, Berry AC, et al. Large increases in resistance training volume do not impair muscle hypertrophy or anabolic-catabolic molecular signaling in trained individuals. J Appl Physiol. 2026;141(2):477-493. doi:10.1152/japplphysiol.00284.2026", "u": "https://doi.org/10.1152/japplphysiol.00284.2026"}, {"k": "rantila2026", "f": "Räntilä A, Ahtiainen JP. Exploring the Upper Limits of Resistance Training Volume for Muscle Hypertrophy and Strength in Trained Athletes. J Sci Sport Exerc. 2026 (online 28 Jul 2026):1-11. doi:10.1007/s42978-026-00387-7", "u": "https://doi.org/10.1007/s42978-026-00387-7"}, {"k": "acsm2026", "f": "Currier BS, D'Souza AC, Singh MAF, Lowisz CV, Rawson ES, Schoenfeld BJ, et al. American College of Sports Medicine Position Stand. Resistance Training Prescription for Muscle Function, Hypertrophy, and Physical Performance in Healthy Adults: An Overview of Reviews. Med Sci Sports Exerc. 2026;58(4):851-872. doi:10.1249/MSS.0000000000003897", "u": "https://doi.org/10.1249/MSS.0000000000003897"}, {"k": "huang2025", "f": "Huang Z, Sun J, Li D, Chen C, Wang D. Autoregulated resistance training for maximal strength enhancement: A systematic review and network meta-analysis. J Exerc Sci Fit. 2025;23(4):360-369. doi:10.1016/j.jesf.2025.07.006", "u": "https://doi.org/10.1016/j.jesf.2025.07.006"}, {"k": "hickmott2022", "f": "Hickmott LM, Chilibeck PD, Shaw KA, Butcher SJ. The Effect of Load and Volume Autoregulation on Muscular Strength and Hypertrophy: A Systematic Review and Meta-Analysis. Sports Med Open. 2022;8(1):9. doi:10.1186/s40798-021-00404-9", "u": "https://doi.org/10.1186/s40798-021-00404-9"}, {"k": "nuzzo2024", "f": "Nuzzo JL, Pinto MD, Nosaka K, Steele J. Maximal Number of Repetitions at Percentages of the One Repetition Maximum: A Meta-Regression and Moderator Analysis of Sex, Age, Training Status, and Exercise. Sports Med. 2024;54(2):303-321. doi:10.1007/s40279-023-01937-7", "u": "https://doi.org/10.1007/s40279-023-01937-7"}, {"k": "reynolds2006", "f": "Reynolds JM, Gordon TJ, Robergs RA. Prediction of one repetition maximum strength from multiple repetition maximum testing and anthropometry. J Strength Cond Res. 2006;20(3):584-592. doi:10.1519/R-15304.1", "u": "https://doi.org/10.1519/R-15304.1"}, {"k": "moesgaard2022", "f": "Moesgaard L, Beck MM, Christiansen L, Aagaard P, Lundbye-Jensen J. Effects of Periodization on Strength and Muscle Hypertrophy in Volume-Equated Resistance Training Programs: A Systematic Review and Meta-analysis. Sports Med. 2022;52(7):1647-1666. doi:10.1007/s40279-021-01636-1", "u": "https://doi.org/10.1007/s40279-021-01636-1"}, {"k": "acsm2009", "f": "American College of Sports Medicine (Ratamess NA, Alvar BA, Evetoch TK, Housh TJ, Kibler WB, Kraemer WJ, Triplett NT). American College of Sports Medicine position stand. Progression models in resistance training for healthy adults. Med Sci Sports Exerc. 2009;41(3):687-708. doi:10.1249/MSS.0b013e3181915670", "u": "https://doi.org/10.1249/MSS.0b013e3181915670"}, {"k": "varovic2025", "f": "Varovic D, Wolf M, Schoenfeld BJ, Steele J, Grgic J, Mikulic P. Does Muscle Length Influence Regional Hypertrophy? A Systematic Review and Meta-Analysis. Int J Sports Med. 2025;46(14):1027-1036. doi:10.1055/a-2615-4935", "u": "https://doi.org/10.1055/a-2615-4935"}, {"k": "wolf2025", "f": "Wolf M, Androulakis Korakakis P, Piñero A, Mohan AE, Hermann T, Augustin F, et al. Lengthened partial repetitions elicit similar muscular adaptations as full range of motion repetitions during resistance training in trained individuals. PeerJ. 2025;13:e18904. doi:10.7717/peerj.18904", "u": "https://doi.org/10.7717/peerj.18904"}, {"k": "maeo2021", "f": "Maeo S, Huang M, Wu Y, Sakurai H, Kusagawa Y, Sugiyama T, et al. Greater Hamstrings Muscle Hypertrophy but Similar Damage Protection after Training at Long versus Short Muscle Lengths. Med Sci Sports Exerc. 2021;53(4):825-837. doi:10.1249/MSS.0000000000002523", "u": "https://doi.org/10.1249/MSS.0000000000002523"}, {"k": "maeo2023", "f": "Maeo S, Wu Y, Huang M, Sakurai H, Kusagawa Y, Sugiyama T, Kanehisa H, Isaka T. Triceps brachii hypertrophy is substantially greater after elbow extension training performed in the overhead versus neutral arm position. Eur J Sport Sci. 2023;23(7):1240-1250. doi:10.1080/17461391.2022.2100279", "u": "https://doi.org/10.1080/17461391.2022.2100279"}, {"k": "singer2024", "f": "Singer A, Wolf M, Generoso L, Arias E, Delcastillo K, Echevarria E, et al. Give it a rest: a systematic review with Bayesian meta-analysis on the effect of inter-set rest interval duration on muscle hypertrophy. Front Sports Act Living. 2024;6:1429789. doi:10.3389/fspor.2024.1429789", "u": "https://doi.org/10.3389/fspor.2024.1429789"}, {"k": "grgic2018rest", "f": "Grgic J, Schoenfeld BJ, Skrepnik M, Davies TB, Mikulic P. Effects of Rest Interval Duration in Resistance Training on Measures of Muscular Strength: A Systematic Review. Sports Med. 2018;48(1):137-151. doi:10.1007/s40279-017-0788-x", "u": "https://doi.org/10.1007/s40279-017-0788-x"}, {"k": "coleman2024", "f": "Coleman M, Burke R, Augustin F, Piñero A, Maldonado J, Fisher JP, et al. Gaining more from doing less? The effects of a one-week deload period during supervised resistance training on muscular adaptations. PeerJ. 2024;12:e16777. doi:10.7717/peerj.16777", "u": "https://doi.org/10.7717/peerj.16777"}, {"k": "rogerson2024", "f": "Rogerson D, Nolan D, Androulakis Korakakis P, Immonen V, Wolf M, Bell L. Deloading Practices in Strength and Physique Sports: A Cross-sectional Survey. Sports Med Open. 2024;10:26. doi:10.1186/s40798-024-00691-y", "u": "https://doi.org/10.1186/s40798-024-00691-y"}, {"k": "bell2023", "f": "Bell L, Strafford BW, Coleman M, Androulakis Korakakis P, Nolan D. Integrating Deloading into Strength and Physique Sports Training Programmes: An International Delphi Consensus Approach. Sports Med Open. 2023;9(1):87. doi:10.1186/s40798-023-00633-0", "u": "https://doi.org/10.1186/s40798-023-00633-0"}, {"k": "kassiano2024", "f": "Kassiano W, Costa B, Kunevaliki G, Nunes JP, Castro-e-Souza P, de Paula Felipe J, et al. Muscle hypertrophy and strength adaptations to systematically varying resistance exercises. Res Q Exerc Sport. 2025;96(2):371-381 (online Oct 2024). doi:10.1080/02701367.2024.2409961", "u": "https://doi.org/10.1080/02701367.2024.2409961"}, {"k": "swinton2011", "f": "Swinton PA, Stewart A, Agouris I, Keogh JW, Lloyd R. A biomechanical analysis of straight and hexagonal barbell deadlifts using submaximal loads. J Strength Cond Res. 2011;25(7):2000-2009. doi:10.1519/JSC.0b013e3181e73f87", "u": "https://doi.org/10.1519/JSC.0b013e3181e73f87"}, {"k": "ramirez2022", "f": "Ramirez VJ, Bazrgari B, Gao F, Samaan M. Low Back Biomechanics during Repetitive Deadlifts: A Narrative Review. IISE Trans Occup Ergon Hum Factors. 2022;10(1):34-46. doi:10.1080/24725838.2021.2015642", "u": "https://doi.org/10.1080/24725838.2021.2015642"}, {"k": "herbert2011", "f": "Herbert RD, de Noronha M, Kamper SJ. Stretching to prevent or reduce muscle soreness after exercise. Cochrane Database Syst Rev. 2011;(7):CD004577. doi:10.1002/14651858.CD004577.pub3", "u": "https://doi.org/10.1002/14651858.CD004577.pub3"}, {"k": "guo2017", "f": "Guo J, Li L, Gong Y, Zhu R, Xu J, Zou J, Chen X. Massage Alleviates Delayed Onset Muscle Soreness after Strenuous Exercise: A Systematic Review and Meta-Analysis. Front Physiol. 2017;8:747. doi:10.3389/fphys.2017.00747", "u": "https://doi.org/10.3389/fphys.2017.00747"}, {"k": "wiewelhove2019", "f": "Wiewelhove T, Döweling A, Schneider C, Hottenrott L, Meyer T, Kellmann M, Pfeiffer M, Ferrauti A. A Meta-Analysis of the Effects of Foam Rolling on Performance and Recovery. Front Physiol. 2019;10:376. doi:10.3389/fphys.2019.00376", "u": "https://doi.org/10.3389/fphys.2019.00376"}, {"k": "mchugh2003", "f": "McHugh MP. Recent advances in the understanding of the repeated bout effect: the protective effect against muscle damage from a single bout of eccentric exercise. Scand J Med Sci Sports. 2003;13(2):88-97. doi:10.1034/j.1600-0838.2003.02477.x", "u": "https://doi.org/10.1034/j.1600-0838.2003.02477.x"}, {"k": "thomas2018", "f": "Thomas E, Bianco A, Paoli A, Palma A. The Relation Between Stretching Typology and Stretching Duration: The Effects on Range of Motion. Int J Sports Med. 2018;39(4):243-254. doi:10.1055/s-0044-101146", "u": "https://doi.org/10.1055/s-0044-101146"}, {"k": "ingram2025", "f": "Ingram LA, Tomkinson GR, d'Unienville NMA, Gower B, Gleadhill S, Boyle T, Bennett H. Optimising the Dose of Static Stretching to Improve Flexibility: A Systematic Review, Meta-analysis and Multivariate Meta-regression. Sports Med. 2025;55(3):597-617. doi:10.1007/s40279-024-02143-9", "u": "https://doi.org/10.1007/s40279-024-02143-9"}, {"k": "arntz2023", "f": "Arntz F, Markov A, Behm DG, Behrens M, Negra Y, Nakamura M, Moran J, Chaabene H. Chronic Effects of Static Stretching Exercises on Muscle Strength and Power in Healthy Individuals Across the Lifespan: A Systematic Review with Multi-level Meta-analysis. Sports Med. 2023;53(3):723-745. doi:10.1007/s40279-022-01806-9", "u": "https://doi.org/10.1007/s40279-022-01806-9"}, {"k": "fradkin2010", "f": "Fradkin AJ, Zazryn TR, Smoliga JM. Effects of Warming-up on Physical Performance: A Systematic Review With Meta-analysis. J Strength Cond Res. 2010;24(1):140-148. doi:10.1519/JSC.0b013e3181c643a0", "u": "https://doi.org/10.1519/JSC.0b013e3181c643a0"}, {"k": "kay2012", "f": "Kay AD, Blazevich AJ. Effect of Acute Static Stretch on Maximal Muscle Performance: A Systematic Review. Med Sci Sports Exerc. 2012;44(1):154-164. doi:10.1249/MSS.0b013e318225cb27", "u": "https://doi.org/10.1249/MSS.0b013e318225cb27"}, {"k": "gross2015", "f": "Gross A, Kay TM, Paquin JP, Blanchette S, Lalonde P, Christie T, et al. Exercises for mechanical neck disorders. Cochrane Database Syst Rev. 2015;1:CD004250. doi:10.1002/14651858.CD004250.pub5", "u": "https://doi.org/10.1002/14651858.CD004250.pub5"}];
 function refLabel(k){ const r=WHY_REFS.find(x=>x.k===k); if(!r) return k; const who=/^American College/.test(r.f)? 'ACSM' : r.f.split(/[ ,]/)[0]; const yr=(/\b(?:19|20)\d{2}\b/.exec(r.f)||[''])[0]; return who+(yr?' '+yr:''); }
 function renderWhy(){
   const el=$('why-cards'); if(!el) return;
   el.innerHTML=WHY_CARDS.map(c=>`<div class="card"><h4>${esc(c.t)}${c.outside?' <span class="pill">outside this review</span>':''}</h4><p class="why">${esc(c.b)}</p>${c.r.length? `<div class="refk">${c.r.map(k=>{ const i=WHY_REFS.findIndex(x=>x.k===k); return `<a href="#ref-${esc(k)}" onclick="document.getElementById('ref-${esc(k)}').scrollIntoView({behavior:'smooth',block:'center'});return false">[${i+1}] ${esc(refLabel(k))}</a>`; }).join(' · ')}</div>` : ''}</div>`).join('');
   $('why-refs').innerHTML=WHY_REFS.map(r=>`<li id="ref-${esc(r.k)}">${esc(r.f)} <a href="${esc(r.u)}" target="_blank" rel="noopener">${esc(r.u.replace(/^https?:\/\//,''))}</a></li>`).join('');
 }
+
+/* ================= mobility: guided daily routine, desk reset, pre-lift warm-up =================
+   Picks moves from the last three days of lifting (sore areas get rolling and easy movement, never holds),
+   this week's stretch minutes (mild 30-s holds until ~5 min per side per area, none past 10), and
+   2 min of neck & shoulder strength. Sources on the "Mobility" card in The Why; the rest are design choices. */
+const MOB_DRILLS = [{"id": "ham-strap", "name": "Lying Hamstring Stretch", "kind": "hold", "dose": 30, "sides": 2, "pos": "floor", "equipment": "none", "area": "hams", "cue": "On your back, towel or band around one foot. Lift the straight leg to a mild stretch.", "avoid": "Low back stays on the floor. Mild is enough; pulling harder adds nothing."}, {"id": "ham-chair", "name": "Seated Hamstring Lean", "kind": "hold", "dose": 30, "sides": 2, "pos": "sit", "equipment": "chair", "area": "hams", "cue": "Sit on the chair edge, one leg straight, heel down. Lean forward from the hips, back long.", "avoid": "Hinge, don't curl. When your back starts to round, that's far enough."}, {"id": "hip-flexor-stand", "name": "Standing Hip Flexor Stretch", "kind": "hold", "dose": 30, "sides": 2, "pos": "stand", "equipment": "none", "area": "hips", "cue": "Long step back, squeeze the back glute, tuck your tailbone. Feel the front of that hip.", "avoid": "Tuck, don't lean back. Leaning back moves the stretch into the low back."}, {"id": "hip-flexor-kneel", "name": "Kneeling Hip Flexor Stretch", "kind": "hold", "dose": 30, "sides": 2, "pos": "kneel", "equipment": "none", "area": "hips", "cue": "One knee on a cushion. Squeeze that glute, shift forward until the front of the hip stretches.", "avoid": "Ribs down; if the low back arches, shift less. Tuck the back toes under so the arch stays loose."}, {"id": "calf-wall", "name": "Wall Calf Stretch", "kind": "hold", "dose": 30, "sides": 2, "pos": "stand", "equipment": "wall", "area": "calves", "cue": "Hands on the wall, one foot back, heel down, knee straight. Lean in slowly.", "avoid": "Ease in slowly. A sudden hard calf stretch can make the arch grab."}, {"id": "calf-bent", "name": "Bent-Knee Calf Stretch", "kind": "hold", "dose": 30, "sides": 2, "pos": "stand", "equipment": "wall", "area": "calves", "cue": "Hands on the wall, one foot back. Bend the back knee and sink, heel down.", "avoid": "Ease in slowly. A sudden hard calf stretch can make the arch grab."}, {"id": "neck-side", "name": "Gentle Neck Side Lean", "kind": "hold", "dose": 20, "sides": 2, "pos": "sit", "equipment": "chair", "cue": "Sit on one hand. Tip the opposite ear toward its shoulder. Let gravity do it.", "avoid": "No pulling with the hand and no head circles. Tilt only, to a mild stretch."}, {"id": "arch-roll", "name": "Arch Roll", "kind": "flow", "dose": 30, "sides": 2, "pos": "sit", "equipment": "none", "cue": "Seated, roll one arch slowly over a ball or bottle. Medium pressure, heel to toes.", "avoid": "If the arch starts to grab, stop and pull the toes up toward the shin."}, {"id": "toe-yoga", "name": "Toe Lifts & Spreads", "kind": "reps", "dose": 10, "sides": 1, "pos": "sit", "equipment": "none", "cue": "Feet flat. Lift just the big toes, then just the little toes. Then spread them wide.", "avoid": "Never curl the toes hard. If an arch grabs, pull the toes up and wait."}, {"id": "band-raise", "name": "Band Side Raise", "kind": "flow", "dose": 120, "sides": 1, "pos": "stand", "equipment": "band", "cue": "Stand on a light band. Raise both arms out to shoulder height, lower slowly. Rest when needed.", "avoid": "Shoulders down, neck long, no shrugging. Stop each set two reps before it gets sloppy. 15 feels easy? Use a stronger band."}, {"id": "pull-apart", "name": "Band Pull-Aparts", "kind": "reps", "dose": 15, "sides": 1, "pos": "stand", "equipment": "band", "cue": "Arms straight out front, pull the band apart to your chest. Shoulders down, neck long.", "avoid": "Light band. If the traps take over, go lighter."}, {"id": "prone-y", "name": "Face-Down Y Raise", "kind": "flow", "dose": 120, "sides": 1, "pos": "floor", "equipment": "none", "cue": "Lie face down, arms in a Y, thumbs up. Lift the arms slightly, shoulders away from ears.", "avoid": "Forehead on a towel. Don't lift the head. Rest a few seconds between sets of 8."}, {"id": "roll-quads", "name": "Roll the Thighs", "kind": "flow", "dose": 60, "sides": 1, "pos": "floor", "equipment": "roller", "cue": "Face down on the roller. Slow passes from hip to just above the knee. Breathe.", "avoid": "Firm, not punishing. Stay off the kneecap."}, {"id": "roll-hams", "name": "Roll the Hamstrings", "kind": "flow", "dose": 45, "sides": 2, "pos": "floor", "equipment": "roller", "cue": "Sit with one thigh on the roller, hands behind you. Slow passes from knee to glute.", "avoid": "Stay off the back of the knee. Firm, not punishing."}, {"id": "roll-calves", "name": "Roll the Calves", "kind": "flow", "dose": 45, "sides": 2, "pos": "floor", "equipment": "roller", "cue": "Sit with one calf on the roller, other leg crossed on top. Slow passes, ankle to knee.", "avoid": "Foot relaxed, not pointed. Pointing can make the arch grab."}, {"id": "roll-upper-back", "name": "Upper-Back Roll", "kind": "reps", "dose": 8, "sides": 1, "pos": "floor", "equipment": "roller", "cue": "Roller across the upper back, hands cradle the head. Lean back over it, move a notch, repeat.", "avoid": "Stay above the bottom of the ribs, never the low back. Hands hold the head; don't pull on it."}, {"id": "self-massage", "name": "Self-Massage", "nameSub": "for your {area}", "kind": "flow", "dose": 60, "sides": 1, "pos": "sit", "equipment": "none", "cue": "Use both hands or a ball. Firm, slow strokes along the muscle. Ease up on tender spots.", "avoid": ""}, {"id": "chair-squat", "name": "Easy Chair Squats", "kind": "reps", "dose": 8, "sides": 1, "pos": "stand", "equipment": "chair", "cue": "Stand up from a chair and sit back down. Easy pace. Use your hands if you like.", "avoid": "Light and easy. This is to move the legs, not to work them."}, {"id": "ham-floss-seated", "name": "Seated Hamstring Floss", "kind": "reps", "dose": 10, "sides": 2, "pos": "sit", "equipment": "chair", "cue": "Sit tall. Slowly straighten one knee, then bend it. Smooth rhythm, no hold at the end.", "avoid": "Move in and out. Don't hold or bounce at the end."}, {"id": "ankle-rock", "name": "Knee-to-Wall Ankle Rocks", "kind": "reps", "dose": 10, "sides": 2, "pos": "stand", "equipment": "wall", "cue": "Foot a hand-width from the wall. Drive the knee to the wall, heel stays down.", "avoid": ""}, {"id": "open-book", "name": "Open Book", "kind": "reps", "dose": 6, "sides": 2, "pos": "floor", "equipment": "none", "cue": "Lie on your side, knees bent and stacked. Open the top arm across; eyes follow the hand.", "avoid": "Keep the knees together so the twist stays in the upper back."}, {"id": "wall-slide", "name": "Forearm Wall Slides", "kind": "reps", "dose": 8, "sides": 1, "pos": "stand", "equipment": "wall", "cue": "Face the wall, forearms on it. Slide up slowly, shoulders staying down away from ears.", "avoid": "Only as high as you can go without shrugging."}, {"id": "arm-swings", "name": "Easy Arm Swings", "kind": "reps", "dose": 10, "sides": 1, "pos": "stand", "equipment": "none", "cue": "Stand tall. Swing both arms open wide, then across your chest. Relaxed and easy.", "avoid": ""}, {"id": "cat-cow", "name": "Cat-Cow", "kind": "reps", "dose": 8, "sides": 1, "pos": "floor", "equipment": "none", "cue": "On hands and knees, slowly round the whole back, then lift the chest. Move with your breath.", "avoid": "Small arch in the low back; let the head follow, no cranking the neck."}, {"id": "bird-dog", "name": "Bird Dog", "kind": "reps", "dose": 6, "sides": 2, "pos": "floor", "equipment": "none", "cue": "Hands and knees. Reach the opposite arm and leg long, hold five seconds. Hips stay level.", "avoid": "Reach long, not high. Lifting the leg high arches the low back."}, {"id": "side-plank-knees", "name": "Side Plank (Knees)", "kind": "hold", "dose": 10, "sides": 2, "rounds": 3, "pos": "floor", "equipment": "none", "cue": "On your side, elbow under shoulder, knees bent. Lift the hips into a straight line.", "avoid": "Push the floor away so the shoulder doesn't sink toward the ear."}, {"id": "walk-break", "name": "Stand & Walk", "kind": "flow", "dose": 30, "sides": 1, "pos": "stand", "equipment": "none", "cue": "Stand up and walk around: kitchen, hallway, anywhere. Easy pace.", "avoid": ""}, {"id": "chin-tuck", "name": "Chin Tucks", "kind": "reps", "dose": 10, "sides": 1, "pos": "sit", "equipment": "none", "cue": "Slide your chin straight back into a double chin. Hold two seconds. Eyes stay level.", "avoid": "Small and gentle. Glide back; don't tip the head down."}, {"id": "chair-extension", "name": "Chair Back Extension", "kind": "reps", "dose": 8, "sides": 1, "pos": "sit", "equipment": "chair", "cue": "Sit tall, hands crossed on chest, lean back over the chair top. Ribs stay down.", "avoid": "Bend through the upper back only. If the low back arches, make it smaller."}, {"id": "figure4-seated", "name": "Seated Figure-4", "kind": "hold", "dose": 20, "sides": 2, "pos": "sit", "equipment": "chair", "cue": "Ankle over the other knee. Sit tall and lean forward from the hips, back long.", "avoid": "Hinge with a flat back. Don't curl down toward the knee."}, {"id": "shoulder-set", "name": "Shoulders Back & Down", "kind": "reps", "dose": 6, "sides": 1, "pos": "sit", "equipment": "chair", "cue": "Roll your shoulders back, then press them down away from your ears. Hold two seconds.", "avoid": ""}, {"id": "belly-breathing", "name": "Feet-Up Breathing", "kind": "flow", "dose": 60, "sides": 1, "pos": "floor", "equipment": "chair", "cue": "On your back, calves on a chair. Slow breaths in through the nose, long easy exhales.", "avoid": ""}, {"id": "easy-cardio", "name": "Easy Cardio", "kind": "flow", "dose": 300, "sides": 1, "pos": "stand", "equipment": "none", "cue": "Bike, rower or incline walk. Easy pace, enough to break a light sweat.", "avoid": ""}, {"id": "leg-swings", "name": "Leg Swings", "kind": "reps", "dose": 10, "sides": 2, "pos": "stand", "equipment": "wall", "cue": "Hold the wall. Swing one leg forward and back, relaxed, a little higher each time.", "avoid": "Easy height, no kicking. Keep the swings small if the hamstrings are sore."}, {"id": "hip-rock", "name": "Half-Kneeling Hip Rock", "kind": "reps", "dose": 8, "sides": 2, "pos": "kneel", "equipment": "none", "cue": "One knee down, glute squeezed. Rock forward until the front of the hip opens, then back.", "avoid": "Pad the knee. Ribs down so the low back stays out of it."}, {"id": "bw-squat", "name": "Bodyweight Squats", "kind": "reps", "dose": 10, "sides": 1, "pos": "stand", "equipment": "none", "cue": "Feet shoulder-width. Sit down deep with control, chest tall, then stand. Hold something if needed.", "avoid": ""}, {"id": "pass-through", "name": "Pass-Through", "kind": "reps", "dose": 10, "sides": 1, "pos": "stand", "equipment": "none", "cue": "Wide grip on a band, towel or stick. Arms straight, lift it overhead and behind, then back.", "avoid": "Widen the grip until it's smooth. Never force the shoulders through."}, {"id": "walk-easy", "name": "Easy Walk", "kind": "flow", "dose": 300, "sides": 1, "pos": "stand", "equipment": "none", "cue": "Walk at an easy pace: outside, around the house, anywhere. Arms loose, breathe easy.", "avoid": ""}];
+const MOB_BY = Object.fromEntries(MOB_DRILLS.map(d=>[d.id,d]));
+const MOB_REP_SECS = {'chin-tuck':3,'toe-yoga':3,'pull-apart':3,'ankle-rock':3,'ham-floss-seated':3,'leg-swings':2,'arm-swings':2,'bird-dog':7,'open-book':5};
+const MOB_POS = {stand:0, sit:1, kneel:2, floor:3};
+/* sore = about 5 hard sets of a familiar lift, or 3 of a new one (repeated-bout effect); a design threshold */
+const MOB_HOLD_S=30, MOB_WEEK_MIN=300, MOB_WEEK_CAP=600, MOB_SORE_MIN=5, MOB_RECENCY=[0.5,1.0,0.9,0.5], DESK_GOAL=3;
+const MOB_STRETCHY=/Romanian|RDL|Leg Curl|Nordic|Split|Lunge|Calf|Pulldown|Incline|Overhead Extension/;
+const MOB_TARGETS=[
+  {k:'hams',   label:'hamstrings', g:'Posterior', ids:['ham-strap','ham-chair'],               sore:'skip'},
+  {k:'hips',   label:'hips',       g:'Quads',     ids:['hip-flexor-stand','hip-flexor-kneel'], sore:'one'},
+  {k:'calves', label:'calves',     g:'Calves',    ids:['calf-wall','calf-bent'],               sore:'skip'}];
+const MOB_RELIEF={Quads:['roll-quads','chair-squat'], Posterior:['roll-hams','ham-floss-seated'], Calves:['roll-calves','ankle-rock'],
+  Back:['roll-upper-back','open-book'], Shoulders:['self-massage','wall-slide'], Chest:['self-massage','arm-swings'],
+  Arms:['self-massage','arm-swings'], Grip:['self-massage',null], Core:[null,'cat-cow']};
+const MOB_COMFORT=['neck-side','arch-roll','toe-yoga'];
+const MOB_AREA={Quads:'thighs', Posterior:'hamstrings & glutes', Calves:'calves', Back:'upper back & lats', Shoulders:'shoulders', Chest:'chest', Arms:'arms', Grip:'forearms', Core:'core'};
+const MOB_BUDGET={full:720, short:345};
+const MOB_RESET={stand:[['walk-break',30],['hip-flexor-stand',20],['chair-extension',6],['chin-tuck',8]],
+                 seated:[['figure4-seated',20],['shoulder-set',6],['chair-extension',6],['chin-tuck',8]]};
+const MOB_WARM={lower:[['easy-cardio',300],['leg-swings',10],['hip-rock',8],['bw-squat',10]],
+                upper:[['easy-cardio',300],['arm-swings',10],['pass-through',10],['pull-apart',15]]};
+const MOB_BACK=[['walk-easy',300],['cat-cow',8],['bird-dog',6],['side-plank-knees',10,3],['hip-flexor-stand',30],['belly-breathing',60]];
+
+function mobDayIdx(){ return daysBetween(new Date(2026,0,1), today()); }
+function mobMorning(h){ return (h!=null? h : new Date().getHours()) < 10; }
+function mobHasGear(eq){ const g=DB.mobGear||{}; return !((eq==='roller'||eq==='band') && g[eq]===false); }
+function mobStep(id, block, o){ o=o||{}; const d=MOB_BY[id]; return {id, d, block, kind:o.kind||d.kind, dose:o.dose!=null? o.dose : d.dose, rounds:o.rounds||d.rounds||1, g:o.g||null}; }
+function mobStepSecs(s, setup){ const per= s.kind==='reps'? s.dose*(MOB_REP_SECS[s.id]||4) : s.dose, n=s.d.sides*s.rounds; return n*per + (n-1)*5 + (setup==null? 10 : setup); }
+function mobSecs(steps, setup){ return steps.reduce((a,s)=> a+mobStepSecs(s,setup), 0); }
+
+/* soreness forecast: hard sets per lifted group over the last 3 days, weighted by recency, newness and stretch loading */
+function mobHardSets(e){ return workSets(e).reduce((a,s)=> a + (!isNum(s.rir)? 1 : +s.rir<=3? (+s.rir===0? 1.5 : 1) : 0), 0); }
+function mobNewness(name, before){
+  const prior=sortedLogs().filter(l=> new Date(l.date)<new Date(before) && l.entries.some(e=> e.exercise===name && workSets(e).length));
+  if(!prior.length) return 2.0;
+  if(daysBetween(prior[prior.length-1].date, before)>21) return 1.6;
+  if(prior.length<=2) return 1.3;
+  return 1.0;
+}
+function soreInfo(){
+  const heat={}, src={}; let fresh=null;
+  for(const l of realLogs()){
+    const dd=daysBetween(l.date, today()), w=MOB_RECENCY[dd]; if(!w) continue;
+    for(const e of l.entries){
+      const n=mobHardSets(e); if(!n) continue;
+      const g=inferMuscle(e.exercise); if(!MOB_AREA[g]) continue;
+      const nw=mobNewness(e.exercise, l.date), v=n*w*nw*(MOB_STRETCHY.test(e.exercise)? 1.2 : 1);
+      heat[g]=(heat[g]||0)+v;
+      if(!src[g] || v>src[g].v) src[g]={v, day:l.day, d:dd};
+      if(nw>=1.6 && (!fresh || v>fresh.v)) fresh={v, exercise:e.exercise, g};
+    }
+  }
+  const hot=Object.keys(heat).filter(g=> heat[g]>=MOB_SORE_MIN).sort((a,b)=> heat[b]-heat[a]);
+  if(fresh && !hot.includes(fresh.g)) fresh=null;
+  return {heat, hot, src, fresh};
+}
+/* this week's static-hold seconds per side (Mon–Sun) */
+function weekHolds(){ const a=weekStart(today()), o={hams:0,hips:0,calves:0};
+  for(const x of (DB.mobLog||[])) if(x && x.holds && dayOf(x.date)>=a) for(const k in o) o[k]+=num(x.holds[k]);
+  return o; }
+function mobRounds(t, heat, wk){
+  const base= wk[t.k]<MOB_WEEK_MIN? 2 : wk[t.k]<MOB_WEEK_CAP? 1 : 0;
+  if((heat[t.g]||0)>=MOB_SORE_MIN) return t.sore==='one'? Math.min(1, base) : 0;
+  return base;
+}
+function mobStrengthStep(){
+  if(realLogs().some(l=> sameDay(l.date, today()) && /^Upper/.test(l.day||''))) return null;   // rows, raises and face pulls covered it today
+  const id= !mobHasGear('band')? 'prone-y' : (mobDayIdx()%2? 'band-raise' : 'pull-apart');
+  return mobStep(id, 'strength', {kind:'flow', dose:120});
+}
+function mobReliefSteps(g, full, h){
+  let [r, m]=MOB_RELIEF[g]||[null,null];
+  if(r && MOB_BY[r].equipment==='roller' && !mobHasGear('roller')) r= (g==='Back')? null : 'self-massage';
+  if(m==='cat-cow' && mobMorning(h)) m='bird-dog';
+  const out=[];
+  if(r) out.push(mobStep(r, 'relief', {g}));
+  if(m && (full || !r)) out.push(mobStep(m, 'relief', {g}));
+  return out;
+}
+function buildPlan(kind, opt){
+  opt=opt||{}; const S=soreInfo(), wk=weekHolds(), h=opt.hour;
+  const steps=[], seen=new Set();
+  const add=s=>{ const key=s.id+(s.id==='self-massage'? ':'+s.g : ''); if(seen.has(key)) return; seen.add(key); steps.push(s); };
+  const st=mobStrengthStep(); if(st) add(st);
+  const rel=[]; S.hot.slice(0, kind==='full'? 2 : 1).forEach(g=> rel.push(...mobReliefSteps(g, kind==='full', h)));
+  const tg=MOB_TARGETS.map(t=>({t, n:mobRounds(t, S.heat, wk), w:wk[t.k]})).filter(x=> x.n>0).sort((a,b)=> a.w-b.w)
+    .map(x=> mobStep(x.t.ids[mobDayIdx()%2], 'target', {kind:'hold', dose:MOB_HOLD_S, rounds: kind==='full'? x.n : 1}));
+  if(kind==='full'){ add(mobStep(MOB_COMFORT[mobDayIdx()%3], 'comfort')); rel.forEach(add); tg.forEach(add); }
+  else { rel.forEach(add); for(const s of tg){ if(mobSecs(steps)+mobStepSecs(s) > MOB_BUDGET.short) break; add(s); } }
+  if(!steps.length){ add(mobStep(MOB_COMFORT[mobDayIdx()%3], 'comfort')); add(mobStep('chin-tuck', 'comfort')); }
+  const ordered=steps.map((s,i)=>({s,i})).sort((a,b)=> (MOB_POS[a.s.d.pos]-MOB_POS[b.s.d.pos]) || (a.i-b.i)).map(x=> x.s);
+  if(kind==='full') ordered.push(mobStep('belly-breathing', 'finish'));
+  while(kind==='full' && mobSecs(ordered)>MOB_BUDGET.full){
+    const c=ordered.findIndex(s=> s.block==='comfort'); if(c>=0){ ordered.splice(c,1); continue; }
+    const t=ordered.filter(s=> s.block==='target' && s.rounds>1).sort((a,b)=> wk[b.d.area]-wk[a.d.area])[0]; if(t){ t.rounds=1; continue; }
+    const f=ordered.findIndex(s=> s.block==='finish'); if(f>=0){ ordered.splice(f,1); continue; }
+    break;
+  }
+  return {kind, steps:ordered, secs:mobSecs(ordered), S, wk, next: DRAFT? DRAFT.session : nextLift()};
+}
+function buildReset(v){ const steps=MOB_RESET[v].map(([id,dose])=> mobStep(id, 'desk', {dose})); return {kind: v==='seated'? 'desk-seated' : 'desk', steps, secs:mobSecs(steps,5)}; }
+function buildWarm(session){
+  const lower=(PROGRAM[session]||[]).some(e=> e.lower);
+  const steps=MOB_WARM[lower? 'lower' : 'upper'].map(([id,dose])=> (id==='pull-apart' && !mobHasGear('band'))? mobStep('wall-slide','warm',{dose:8}) : mobStep(id,'warm',{dose}));
+  return {kind:'warm', session, steps, secs:mobSecs(steps)};
+}
+function buildBack(opt){ const h=(opt||{}).hour;
+  const steps=MOB_BACK.filter(([id])=> !(id==='cat-cow' && mobMorning(h))).map(([id,dose,rounds])=> mobStep(id, 'back', {dose, rounds}));
+  return {kind:'back', steps, secs:mobSecs(steps)}; }
+let MOB_CACHE={};
+function mobPlan(kind){ const ml=DB.mobLog||[], key=[todayKey(), realLogs().length, ml.length, (ml[ml.length-1]||{}).date||'', JSON.stringify(DB.mobGear||{}), mobMorning()].join('|');
+  if(!MOB_CACHE[kind] || MOB_CACHE[kind].key!==key) MOB_CACHE[kind]={key, plan: kind==='back'? buildBack() : buildPlan(kind)};
+  return MOB_CACHE[kind].plan; }
+/* holds count toward the week only for full rounds (both sides) */
+function holdCredit(plan, prog){ const o={}; plan.steps.forEach((s,i)=>{ const r=(prog[i]||{}).rounds||0; if(s.kind==='hold' && s.d.area && r) o[s.d.area]=(o[s.d.area]||0)+s.dose*r; }); return o; }
+function deskCountToday(){ return (DB.mobLog||[]).filter(x=> x && /^desk/.test(x.kind) && (x.done||[]).length>=3 && sameDay(x.date, today())).length; }
+function mobWhen(d){ return ['today','yesterday','2 days ago','3 days ago'][d]||''; }
+const MOB_AREA_SHORT={Quads:'thighs', Posterior:'hamstrings', Calves:'calves', Back:'upper back', Shoulders:'shoulders', Chest:'chest', Arms:'arms', Grip:'forearms', Core:'core'};
+function mobSummary(p){
+  const rel=[...new Set(p.steps.filter(s=> s.block==='relief').map(s=> MOB_AREA_SHORT[s.g]))];
+  const tg=p.steps.filter(s=> s.block==='target').map(s=> MOB_TARGETS.find(t=> t.k===s.d.area).label);
+  const parts=[];
+  if(rel.length) parts.push('ease '+rel.join(' & '));
+  if(tg.length) parts.push('stretch '+tg.join(', ')); else if(!rel.length) parts.push('stretch goal met');
+  if(!parts.length) parts.push('neck & shoulders');
+  return `${Math.max(1, Math.round(p.secs/60))} min · ${parts.join(' · ')}`;
+}
+function mobMinSec(s){ s=Math.round(s); return Math.floor(s/60)+':'+pad2(s%60); }
+function mobWeekLine(k, s){ const lab={hams:'Hamstrings', hips:'Hips', calves:'Calves'}[k];
+  return s>=MOB_WEEK_CAP? `${lab} 10:00 · done for the week` : s>=MOB_WEEK_MIN? `${lab} ${mobMinSec(s)} ✓ goal met` : `${lab} ${mobMinSec(s)} of 5:00`; }
+function mobSoreFrom(S){ const by=new Map(); for(const g of S.hot){ const k=S.src[g].day+' '+mobWhen(S.src[g].d); if(!by.has(k)) by.set(k,[]); by.get(k).push(MOB_AREA[g]); }
+  return [...by].map(([k,a])=> `${a.join(', ')} from ${k}`).join('; '); }
+function mobSoreLines(S, plan){
+  if(!S.hot.length) return ['Nothing looks sore today, so the time goes to stretching what\'s tight.'];
+  const eased= plan? S.hot.filter(g=> plan.steps.some(s=> s.block==='relief' && s.g===g)) : S.hot;
+  const out=[`Likely sore: ${mobSoreFrom(S)}.${eased.length? ` Today's routine eases ${eased.map(g=> MOB_AREA[g]).join(' & ')} with rolling and easy movement instead of stretching.` : ''}`];
+  if(S.fresh) out.push(`${S.fresh.exercise} is new to you (or back after a break), so expect more soreness than usual. It fades quickly once you repeat it.`);
+  return out;
+}
+
+/* ---------- the routine sheet ---------- */
+let MOB_GEAR_DRAFT=null;
+function openMobSheet(){
+  const g=DB.mobGear||{};
+  if(g.roller===undefined || g.band===undefined){ MOB_GEAR_DRAFT={roller:g.roller!==false, band:g.band!==false}; mobGearSheet(); return; }
+  const P=mobPlan('full'), Sh=mobPlan('short'), B=mobPlan('back'), wk=P.wk;
+  sheet(`<div class="st">Mobility, picked for today</div>
+    ${mobSoreLines(P.S, P).map(x=>`<div class="why">${esc(x)}</div>`).join('')}
+    <div class="why">This week: hamstrings ${mobMinSec(wk.hams)} · hips ${mobMinSec(wk.hips)} · calves ${mobMinSec(wk.calves)} of 5:00.</div>
+    <div class="why">${esc(P.next)} is next. Its warm-up runs in gym mode, right before you lift.</div>
+    <div class="readi">
+      <button class="g" onclick="openMob('full')"><b>▶</b> Full routine<small>about ${Math.max(1,Math.round(P.secs/60))} min</small></button>
+      <button class="g" onclick="openMob('short')"><b>▶</b> Short routine<small>about ${Math.max(1,Math.round(Sh.secs/60))} min · the essentials</small></button>
+      <button class="y" onclick="openMob('back')"><b>▶</b> Stiff back today<small>about ${Math.max(1,Math.round(B.secs/60))} min · an easy walk, then gentle trunk work</small></button>
+      <button onclick="closeSheet();if(DRAFT)showGym();else openGym(nextLift())"><b>▶</b> Lifting within the hour?<small>Do the warm-up instead. Long holds right before heavy sets cost a little strength.</small></button>
+      <button onclick="mobClass()"><b>✓</b> I did yoga or a class<small>ticks it off</small></button>
+    </div><button class="btn ghost" style="width:100%;margin-top:10px" onclick="closeSheet()">Cancel</button>`);
+}
+function mobGearSheet(){
+  const d=MOB_GEAR_DRAFT, yn=(k)=>`<span style="display:inline-flex;gap:6px"><button class="btn sm${d[k]?' primary':''}" onclick="MOB_GEAR_DRAFT.${k}=true;mobGearSheet()">Yes</button><button class="btn sm${!d[k]?' primary':''}" onclick="MOB_GEAR_DRAFT.${k}=false;mobGearSheet()">No</button></span>`;
+  sheet(`<div class="st">Quick setup</div><div class="why">What do you have at home? The routine only uses what you have.</div>
+    <div style="display:grid;gap:10px;margin:14px 0">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span>Foam roller</span>${yn('roller')}</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span>Light resistance band</span>${yn('band')}</div>
+    </div><button class="btn primary" style="width:100%" onclick="mobGearSave()">Save</button>
+    <div class="why" style="margin-top:8px;font-size:12px">Change it any time on the Mobility page.</div>`);
+}
+function mobGearSave(){ if(guardRO()) return; DB.mobGear=Object.assign({}, DB.mobGear, MOB_GEAR_DRAFT); MOB_GEAR_DRAFT=null; save(); openMobSheet(); }
+function mobSetGear(eq, val){ if(guardRO()) return; DB.mobGear=Object.assign({}, DB.mobGear, {[eq]:!!val}); save(); renderMobility(); }
+function mobClass(){ if(guardRO()) return; getChecklist().mobility=true; DB.mobLog=(DB.mobLog||[]).concat([{date:new Date().toISOString(), kind:'class', done:[], skipped:[], secs:0, holds:{}}]).slice(-400); save(); closeSheet(); refresh(); }
+
+/* ---------- the player ---------- */
+let MOB=null, MOB_TICK=null;
+function openMob(kind, opt){
+  opt=opt||{};
+  if(GYM_OPEN && kind!=='warm'){ toast('Finish or close the lift first'); return; }
+  closeSheet();
+  const plan= kind==='desk'? buildReset('stand') : kind==='desk-seated'? buildReset('seated') : kind==='warm'? buildWarm(opt.session) : mobPlan(kind);
+  if(!plan.steps.length){ if(kind==='warm') showGym(); return; }
+  const P=Object.assign({}, plan, {steps: plan.steps.map(s=> Object.assign({}, s))});   // the cached plan stays untouched
+  MOB={plan:P, kind, i:0, side:0, round:0, phase:'ready', endAt:0, left:0, prog:P.steps.map(()=>({rounds:0, units:0, done:false, skipped:false})), t0:Date.now(), after:opt.after||null};
+  $('mob').classList.remove('hidden'); document.body.style.overflow='hidden'; wakeOn();
+  if(!MOB_TICK) MOB_TICK=setInterval(mobTick, 250);
+  renderMob();
+}
+function closeMob(){
+  MOB=null; if(MOB_TICK){ clearInterval(MOB_TICK); MOB_TICK=null; }
+  const m=$('mob'); if(m){ m.classList.add('hidden'); m.innerHTML=''; }
+  if(!GYM_OPEN){ document.body.style.overflow=''; wakeOff(); }
+}
+function mobCur(){ return MOB && MOB.plan.steps[MOB.i]; }
+function mobTimed(s){ return s.kind!=='reps'; }
+function mobBuzz(){ try{ if(navigator.vibrate) navigator.vibrate(200); }catch(e){} }
+function mobStart(){ unlockAudio(); mobStartUnit(); }
+function mobStartUnit(){ const s=mobCur(); if(!s) return; if(mobTimed(s)){ MOB.phase='run'; MOB.endAt=Date.now()+s.dose*1000; } else MOB.phase='reps'; renderMob(); }
+function mobUnitDone(){
+  const s=mobCur(), p=MOB.prog[MOB.i], u=MOB.round*s.d.sides+MOB.side, n=s.d.sides*s.rounds;
+  p.units=Math.max(p.units, u+1);
+  if(MOB.side===s.d.sides-1) p.rounds=Math.max(p.rounds, MOB.round+1);
+  if(u+1<n){
+    if(MOB.side<s.d.sides-1) MOB.side++; else { MOB.side=0; MOB.round++; }
+    if(mobTimed(s)){ beep(); mobBuzz(); MOB.phase='switch'; MOB.endAt=Date.now()+5000; } else MOB.phase='reps';
+    renderMob(); return;
+  }
+  p.done=true; p.skipped=false; if(mobTimed(s)){ beep(); mobBuzz(); }
+  if(MOB.i>=MOB.plan.steps.length-1){ mobFinish(); return; }
+  MOB.phase='next'; MOB.endAt=Date.now()+5000; renderMob();
+}
+function mobGoNext(){ MOB.i++; MOB.side=0; MOB.round=0; const s=mobCur(); if(!s){ mobFinish(); return; } if(mobTimed(s)) mobStartUnit(); else { MOB.phase='reps'; renderMob(); } }
+function mobTick(){
+  if(!MOB) return;
+  let n=0;
+  while(n<4 && MOB && (MOB.phase==='run'||MOB.phase==='switch'||MOB.phase==='next') && Date.now()>=MOB.endAt){
+    n++;
+    if(MOB.phase==='run') mobUnitDone(); else if(MOB.phase==='switch') mobStartUnit(); else mobGoNext();
+  }
+  if(MOB) mobPaintClock();
+}
+function mobPause(){ if(!MOB) return; if(MOB.phase==='run'){ MOB.left=Math.max(0, MOB.endAt-Date.now()); MOB.phase='paused'; } else if(MOB.phase==='paused'){ MOB.endAt=Date.now()+MOB.left; MOB.phase='run'; } renderMob(); }
+function mobMore(){ if(!MOB) return; if(MOB.phase==='run') MOB.endAt+=15000; else if(MOB.phase==='paused') MOB.left+=15000; mobPaintClock(); }
+function mobSettle(){ if(MOB && MOB.phase==='next' && MOB.i<MOB.plan.steps.length-1){ MOB.i++; MOB.side=0; MOB.round=0; MOB.phase='ready'; } }
+function mobSkip(){ if(!MOB) return; mobSettle(); const p=MOB.prog[MOB.i]; if(!p.done) p.skipped=true; if(MOB.i>=MOB.plan.steps.length-1){ mobFinish(); return; } MOB.i++; MOB.side=0; MOB.round=0; MOB.phase='ready'; renderMob(); }
+function mobBack(){ if(!MOB) return; mobSettle(); MOB.i=Math.max(0, MOB.i-1); MOB.side=0; MOB.round=0; MOB.phase='ready'; renderMob(); }
+function mobJump(k){ if(!MOB || !MOB.plan.steps[k]) return; MOB.i=k; MOB.side=0; MOB.round=0; MOB.phase='ready'; renderMob(); }
+function mobNoGear(eq){
+  if(!MOB) return; mobSettle(); if(!READONLY){ DB.mobGear=Object.assign({}, DB.mobGear, {[eq]:false}); save(); }
+  const P=MOB.plan;
+  for(let k=P.steps.length-1;k>=MOB.i;k--){ const s=P.steps[k]; if(s.d.equipment!==eq) continue;
+    const rep= eq==='roller'? (s.g==='Back'? null : mobStep('self-massage', s.block, {g:s.g}))
+             : s.block==='warm'? mobStep('wall-slide','warm',{dose:8}) : mobStep('prone-y', s.block, {kind:'flow', dose:120});
+    if(rep){ P.steps[k]=rep; MOB.prog[k]={rounds:0, units:0, done:false, skipped:false}; } else { P.steps.splice(k,1); MOB.prog.splice(k,1); } }
+  P.secs=mobSecs(P.steps);
+  toast(eq==='roller'? 'Got it, no roller. Change it on the Mobility page.' : 'Got it, no band. Change it on the Mobility page.');
+  if(MOB.i>=P.steps.length){ mobFinish(); return; }
+  MOB.side=0; MOB.round=0; MOB.phase='ready'; renderMob();
+}
+function mobEntry(){ const P=MOB.plan; return {date:new Date().toISOString(), kind:MOB.kind,
+  done:P.steps.filter((s,i)=> MOB.prog[i].done).map(s=> s.id), skipped:P.steps.filter((s,i)=> MOB.prog[i].skipped && !MOB.prog[i].done).map(s=> s.id),
+  secs:Math.round((Date.now()-MOB.t0)/1000), holds:holdCredit(P, MOB.prog)}; }
+function mobLogEntry(tick){ if(READONLY) return null; const e=mobEntry(); DB.mobLog=(DB.mobLog||[]).concat([e]).slice(-400); const c=getChecklist(); if(tick) c.mobility=true; if(/^desk/.test(e.kind) && c.desk==='skip') c.desk=false; save(); return e; }
+function mobDoneCount(){ return MOB.prog.filter(p=> p.done).length; }
+function mobCounts(){ const k=MOB.kind, n=mobDoneCount(), t=MOB.plan.steps.length; return /^desk/.test(k)? n>=Math.max(1, t-1) : n>=Math.ceil(t/2); }
+function mobFinish(){
+  if(!MOB) return; const k=MOB.kind;
+  if(k==='warm'){ if(mobDoneCount()) mobLogEntry(false); closeMob(); showGym(); toast('Warmed up. Ramp-up sets next.'); return; }
+  const routine= k==='full'||k==='short'||k==='back', counts=mobCounts();
+  MOB.ticked= routine && counts && !READONLY;
+  MOB.entry= (routine? mobDoneCount()>0 : counts)? mobLogEntry(MOB.ticked) : null;
+  MOB.counted=counts; MOB.phase='done'; renderMob();
+}
+function mobClose(){
+  if(!MOB) return; const k=MOB.kind, done=MOB.prog.filter(p=> p.done).length, t=MOB.plan.steps.length;
+  if(k==='warm'){ closeMob(); showGym(); return; }
+  if(MOB.phase==='done'){ closeMob(); refresh(); return; }
+  if((k==='full'||k==='short'||k==='back') && done>=Math.ceil(t/2)){
+    if(MOB.phase==='run'){ MOB.left=Math.max(0, MOB.endAt-Date.now()); MOB.phase='paused'; } else if(MOB.phase==='next'||MOB.phase==='switch') MOB.phase='ready';
+    renderMob();
+    sheet(`<div class="st">Count today's mobility?</div><div class="why">You did ${done} of ${t} moves, most of it.</div>
+      <div class="readi"><button class="g" onclick="mobCountIt(true)"><b>✓</b> Count it</button><button onclick="mobCountIt(false)">Just close</button></div>`); return; }
+  if(done>0 && !/^desk/.test(k)) mobLogEntry(false);
+  closeMob(); refresh();
+}
+function mobCountIt(yes){ closeSheet(); if(MOB && MOB.phase!=='done' && !MOB.entry) mobLogEntry(!!yes); closeMob(); refresh(); }
+function mobSkipWarm(){ closeMob(); showGym(); }
+
+const MOB_TITLE={full:'Mobility · Full', short:'Mobility · Short', back:'Stiff-back routine', desk:'Desk reset', 'desk-seated':'Desk reset'};
+const MOB_HELP={strength:'Neck & shoulder strength. Two minutes, shoulders down, neck long.', target:'Mild stretch, about 5 out of 10. Breathe. Harder adds nothing.',
+  comfort:'Quick comfort move.', finish:'Slow down. Let the breath get long.', desk:'Quick one. Get up, move, reset.', warm:'Warming up, not wearing out. Smooth and controlled.', back:'Moving beats resting. Easy does it.'};
+const MOB_CHIP={strength:'Strength', target:'Stretch', relief:'Ease', comfort:'Comfort', finish:'Finish', desk:'Desk', warm:'Warm-up', back:'Stiff back'};
+function mobHelp(s){ if(s.block==='relief'){ const src=MOB.plan.S && MOB.plan.S.src[s.g]; return `Sore from ${src? src.day : 'lifting'}? This helps it feel better. It won't make you stronger, and that's fine.`; } return MOB_HELP[s.block]||''; }
+function mobDoseLine(s, short){
+  if(s.block==='strength') return short? '2 min' : '2 min · sets of 10–15, rest a few seconds between';
+  if(s.kind==='hold') return s.d.sides===2? `${s.dose} s each side${s.rounds>1? ' · '+s.rounds+' rounds' : ''}` : `${s.dose} s${s.rounds>1? ' × '+s.rounds : ''}`;
+  if(s.kind==='reps') return s.d.sides===2? `${s.dose} each side` : `${s.dose} reps`;
+  return s.dose>=120? `${Math.round(s.dose/60)} min, keep it moving` : `${s.dose} s, keep it moving`;
+}
+function mobSideLabel(s){
+  const R=s.rounds, r=MOB.round+1;
+  if(s.d.sides===2) return R>1? `${MOB.side? 'Right' : 'Left'} · round ${r} of ${R}` : (MOB.side? 'Right side' : 'Left side');
+  return R>1? `Round ${r} of ${R}` : '';
+}
+function mobLeftSecs(){ const P=MOB.plan; return P.steps.reduce((a,s,i)=> a+(i>=MOB.i && !MOB.prog[i].done? mobStepSecs(s) : 0), 0); }
+function mobClockSecs(){ return MOB.phase==='paused'? MOB.left/1000 : Math.max(0, (MOB.endAt-Date.now())/1000); }
+function mobPaintClock(){
+  const d=$('mob-digits'), ring=$('mob-ring'); if(!d || !MOB) return;
+  const s=mobCur(), left=mobClockSecs(), tot= MOB.phase==='run'||MOB.phase==='paused'? (s? s.dose : 1) : 5;
+  d.textContent=fmtClock(Math.ceil(left)); if(ring) ring.style.setProperty('--p', Math.max(0, Math.min(100, 100*(1-left/Math.max(1,tot)))).toFixed(1));
+}
+function renderMob(){
+  const m=$('mob'); if(!m || !MOB) return;
+  const P=MOB.plan, t=P.steps.length, title= MOB.kind==='warm'? 'Warm-up · '+(P.session||'') : MOB_TITLE[MOB.kind];
+  if(MOB.phase==='done'){
+    const e=MOB.entry, done=MOB.prog.filter(p=> p.done).length, wk=weekHolds();
+    const head= !MOB.counted? `${done} of ${t} moves done — not enough to count today. Finish more of it next time.`
+      : MOB.kind==='back'? 'Stiff-back routine done ✓. Keep moving today. A walk later helps too.'
+      : /^desk/.test(MOB.kind)? `Desk reset done ✓. That's ${deskCountToday()} of ${DESK_GOAL} today. Next one after 30–60 minutes of sitting.`
+      : `Mobility done ✓. ${done} of ${t} moves · ${Math.max(1, Math.round(((e&&e.secs)||0)/60))} min.${MOB.ticked? ' Ticked on Today.' : ''}`;
+    const weekly=(MOB.kind==='full'||MOB.kind==='short'||MOB.kind==='back')? ['hams','hips','calves'].map(k=>`<div class="sum-row"><span>${esc(mobWeekLine(k, wk[k]))}</span></div>`).join('') : '';
+    m.innerHTML=`<div class="gym-top"><div style="min-width:0"><div class="gt">${esc(title)}</div><div class="gs">finished</div></div></div>
+      <div class="gym-body"><div class="setcard"><div class="mob-done">${esc(head)}</div>${weekly}
+      <button class="donebtn" onclick="closeMob();go('today')">Back to Today</button></div></div>`;
+    return;
+  }
+  const showI= MOB.phase==='next'? Math.min(MOB.i+1, t-1) : MOB.i, s=P.steps[showI];
+  const timed=mobTimed(s), sub= s.id==='self-massage' && s.g? `for your ${MOB_AREA[s.g]}` : '';
+  const side=mobSideLabel(s);
+  let stage='';
+  if(MOB.phase==='ready') stage=`<button class="donebtn" onclick="mobStart()">▶ Start</button><div class="why" style="text-align:center;margin-top:6px">Tap when you're in position.</div>`;
+  else if(MOB.phase==='next') stage=`<div class="mob-ring" id="mob-ring" style="--c:var(--steel)"><div><div class="mob-big">Up next</div><div class="mob-digits" id="mob-digits">0:05</div><div class="mob-side">Get set…</div></div></div><button class="donebtn alt" onclick="mobGoNext()">Go now</button>`;
+  else if(MOB.phase==='switch') stage=`<div class="mob-ring" id="mob-ring" style="--c:var(--steel)"><div><div class="mob-big">${s.d.sides===2? 'Switch sides' : 'Round '+(MOB.round+1)+', same move'}</div><div class="mob-digits" id="mob-digits">0:05</div><div class="mob-side">${esc(side)}</div></div></div>`;
+  else if(MOB.phase==='reps') stage=`<div class="mob-ring mob-reps"><div><div class="mob-digits">${s.dose}</div><div class="mob-side">${esc(side||'reps')}</div></div></div>
+      <button class="donebtn" onclick="mobUnitDone()">✓ ${MOB.side<s.d.sides-1? 'Done, other side' : 'Done'}</button>`;
+  else stage=`<div class="mob-ring" id="mob-ring" onclick="mobPause()" style="--c:var(--${s.block==='relief'||s.block==='back'?'green':s.block==='strength'||s.block==='desk'?'steel':'amber'})"><div><div class="mob-digits" id="mob-digits">0:00</div><div class="mob-side">${MOB.phase==='paused'? 'Paused. Tap to keep going.' : esc(side || (s.kind==='flow'? 'Keep it moving' : ''))}</div></div></div>
+      <div style="text-align:center;margin-top:8px"><button class="btn sm" onclick="mobMore()">+15 s</button></div>`;
+  const heads= (s.d.avoid? `<div class="lastset">Heads-up: ${esc(s.d.avoid)}</div>` : '') + (s.kind==='hold' && s.block!=='target' && s.id!=='side-plank-knees'? `<div class="why" style="margin-top:6px">Mild stretch, about 5 out of 10. Harder adds nothing.</div>` : '');
+  const gear= (s.d.equipment==='roller'||s.d.equipment==='band')? `<div style="text-align:center;margin-top:10px"><button class="btn sm ghost" onclick="mobNoGear('${s.d.equipment}')">No ${s.d.equipment}? Swap</button></div>` : '';
+  m.innerHTML=`<div class="gym-top"><div style="min-width:0"><div class="gt">${esc(title)}</div><div class="gs">${showI+1} / ${t} · about ${Math.max(1, Math.round(mobLeftSecs()/60))} min left</div></div>
+      <div class="gx"><button class="btn sm ghost" onclick="mobClose()" aria-label="Close">✕</button></div></div>
+    <div class="gym-dots">${P.steps.map((x,k)=>`<i class="mb-${x.block}${k===showI?' cur':(MOB.prog[k].done?' done':'')}" onclick="mobJump(${k})"></i>`).join('')}</div>
+    <div class="gym-body">
+      <div><span class="pill ${s.block==='relief'||s.block==='back'?'green':s.block==='strength'||s.block==='desk'?'steel':'amber'}">${esc(MOB_CHIP[s.block]||'')}</span> <span class="why">${esc(mobHelp(s))}</span></div>
+      <div class="gym-name" style="margin-top:10px">${esc(s.d.name)}</div>${sub? `<div class="why">${esc(sub)}</div>` : ''}
+      <div class="mob-cue">${esc(s.d.cue)}</div>
+      <div class="gym-px">${esc(mobDoseLine(s))}</div>
+      <div class="setcard mob-stage">${stage}${heads}${gear}</div>
+      ${MOB.kind==='warm' && MOB.i===0 && MOB.phase==='ready'? `<button class="btn ghost" style="width:100%;min-height:52px;margin-top:10px" onclick="mobSkipWarm()">Skip warm-up →</button>` : ''}
+    </div>
+    <div class="gym-nav"><button class="btn" ${showI===0?'disabled':''} onclick="mobBack()">← Back</button><button class="btn" onclick="mobSkip()">Skip →</button></div>`;
+  mobPaintClock();
+}
+
+/* ---------- the Mobility page ---------- */
+function renderMobility(){
+  const el=$('mob-today'); if(!el) return;
+  const P=mobPlan('full'), Sh=mobPlan('short'), S=P.S, wk=P.wk, g=DB.mobGear||{};
+  const blocks=[['strength','Neck & shoulders. Two minutes of strength work. It does more for a stiff neck than stretching.'],
+    ['target',`Mild holds for what's tight: ${P.steps.filter(s=>s.block==='target').map(s=>MOB_TARGETS.find(t=>t.k===s.d.area).label).join(', ')||'—'}. About 5 minutes a week each does the job.`],
+    ['relief',`${S.hot.length? mobSoreFrom(Object.assign({}, S, {hot:S.hot.filter(g=> P.steps.some(s=> s.block==='relief' && s.g===g))})) : ''}. Rolling and easy movement help soreness feel better. Stretching doesn't.`],
+    ['comfort','One quick comfort move.'], ['finish','A minute of slow breathing.']];
+  const rows=blocks.map(([b,label])=>{ const st=P.steps.filter(s=> s.block===b); if(!st.length) return '';
+    return `<div style="margin-top:10px"><div class="pill ${b==='relief'?'green':b==='strength'?'steel':'amber'}">${esc(MOB_CHIP[b])}</div><div class="why" style="margin:5px 0 3px">${esc(label)}</div>${st.map(s=>`<div class="sum-row"><span>${esc(s.d.name)}${s.id==='self-massage'&&s.g? ' · '+esc(MOB_AREA[s.g]) : ''}</span><span class="r">${esc(mobDoseLine(s, true))}</span></div>`).join('')}</div>`; }).join('');
+  const bar=(k)=>{ const s=wk[k], pct=Math.min(100, Math.round(100*s/MOB_WEEK_MIN)); return `<div style="margin-top:8px"><div style="display:flex;justify-content:space-between;font-size:13px"><span>${esc(mobWeekLine(k,s))}</span></div><div class="mob-bar"><i style="width:${pct}%"></i></div></div>`; };
+  const yn=(k,label)=>`<span style="display:inline-flex;align-items:center;gap:6px;margin-right:12px">${label} <button class="btn sm${g[k]!==false?' primary':''}" onclick="mobSetGear('${k}',true)">Yes</button><button class="btn sm${g[k]===false?' primary':''}" onclick="mobSetGear('${k}',false)">No</button></span>`;
+  el.innerHTML=`<div class="grid g2" style="margin-bottom:16px">
+    <div class="card"><h4>Today's routine <span class="pill">${Math.max(1,Math.round(P.secs/60))} min</span></h4>
+      <div class="why">Built from your last three days of lifting and this week's stretch minutes. It changes every day.</div>${rows}
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn primary" onclick="openMob('full')">▶ Full · ${Math.max(1,Math.round(P.secs/60))} min</button><button class="btn" onclick="openMob('short')">Short · ${Math.max(1,Math.round(Sh.secs/60))} min</button><button class="btn" onclick="openMob('back')">Stiff back today</button></div></div>
+    <div class="card"><h4>Flexibility this week <span class="pill">per side</span></h4>
+      <div class="why">Each tight area needs about 5 minutes a week of mild holds. Past 10, more adds nothing, so the routine stops adding them. The stand-up desk reset's hip stretch counts toward Hips.</div>
+      ${['hams','hips','calves'].map(bar).join('')}</div>
+    <div class="card"><h4>Soreness: what to expect</h4>
+      ${(S.hot.length? [`Likely sore: ${mobSoreFrom(S)}.`] : ['Nothing looks sore today.']).concat(S.fresh? [`${S.fresh.exercise} is new to you, or you're back to it after a break, so expect more soreness than usual for a few days. It fades fast once you repeat it.`] : []).map(x=>`<p class="why"><b>${esc(x)}</b></p>`).join('')}
+      <p class="why">Soreness peaks 1 to 3 days after a session and fades within a week. It's worst in week one, after a new exercise, and after time off, and it drops fast once a lift is familiar. Stretching won't stop it. Rolling or rubbing the sore muscle helps it feel better, and so do a few minutes of easy movement. Sore doesn't mean the workout worked, and not being sore doesn't mean it stopped working. Mild soreness isn't a reason to skip a session. Warm up and it usually eases.</p></div>
+    <div class="card"><h4>Desk reset <span class="pill steel">2 min</span></h4>
+      <p class="why">Four moves, the same every time, so you can do them without thinking. Sitting isn't damaging your back, but staying still stiffens it. Get up every 30 to 60 minutes, and run this reset about 3 times a day. The end of a call is a good trigger. Your best posture is your next one.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="btn primary" onclick="openMob('desk')">▶ Stand-up reset</button><button class="btn" onclick="openMob('desk-seated')">Stay-seated reset <small>for calls</small></button></div>
+      <p class="why" style="margin-top:8px">${deskCountToday()} of ${DESK_GOAL} today. Three is a starting goal, not a magic number.</p></div>
+  </div>
+  <div class="card" style="margin-bottom:16px"><div class="why">At home: ${yn('roller','Foam roller')}${yn('band','Light band')} The routine only uses what you have.</div>
+    <details class="gnote" style="margin-top:10px"><summary>All moves</summary>${MOB_DRILLS.map(d=>`<div class="sum-row"><span><b>${esc(d.name)}</b> · ${esc(mobDoseLine(mobStep(d.id,'x')))}<br><span class="why">${esc(d.cue)}</span></span></div>`).join('')}</details></div>`;
+}
+function mobTodayRow(){
+  const done=isDone('mobility');
+  if(done){ const last=(DB.mobLog||[]).filter(x=> x && sameDay(x.date, today()) && x.kind!=='warm' && !/^desk/.test(x.kind)).pop();
+    return {id:'mobility', t:'Mobility', s: !last? 'done ✓' : last.kind==='class'? 'done ✓ · yoga or a class' : last.kind==='back'? 'done ✓ · stiff-back routine' : `done ✓ · ${last.done.length} moves`}; }
+  return {id:'mobility', t:'Mobility', s:esc(mobSummary(mobPlan('full'))), act:`<button class="btn sm primary cact" onclick="event.stopPropagation();openMobSheet()">Start</button>`};
+}
+function deskTodayRow(){
+  return {id:'desk', t:'Desk reset', s:`2 min · ${deskCountToday()} of ${DESK_GOAL} today`, act: isDone('desk')? '' : `<button class="btn sm cact" onclick="event.stopPropagation();openMob('desk')">Start</button>`};
+}
+
 
 /* ================= boot ================= */
 let DB=load();
@@ -4264,8 +4692,10 @@ init();
   new MutationObserver(snap).observe(t,{subtree:true,childList:true,attributes:true,attributeFilter:['class']}); snap(); })();
 document.addEventListener('visibilitychange',()=>{
   if(document.hidden) return;
-  if(GYM_OPEN){ wakeOn(); tick(); }
-  if(LAST_DAY!==todayKey()){ LAST_DAY=todayKey(); if(!GYM_OPEN) refresh(); }
+  if(GYM_OPEN || MOB) wakeOn();
+  if(GYM_OPEN) tick();
+  if(MOB) mobTick();
+  if(LAST_DAY!==todayKey()){ LAST_DAY=todayKey(); if(!GYM_OPEN && !MOB) refresh(); }
 });
 window.__train={ get DB(){ return DB; }, get draft(){ return DRAFT; }, version:APP_VERSION, readonly:()=>READONLY, migrate, loadFrom, plateMath, e1rm, planFor, cardFor, levelOf, makeLadder, classify, est, prescribe, ladderLevel, liftStats, ctx, chipText, prBoard, milestoneDates, selftest:runSelftest, PROGRAM, TEMPLATES };
 if(SELFTEST) setTimeout(runSelftest, 30);
