@@ -292,6 +292,8 @@
   .steps2{display:grid;grid-template-columns:1.4fr 1fr;gap:8px;margin-top:12px}
   .steps2.one{grid-template-columns:1fr}
   .rirchips{display:flex;gap:6px;margin-top:10px;align-items:center}
+  .setcard.wucard{border-style:dashed}
+  .setlist .sl.wu .k{color:var(--muted)}
   .stepchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;align-items:center;font-size:11.5px;color:var(--muted)}
   .stepchips .sl2{margin-right:2px}
   .stepchips button{font-family:var(--mono);font-size:11px;color:var(--muted);background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:5px 10px;cursor:pointer;-webkit-tap-highlight-color:transparent}
@@ -849,7 +851,7 @@
 <script>
 'use strict';
 /* ================= core constants ================= */
-const APP_VERSION = '3.2.3';
+const APP_VERSION = '3.2.4';
 const KEY = 'argus_training_v1';
 const DRAFT_KEY = KEY + ':draft';
 const SNAP_KEY = 'argus_training_v2_snapshot';
@@ -1259,10 +1261,11 @@ function plateViz(total, mode){
 }
 function warmup(ex, mode, work, v){
   work=num(work);
-  if(ex.role!=='main' || !(work>0) || mode==='assist' || mode==='time' || mode==='bw') return [];
+  const loaded=(mode==='bb'||mode==='trap'||mode==='plate'), sec= ex.role==='sec' && loaded;
+  if((ex.role!=='main' && !sec) || !(work>0) || mode==='assist' || mode==='time' || mode==='bw') return [];
   const base=loadBase(mode), out=[], seen=new Set();
-  const loaded=(mode==='bb'||mode==='trap'||mode==='plate');
-  const plan = loaded? [[0,mode==='plate'?10:8],[.4,5],[.6,3],[.75,2],[.85,1]] : [[.5,8],[.7,4],[.85,2]];
+  /* main lifts get the full ramp; secondary bar/plate lifts a short one */
+  const plan = sec? [[0,mode==='plate'?10:8],[.5,5],[.75,3]] : loaded? [[0,mode==='plate'?10:8],[.4,5],[.6,3],[.75,2],[.85,1]] : [[.5,8],[.7,4],[.85,2]];
   for(const [p,r] of plan){
     const w = p===0? base : (!loaded && v && mode!=='kb')? num(snapLoad(v, work*p)) : Math.floor(work*p/5)*5;
     if(p>0 && loaded && w<=base) continue;
@@ -1279,6 +1282,7 @@ function sledKind(name){ return /Belt Squat/.test(name)? 'belt' : /Landmine/.tes
 function bwKind(name){ return /Pull-up|Negatives|Chin|Dips/.test(name)? 'belt' : 'body'; }
 /* the drawing for whatever is in your hands; a drawing must never block logging a set */
 function equipViz(v, w, o){
+  if(bwOK(v) && w!=='' && w!=null && num(w)===0) return `<div class="warmup ivs-line" style="margin-top:10px">Bodyweight — ${v.mode==='kb'?'no kettlebell':'no dumbbells'}</div>`;
   o=o||{};
   if(v.mode==='assist' && (w===''||w==null)) return '';
   w=num(w);
@@ -2372,7 +2376,7 @@ function histOf(name, mode, skipLight){
   }
   return out;
 }
-function workSets(e){ return (e.sets||[]).filter(s=>num(s.r)>0); }
+function workSets(e){ return (e.sets||[]).filter(s=>num(s.r)>0 && !s.wu); }
 /* ================= predictive engine =================
    level = load × (1 + (reps + RIR) / 30) from the working sets of a lift in its slot.
    Next load = the heaviest loadable weight predicted to give today's reps at today's RIR,
@@ -2382,6 +2386,10 @@ const PK=30, TRUST_T=12, RIR_CAP=4, RAMP_RIR=5, MISSING_RIR=1, GAP_D=14, STALE_D
 const LOADED_MODES=['bb','trap','plate','db','kb','mach','cable'];
 const KB_RUNGS=[18,26,35,44,53,62,70,79,88,97,106];
 const STEP_MODES=['mach','cable','assist','db'], STEP_CHOICES=[2.5,5,10];
+/* lunges, step-ups and split squats can be done with no dumbbells: 0 lb = bodyweight (a 2.5 stand-in counts as bodyweight too) */
+const BW_OK=/Lunge|Step-up|Split Squat/;
+function bwOK(v){ return !!v && (v.mode==='db'||v.mode==='kb') && BW_OK.test(v.n||v.exercise||''); }
+function bwOnly(e){ return bwOK({mode:e.mode, n:e.exercise}) && workSets(e).length>0 && workSets(e).every(s=>num(s.w)<=2.5); }
 const ISO_DB=['Biceps Curl','Hammer Curl','Lateral Raise'];
 const DB_PRESSES=['DB Bench Press','Incline DB Press','DB Shoulder Press'];
 function isNum(x){ return x!=='' && x!=null && isFinite(+x); }
@@ -2420,7 +2428,7 @@ function effOf(s, e){ return e.mode==='assist'? (num(e.bw)||currentBodyweight())
 /* working sets vs warm-up / ramp sets: the top load, plus later sets within one rung below it */
 function classify(e, lad){
   let S=(e.sets||[]).filter(s=>num(s.r)>0 && !s.wu);
-  if(LOADED_MODES.includes(e.mode)) S=S.filter(s=>num(s.w)>0);
+  if(LOADED_MODES.includes(e.mode)) S=S.filter(s=>num(s.w)>(bwOK({mode:e.mode, n:e.exercise})? 2.5 : 0));
   if(e.mode==='assist' && !(num(e.bw)||currentBodyweight())) return null;
   if(!S.length) return null;
   const E=S.map(s=>effOf(s,e)), top=Math.max(...E), i0=E.findIndex(x=>x>=top-0.01);
@@ -2489,7 +2497,7 @@ function levelOf(ex, v, lad, day){
 }
 function judgeSession(h, prevH, ex, v, track){
   const c=h.c, cd=h.e.card;
-  const pc= cd? {rl:num(cd.rl), rh:num(cd.rh), sets:num(cd.sets), rirLow:num(cd.rirLow), buildPlus:!!cd.buildPlus}
+  const pc= (cd && isNum(cd.rl) && isNum(cd.rh))? {rl:num(cd.rl), rh:num(cd.rh), sets:num(cd.sets), rirLow:num(cd.rirLow), buildPlus:!!cd.buildPlus}
     : (()=>{ const p=prescribe(ex, ctxAt(dayOf(h.log.date)), {readiness:h.log.readiness, express:h.log.express}); return {rl:p.rl, rh:p.rh, sets:p.sets, rirLow:rirLowOf(p), buildPlus:p.buildPlus}; })();
   const aimL= cd && isNum(cd.aim)? num(cd.aim) : pc.rh;
   const fin0=(s,i)=> i===c.W.length-1 && ex.failOK && !v.noFail && pc.buildPlus;
@@ -2630,6 +2638,18 @@ function bwCard(ex, v, px, d){
   const aim=Math.min(REP_CEIL, Math.min(minR+1, px.rh));
   return {w:added, r:Math.min(minR, px.rh)||px.rl, aim, track:'B', hint:`same load — aim for ${aim} on every set`};
 }
+/* a lunge / step-up / split squat last done at bodyweight: reps first, then pick up dumbbells */
+function bwLoadCard(ex, v, px, d){
+  const hist=histOf(v.n, v.mode, false).filter(h=>!h.log.deload && h.e.slot===ex.slot && workSets(h.e).length), last=hist[hist.length-1], prev=hist[hist.length-2], S=workSets(last.e), thr=Math.max(1, rirLowOf(px));
+  const base={rirT:px.rir, rirShown:rirLowOf(px), rirLow:rirLowOf(px), sets:px.sets, rl:px.rl, rh:px.rh, buildPlus:px.buildPlus, track:'B'};
+  const lastRir=S[S.length-1].rir, top=S.every(s=>num(s.r)>=px.rh), minR=Math.min(...S.map(s=>num(s.r)));
+  const quiet=d.readiness==='yellow'||d.readiness==='red'||px.deload||backFromAway(last.log.date, parseYmd(d.day)||today());
+  const earned=!quiet && top && (isNum(lastRir)? +lastRir>=thr : !!(prev && bwOnly(prev.e) && workSets(prev.e).length>=Math.min(px.sets,3) && workSets(prev.e).every(s=>num(s.r)>=px.rh)));
+  const kb=v.mode==='kb', w0=kb? KB_RUNGS[0] : 10;
+  if(earned) return Object.assign(base, {w:w0, r:px.rl, aim:px.rl, hint:`top of the range at bodyweight — pick up ${kb?'a kettlebell':'dumbbells'}, about ${w0} lb${kb?'':' each'}`});
+  const aim=Math.min(REP_CEIL, Math.min(minR+1, px.rh));
+  return Object.assign(base, {w:0, r:Math.min(minR, px.rh)||px.rl, aim, hint:`bodyweight — aim for ${aim} on every set`});
+}
 /* everything the card needs for one exercise, for a draft day */
 function planFor(ex, d, vOverride){
   const sl=d.ex && d.ex[ex.slot], v=vOverride || (sl? variantOf(ex, sl.variant) : prefVariant(ex));
@@ -2642,6 +2662,7 @@ function planFor(ex, d, vOverride){
   let card;
   if(v.mode==='time') card=hangCard(ex, v, px, d);
   else if(v.mode==='bw') card=bwCard(ex, v, px, d);
+  else if(bwOK(v) && (!Lv || (Lv.establish && !Lv.ref)) && (()=>{ const h=histOf(v.n, v.mode, false).filter(x=>!x.log.deload && x.e.slot===ex.slot && workSets(x.e).length); return h.length && bwOnly(h[h.length-1].e); })()) card=bwLoadCard(ex, v, px, d);
   else card=cardFor(ex, v, px, Lv||{establish:true}, lad, d);
   return {v, px, Lv, lad, card};
 }
@@ -2655,6 +2676,7 @@ function repredictAfter(ex, sl, v, si){
   const loose= ex.role==='acc' || !!ex.hiRep, tol= loose? 2 : 1, drop= restFor(ex)>=150? 1 : 2;
   const off=Math.abs(+rir-tgt)>=tol || num(s.r)<Math.min(cd.rl, num(cd.r)||cd.rl) || num(s.r)>cd.rh; if(!off) return null;
   const lad=makeLadder(v, currentBodyweight()), E0=lad.toE(num(s.w));
+  if(!(E0>0) || (bwOK(v) && num(s.w)<=2.5)) return null;
   const lvSet=E0*(1+Math.max(1, num(s.r)+Math.min(+rir,RIR_CAP)-drop)/PK), reps=(L)=>rhd(PK*(lvSet/L-1)-tgt);
   const px={rl:cd.rl, rh:cd.rh};
   let L= cd.track==='P'? pickP(lad, reps, px, cd.r) : pickD(lad, reps, px).L;
@@ -2666,17 +2688,17 @@ function repredictAfter(ex, sl, v, si){
   if(Math.abs(L-E0)<0.01) return null;
   return {w:lad.toW(L), dir: L>E0? 'up' : 'down', pred: Math.max(1, Math.min(cd.rh, reps(L)))};
 }
-function fmtSet(s, mode){
+function fmtSet(s, mode, name){
   const rir=(s.rir!=null && s.rir!=='')?`@${s.rir}`:'';
   if(mode==='time') return `${num(s.r)}s`;
   if(mode==='assist') return `−${num(s.w)}×${num(s.r)}${rir}`;
-  if(mode==='bw') return `${num(s.w)>0?'+'+num(s.w):'BW'}×${num(s.r)}${rir}`;
+  if(mode==='bw' || (bwOK({mode, n:name||''}) && s.w!=='' && s.w!=null && num(s.w)===0)) return `${num(s.w)>0?'+'+num(s.w):'BW'}×${num(s.r)}${rir}`;
   return `${num(s.w)}×${num(s.r)}${rir}`;
 }
 function lastTimeHTML(name, mode){
-  const h=histOf(name, mode, false); const last=h[h.length-1];
+  const h=histOf(name, mode, false).filter(x=>workSets(x.e).length); const last=h[h.length-1];
   if(!last) return '';
-  return `<div class="lastline">↺ Last (${fmtD(last.log.date)}): ${esc(workSets(last.e).map(s=>fmtSet(s,last.e.mode)).join(', '))}</div>`;
+  return `<div class="lastline">↺ Last (${fmtD(last.log.date)}): ${esc(workSets(last.e).map(s=>fmtSet(s,last.e.mode,last.e.exercise)).join(', '))}</div>`;
 }
 
 /* ================= scoreboard ================= */
@@ -3235,12 +3257,26 @@ function newDraft(session, o){
   for(const ex of PROGRAM[session]) d.ex[ex.slot]=initSlot(ex, d, prefVariant(ex));
   return d;
 }
+/* guided warm-ups for a main lift: rebuilt from the working weight until one is done or edited */
+function syncWarmups(ex, sl, v){
+  if(!sl || !Array.isArray(sl.sets)) return;
+  const touched=x=> x.done || !x.auto || (x.r!==''&&x.r!=null) || (x.rir!==''&&x.rir!=null);
+  const kept=(Array.isArray(sl.wu)? sl.wu : []).filter(touched);
+  if(sl.wuSkip || sl.sets.some(x=>x.done)){ sl.wu=kept.filter(x=>x.done); return; }
+  const work=num(sl.sets[0] && sl.sets[0].w) || num(sl.card && sl.card.w);
+  const mine=kept.filter(x=>(x.vn||sl.variant)===sl.variant), top= mine.length? Math.max(...mine.map(x=>num(x.w))) : -1;
+  const fresh=warmup(ex, v.mode, work, v).filter(x=> x.w>top+1e-9).map(x=>({w:x.w, r:'', t:x.r, rir:'', done:false, auto:true, wu:true, label:x.label}));
+  sl.wu=kept.concat(fresh);
+}
 function draftSlot(d, ex){ if(!d.ex[ex.slot]||!Array.isArray(d.ex[ex.slot].sets)) d.ex[ex.slot]=initSlot(ex, d, prefVariant(ex)); return d.ex[ex.slot]; }
 function switchVariant(d, ex, v){
   const sl=draftSlot(d, ex); if(sl.variant===v.n) return;
   const fresh=initSlot(ex, d, v);
   sl.variant=v.n; sl.goal=fresh.goal; sl.card=fresh.card;
   sl.sets.forEach(s=>{ if(s.auto && !s.done){ s.w=fresh.sets[0]? fresh.sets[0].w : ''; delete s.rp; delete s.adj; } });
+  if(Array.isArray(sl.wu)) sl.wu=sl.wu.filter(x=>x.done);
+  delete sl.wuSkip;
+  if(d.cur && !sl.sets.some(x=>x.done)) d.cur.w=undefined;
 }
 function draftProgress(d){
   let done=0, total=0;
@@ -3252,16 +3288,17 @@ function draftEntries(d){
   for(const ex of PROGRAM[d.session]){
     const sl=d.ex[ex.slot]; if(!sl||!Array.isArray(sl.sets)) continue;
     const groups=new Map();
-    for(const s of sl.sets){
+    for(const s of (Array.isArray(sl.wu)? sl.wu.filter(x=>x.done) : []).concat(sl.sets)){
       const r=parseInt(s.r,10); if(!(r>0)) continue;
       const v=variantOf(ex, s.vn||sl.variant);
       const o={w: v.mode==='time'? 0 : num(s.w), r};
       if(s.rir!=='' && s.rir!=null && !isNaN(parseInt(s.rir,10))) o.rir=parseInt(s.rir,10);
       if(s.adj) o.adj=s.adj;
+      if(s.wu) o.wu=true;
       if(!groups.has(v.n)) groups.set(v.n, {v, sets:[]});
       groups.get(v.n).sets.push(o);
     }
-    for(const [n,g] of groups){ const en={exercise:n, mode:g.v.mode, slot:ex.slot, sets:g.sets}; if(n===sl.variant && sl.card) en.card=sl.card; if(g.v.mode==='assist') en.bw=currentBodyweight(); entries.push(en); }
+    for(const [n,g] of groups){ if(!g.sets.some(x=>!x.wu)) continue; const en={exercise:n, mode:g.v.mode, slot:ex.slot, sets:g.sets}; if(n===sl.variant && sl.card) en.card=sl.card; if(g.v.mode==='assist') en.bw=currentBodyweight(); entries.push(en); }
   }
   return entries;
 }
@@ -3286,7 +3323,7 @@ function commitDraft(){
   if(!DRAFT) return null;
   if(guardRO()) return null;
   const p=previewLog(DRAFT);
-  if(!p.log.entries.length){ toast('Log at least one set first'); return null; }
+  if(!p.log.entries.some(e=>workSets(e).length)){ toast('Log at least one set first'); return null; }
   DB.logs.push(p.log);
   const ri=ROTATION.indexOf(DRAFT.session); if(ri>=0) DB.seq=(ri+1)%ROTATION.length;
   if(DRAFT.readiness) DB.readiness[DRAFT.day]=DRAFT.readiness;
@@ -3320,6 +3357,7 @@ function suggestLine(v, sg){
   if(v.mode==='time') return h+`<div class="seed">▸ Set 1 goal: ${esc(sg.goal||sg.r||'—')} s <span style="color:var(--muted)">${esc(sg.hint||'')}</span></div>`;
   if(v.mode==='bw') return h+`<div class="seed">▸ ${num(sg.w)>0? '+'+esc(sg.w)+' lb' : 'Bodyweight'} · aim ${esc(sg.aim||sg.r)} <span style="color:var(--muted)">${esc(sg.hint||'')}</span></div>`;
   if(sg.w==null) return h+`<div class="seed est">◆ ${esc(sg.hint||'')}</div>`;
+  if(bwOK(v) && num(sg.w)===0) return h+`<div class="seed">▸ Bodyweight · aim ${esc(sg.aim||sg.r)} <span style="color:var(--muted)">${esc(sg.hint||'')}</span></div>`;
   const main=`${fmtLoad(v, sg.w)} × ${sg.r} @ ${sg.rirShown} RIR${sg.aim>sg.r? ` · aim ${sg.aim}` : ''}`;
   const notes=[sg.unreachable? 'the nearest loadable weight is still heavy for this range' : '', sg.stalled? 'equipment step too big — a cable or machine version moves in finer steps' : ''].filter(Boolean);
   return h+`<div class="seed">▸ ${esc(main)} <span style="color:var(--muted)">— ${esc(sg.hint||'')}</span></div>`
@@ -3504,7 +3542,7 @@ function renderLogbook(){
     return `<div style="border-bottom:1px solid rgba(34,43,56,.5);padding:9px 0"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
         <span><b>${esc(l.day)}</b> <span style="color:var(--muted);font-size:12px">${fmtD(l.date,{weekday:'short',month:'short',day:'numeric'})}</span> ${tags}</span>
         <span style="font-family:var(--mono);font-size:12px;color:var(--steel)">${Math.round(tonnage(l)).toLocaleString()} lb moved<button class="btn sm ghost" style="margin-left:8px;padding:3px 8px;color:var(--red);border-color:rgba(232,99,90,.3)" onclick="delLog(${i})" aria-label="delete">✕</button></span></div>
-      <div style="color:var(--dim);font-size:12px;margin-top:3px">${esc(l.entries.map(e=>e.exercise+' '+workSets(e).map(s=>fmtSet(s,e.mode)).join(', ')).join(' · '))}</div></div>`;
+      <div style="color:var(--dim);font-size:12px;margin-top:3px">${esc(l.entries.map(e=>e.exercise+' '+workSets(e).map(s=>fmtSet(s,e.mode,e.exercise)).join(', ')+((e.sets||[]).some(s=>s.wu)? ` (+${e.sets.filter(s=>s.wu).length} warm-up)` : '')).join(' · '))}</div></div>`;
   }).join('');
   const cl=$('cond-list'), ci=DB.cond.map((c,i)=>i).sort((a,b)=>new Date(DB.cond[b].date)-new Date(DB.cond[a].date));
   cl.innerHTML=ci.slice(0,8).map(i=>{ const c=DB.cond[i];
@@ -3769,7 +3807,11 @@ function gymCur(){
   let si=d.cur.s|0;
   if(si<0 || si>=sl.sets.length){ si=sl.sets.findIndex(s=>!s.done); if(si<0) si=Math.max(0,sl.sets.length-1); }
   d.cur.s=si;
-  return {d, list, i, ex, sl, v, px, si, set:sl.sets[si]};
+  syncWarmups(ex, sl, v);
+  const wus= Array.isArray(sl.wu)? sl.wu : [];
+  if(d.cur.w===undefined){ const o= (sl.wuSkip || sl.sets.some(x=>x.done))? -1 : wus.findIndex(x=>!x.done); d.cur.w= o>=0? o : null; }
+  const wi= (d.cur.w!=null && wus[d.cur.w])? (d.cur.w|0) : null; if(wi==null) d.cur.w=null;
+  return {d, list, i, ex, sl, v, px, si, set: wi!=null? wus[wi] : sl.sets[si], wi};
 }
 function defaultReps(sl, si, px, v){
   if(v.mode==='time') return '';
@@ -3795,26 +3837,32 @@ function renderGym(){
   const g=$('gym');
   if(!DRAFT){ if(GYM_OPEN) closeGym(); return; }
   if(SUMMARY){ renderGymSummary(); return; }
-  const {d, list, i, ex, sl, v, px, si, set}=gymCur();
+  const {d, list, i, ex, sl, v, px, si, set, wi}=gymCur(), isWu= wi!=null;
   const c=ctxForDraft(d), meta=SESSION_META[d.session], sg=slotSuggest(ex, v, d);
   const allDone=slotDone(sl), showCard=!allDone || d.cur.edit;
   const dispW = (set.w!==''&&set.w!=null)? set.w : (sg.w!=null? sg.w : '');
-  const dispR = (set.r!==''&&set.r!=null)? set.r : defaultReps(sl, si, px, v);
+  const dispR = (set.r!==''&&set.r!=null)? set.r : isWu? set.t : defaultReps(sl, si, px, v);
   const loaded = v.mode==='bb'||v.mode==='trap'||v.mode==='plate';
   const phaseTxt = !c.b? 'week-1 targets' : c.ph.pre? 'pre-block' : (c.tpl.weeks?`W${c.w}/${c.tpl.weeks}`:`W${c.w}`)+' '+c.ph.name;
-  const wu = !sl.sets.some(s=>s.done)? warmup(ex, v.mode, num(dispW), v) : [];
   const oneSide = v.mode==='plate' && sledKind(v.n)!=='sled';
-  const warmPlates = x=> x.w>loadBase(v.mode)? plateMath(oneSide? x.w*2 : x.w, v.mode).side.join('+') : 'empty';
-  const warmHTML = wu.length? `<details class="gnote" open><summary>Warm-up to ${num(dispW)}${loaded? (oneSide? ' · plates on the '+(sledKind(v.n)==='belt'?'pin':'sleeve') : ' · plates per side') : ''}</summary><div class="warmup">${wu.map(x=>`<span class="w" title="${esc(x.label)}">${x.w}×${x.r}${loaded? ` <span style="color:var(--dim)">${warmPlates(x)}</span>` : ''}</span>`).join('')}</div></details>` : '';
   const isLast=si===sl.sets.length-1 && v.mode!=='time' && v.mode!=='bw';
   const lastLine=isLast && showCard? `<div class="lastset">Last set: keep going until ${sl.card&&sl.card.rirShown!=null? sl.card.rirShown : px.rir} are left, then tap RIR — it sets next time's weight.</div>` : '';
-  const card = showCard? `<div class="setcard"><div class="sh"><b>Set ${si+1} of ${sl.sets.length}</b><span class="pill">${v.mode==='time'?'goal '+(sl.goal||px.rl)+' s':'target '+px.rl+'–'+px.rh+' @ '+rirText(px)}</span></div>
+  const workCard = showCard? `<div class="setcard"><div class="sh"><b>Set ${si+1} of ${sl.sets.length}</b><span class="pill">${v.mode==='time'?'goal '+(sl.goal||px.rl)+' s':'target '+px.rl+'–'+px.rh+' @ '+rirText(px)}</span></div>
       <div class="steps2${v.mode==='time'?' one':''}">${v.mode==='time'?'':stepperHTML('w', dispW, v.mode==='assist'?'lb assistance':modeUnit(v.mode))}${stepperHTML('r', dispR, v.mode==='time'?'seconds':'reps')}</div>
       ${stepChipsHTML(v)}${lastLine}${v.mode==='time'? hangTimerHTML(sl) : rirChipsHTML(set.rir, isLast? (sl.card&&sl.card.rirShown!=null? sl.card.rirShown : px.rir) : null)}
       ${v.mode==='time'? '' : equipViz(v, dispW)}
       <button class="donebtn" onclick="gymDone()">✓ ${set.done?'Update':'Set '+(si+1)+' done'}</button></div>`
     : `<div class="setcard"><div class="sh"><b>All ${sl.sets.length} sets done ✓</b></div><button class="donebtn${i<list.length-1?'':' alt'}" onclick="${i<list.length-1?`gymGo(${i+1})`:'gymFinish()'}">${i<list.length-1?'Next exercise →':'Finish session ✓'}</button></div>`;
-  const setList = `<div class="setlist">${sl.sets.map((s,k)=>`<div class="sl${s.done?' done':''}${k===si&&showCard?' cur':''}" onclick="gymPickSet(${k})"><span class="k">SET ${k+1}</span><span>${s.done? esc(fmtSet(s, v.mode)) : (k===si&&showCard?'← now':'—')}</span>${s.done?'<span class="ck">✓</span>':''}</div>`).join('')}
+  const wuRows = Array.isArray(sl.wu)? sl.wu.map((s,k)=>`<div class="sl wu${s.done?' done':''}${isWu&&k===wi?' cur':''}" onclick="gymPickWu(${k})"><span class="k">WARM ${k+1}</span><span>${s.done? esc(fmtSet(s, v.mode, v.n)) : (isWu&&k===wi?'← now': esc(fmtSet({w:s.w, r:s.t}, v.mode, v.n)))}</span>${s.done?'<span class="ck">✓</span>':''}</div>`).join('') : '';
+  const wuCard = isWu? `<div class="setcard wucard"><div class="sh"><b>Warm-up ${wi+1} of ${sl.wu.length}</b><span class="pill">${esc(set.t)} reps @ 4+ RIR</span></div>
+      <div class="steps2">${stepperHTML('w', dispW, v.mode==='assist'?'lb assistance':modeUnit(v.mode))}${stepperHTML('r', dispR, 'reps')}</div>
+      <div class="lastset">Easy — stop with plenty left. Warm-ups get you to ${esc(fmtLoad(v, num(sl.sets[0]&&sl.sets[0].w)||num(sl.card&&sl.card.w)))}; they don't count toward your numbers.</div>
+      ${rirChipsHTML(set.rir, 4)}
+      ${equipViz(v, dispW)}
+      <button class="donebtn" onclick="gymDone()">✓ ${set.done?'Update':'Warm-up '+(wi+1)+' done'}</button>
+      <div style="text-align:center;margin-top:8px"><button class="btn sm ghost" onclick="gymSkipWarmups()">Skip warm-ups →</button></div></div>` : '';
+  const card = isWu? wuCard : workCard;
+  const setList = `<div class="setlist">${wuRows}${sl.sets.map((s,k)=>`<div class="sl${s.done?' done':''}${k===si&&showCard&&!isWu?' cur':''}" onclick="gymPickSet(${k})"><span class="k">SET ${k+1}</span><span>${s.done? esc(fmtSet(s, v.mode, v.n)) : (k===si&&showCard&&!isWu?'← now':'—')}</span>${s.done?'<span class="ck">✓</span>':''}</div>`).join('')}
     <div style="display:flex;gap:8px;margin-top:4px"><button class="btn sm ghost" onclick="gymAddSet()">+ Add a set</button>${sl.sets.length>1&&!sl.sets[sl.sets.length-1].done?'<button class="btn sm ghost" onclick="gymRemoveSet()">− Remove last</button>':''}</div></div>`;
   g.innerHTML=`<div class="gym-top"><div style="min-width:0"><div class="gt">${d.session} · ${meta.tag}</div><div class="gs">${esc(phaseTxt)} · ${i+1}/${list.length}${d.express?' · express':''}${d.readiness?' · '+d.readiness:''}</div></div>
       <div class="gx"><button class="btn sm" onclick="gymToList()">List</button><button class="btn sm" onclick="gymFinish()">Finish</button><button class="btn sm ghost" onclick="closeGym()" aria-label="Close">✕</button></div></div>
@@ -3825,7 +3873,7 @@ function renderGym(){
       <div class="gym-px">${px.sets} × ${px.rl}–${px.rh}${v.mode==='time'?' s · stop before your grip gives':' @ '+rirText(px)} · rest ${fmtClock(restFor(ex))}</div>
       ${suggestLine(v, sg)}${lastTimeHTML(v.n, v.mode)}
       <details class="gnote"><summary>Coaching note</summary><div>${esc(ex.note)}</div></details>
-      ${warmHTML}${card}${setList}
+      ${card}${setList}
     </div>
     <div id="gym-rest"></div>
     <div class="gym-nav"><button class="btn" ${i===0?'disabled':''} onclick="gymGo(${i-1})">← Prev</button>${i<list.length-1?`<button class="btn" onclick="gymGo(${i+1})">Next →</button>`:'<button class="btn primary" onclick="gymFinish()">Finish ✓</button>'}</div>`;
@@ -3837,19 +3885,21 @@ function gymGo(k){
   DRAFT.cur={i:k, s:open<0?0:open, edit:false}; HANG=null; saveDraft(); renderGym();
   const b=$('gym-body'); if(b) b.scrollTop=0;
 }
-function gymPickSet(k){ DRAFT.cur.s=k; DRAFT.cur.edit=true; saveDraft(); renderGym(); }
+function gymPickSet(k){ DRAFT.cur.s=k; DRAFT.cur.w=null; DRAFT.cur.edit=true; saveDraft(); renderGym(); }
+function gymPickWu(k){ DRAFT.cur.w=k; DRAFT.cur.edit=true; saveDraft(); renderGym(); }
+function gymSkipWarmups(){ const {sl}=gymCur(); sl.wuSkip=true; sl.wu=(sl.wu||[]).filter(x=>x.done); DRAFT.cur.w=null; if(DRAFT.rest && DRAFT.rest.wu) DRAFT.rest=null; saveDraft(); renderGym(); }
 function gymVariant(vi){
   const {ex}=gymCur(), v=ex.vars[vi]; if(!v) return;
   DB.variantPref[ex.slot]=v.n; save(); switchVariant(DRAFT, ex, v); HANG=null; saveDraft(); renderGym();
 }
 function gymSet(f, val, rerender){
-  const {set}=gymCur(); set[f]=val; if(f==='w') set.auto=false;
+  const {set}=gymCur(); set[f]=val; if(f==='w' || set.wu) set.auto=false;
   saveDraft(); if(rerender) renderGym();
 }
 /* the loadable weights for this exercise, as the numbers you type (help for the assisted machine) */
 function loadables(v){ const bw=currentBodyweight(); if(v.mode==='assist' && !bw) return []; const lad=makeLadder(v, bw); return [...new Set(lad.E.map(e=>Math.round(lad.toW(e)*100)/100))].filter(w=>w>=0).sort((a,b)=>a-b); }
 function stepLoad(v, cur, dir){
-  const c=num(cur), Ws= (LOADED_MODES.includes(v.mode)||v.mode==='assist')? loadables(v) : [];
+  const c=num(cur), Ws= (LOADED_MODES.includes(v.mode)||v.mode==='assist')? (bwOK(v)? [0].concat(loadables(v)) : loadables(v)) : [];
   if(!Ws.length){ const floor=(v.mode==='bb'||v.mode==='trap')? loadBase(v.mode) : 0; return Math.round(Math.max(floor, c+dir*5)*100)/100; }
   if(dir>0){ const n=Ws.find(w=>w>c+1e-9); if(n!=null) return n; const gap= Ws.length>1? Ws[Ws.length-1]-Ws[Ws.length-2] : 5; return Math.round((Math.max(c, Ws[Ws.length-1])+gap)*100)/100; }
   const b=Ws.filter(w=>w<c-1e-9); return b.length? b[b.length-1] : Ws[0];
@@ -3875,24 +3925,35 @@ function gymStep(f, dir){
   const {v, set}=gymCur(); const el=$('gym-'+f);
   const cur=num(el? el.value : set[f]);
   let nv;
-  if(f==='r'){ nv=Math.max(0, cur+dir*(v.mode==='time'?5:1)); set.r=nv; }
+  if(f==='r'){ nv=Math.max(0, cur+dir*(v.mode==='time'?5:1)); set.r=nv; if(set.wu) set.auto=false; }
   else {
     nv=stepLoad(v, cur, dir); set.w=nv; set.auto=false;
   }
   saveDraft(); renderGym();
 }
-function gymRir(x){ const {set}=gymCur(); set.rir=(set.rir!==''&&set.rir!=null&&num(set.rir)===x)? '' : x; saveDraft(); renderGym(); }
+function gymRir(x){ const {set}=gymCur(); set.rir=(set.rir!==''&&set.rir!=null&&num(set.rir)===x)? '' : x; if(set.wu) set.auto=false; saveDraft(); renderGym(); }
 function gymAddSet(){ const {sl}=gymCur(); const last=sl.sets[sl.sets.length-1]; sl.sets.push({w:last?last.w:'', r:'', rir:'', done:false, auto:true}); DRAFT.cur.s=sl.sets.length-1; DRAFT.cur.edit=false; saveDraft(); renderGym(); }
 function gymRemoveSet(){ const {sl}=gymCur(); if(sl.sets.length>1 && !sl.sets[sl.sets.length-1].done){ sl.sets.pop(); DRAFT.cur.s=Math.min(DRAFT.cur.s, sl.sets.length-1); saveDraft(); renderGym(); } }
 function gymDone(){
   unlockAudio();
-  const {list, ex, sl, v, si, set}=gymCur();
+  const {list, ex, sl, v, si, set, wi}=gymCur();
+  if(wi!=null){
+    const raw=$('gym-w')? $('gym-w').value : set.w; if((raw===''||raw==null) && !bwOK(v)){ toast('Set the weight first'); return; }
+    set.w=num(raw);
+    const r=parseInt($('gym-r')? $('gym-r').value : (set.r||set.t), 10); if(!(r>0)){ toast('Enter the reps'); return; }
+    const was=set.done, working=sl.sets.some(x=>x.done);
+    set.r=r; set.done=true; set.auto=false; set.vn=sl.variant; DRAFT.cur.edit=false;
+    const nx=(was||working)? -1 : sl.wu.findIndex(x=>!x.done); DRAFT.cur.w= nx>=0? nx : null;
+    if(nx<0){ const o=sl.sets.findIndex(x=>!x.done); DRAFT.cur.s= o<0? 0 : o; }
+    if(!was && !working){ startRest(nx>=0? 60 : 90); DRAFT.rest.wu=true; }
+    saveDraft(); renderGym(); return;
+  }
   if(v.mode==='time'){ set.w=0; if(HANG){ set.r=Math.floor((Date.now()-HANG)/1000); HANG=null; const el=$('gym-r'); if(el) el.value=set.r; } }
   else {
     const raw=$('gym-w')? $('gym-w').value : set.w;
-    if(raw===''||raw==null){ if(v.mode!=='bw'){ toast(v.mode==='assist'?'Set the assistance first':'Set the weight first'); return; } set.w=0; }
+    if(raw===''||raw==null){ if(v.mode!=='bw'){ toast(v.mode==='assist'?'Set the assistance first':bwOK(v)?'Set the weight — 0 for bodyweight':'Set the weight first'); return; } set.w=0; }
     else set.w=num(raw);
-    if(v.mode!=='plate' && LOADED_MODES.includes(v.mode) && !(num(set.w)>0)){ toast('Set the weight first'); return; }
+    if(v.mode!=='plate' && LOADED_MODES.includes(v.mode) && !(num(set.w)>0) && !bwOK(v)){ toast('Set the weight first'); return; }
   }
   const r=parseInt($('gym-r')? $('gym-r').value : set.r, 10);
   if(!(r>0)){ toast(v.mode==='time'?'Enter the seconds':'Enter the reps'); return; }
@@ -3946,8 +4007,8 @@ function renderGymSummary(){
   const d=DRAFT, p=previewLog(d), list=gymExList();
   const rows=list.map(ex=>{ const sl=draftSlot(d,ex), v=variantOf(ex,sl.variant), done=sl.sets.filter(s=>parseInt(s.r,10)>0);
     const cd=sl.card, lastS=done[done.length-1], vs=(cd && cd.pred!=null && lastS && v.mode!=='time' && v.mode!=='bw')? ` <span style="color:var(--dim)">· card ${cd.r} @${cd.rirShown}, got ${num(lastS.r)}${isNum(lastS.rir)?' @'+lastS.rir:''}</span>` : '';
-    return `<div class="sum-row"><span>${esc(v.n)}</span><span class="r">${done.length? esc(done.map(s=>fmtSet(s,v.mode)).join(', '))+vs : '<span style="color:var(--red)">skipped</span>'}</span></div>`; }).join('');
-  const sets=p.log.entries.reduce((a,e)=>a+e.sets.length,0);
+    return `<div class="sum-row"><span>${esc(v.n)}</span><span class="r">${done.length? esc(done.map(s=>fmtSet(s,v.mode,v.n)).join(', '))+vs : '<span style="color:var(--red)">skipped</span>'}</span></div>`; }).join('');
+  const sets=p.log.entries.reduce((a,e)=>a+workSets(e).length,0);
   const prs=p.prs.map(x=>`<div class="sum-row"><span class="prline">🏆 ${esc(x.name)}</span><span class="r">${esc(fmtMetric(x.t,x.v,x.mode))} <span style="color:var(--dim)">(was ${esc(fmtMetric(x.t,x.prior,x.mode))})</span></span></div>`).join('');
   const ms=p.newMs.map(m=>`<div class="sum-row"><span class="prline">★ ${esc(m.label)}</span><span class="r">milestone</span></div>`).join('');
   $('gym').innerHTML=`<div class="gym-top"><div><div class="gt">Finish ${d.session}</div><div class="gs">${sets} sets${d.day!==todayKey()?' · logs to '+fmtDow(parseYmd(d.day)):''}</div></div><div class="gx"><button class="btn sm ghost" onclick="closeGym()" aria-label="Close">✕</button></div></div>
@@ -4115,6 +4176,34 @@ function runSelftest(){
       sl.card=Object.assign({}, sl.card, {w:47.5, E:47.5}); sl.sets[0]={w:47.5,r:10,rir:2,done:false,auto:true}; sl.sets[1].w=47.5; sl.sets[1].auto=true; d.cur.i=gymExList().findIndex(e=>e.slot==='Seated Cable Row'); d.cur.s=1;
       try{ setLoadStep(5); }catch(e){} const out=[sl.sets[0].w, sl.sets[1].w, sl.card.w, sl.card.E]; DRAFT=keep; GYM_OPEN=kc; return eq(out,[47.5,45,45,45]); });
     T('+/- never dead-end: under the bar goes to the empty bar, above the top keeps going', ()=>{ DB=seeded(); const bb={n:'Barbell Bench',mode:'bb'}, lp={n:'Leg Press',mode:'mach'}, top=loadables(lp).slice(-1)[0]; return eq([stepLoad(bb,0,-1), stepLoad(bb,40,-1), stepLoad(lp,top,1)>top],[45,45,true]); });
+    T('secondary bar lifts get a short warm-up; accessories none', ()=>{ DB=seeded(); const fs=PROGRAM['Lower A'].find(e=>e.slot==='Hack Squat'), fv=fs.vars.find(x=>x.n==='Front Squat'), lr=PROGRAM['Upper B'].find(e=>e.slot==='Lateral Raise');
+      return eq([warmup(fs,'bb',110,fv).map(x=>x.w+'x'+x.r).join(' '), warmup(lr,'db',10,lr.vars[0]).length],['45x8 55x5 80x3',0]); });
+    T('warm-ups are recorded but never counted', ()=>{ const e={mode:'bb',sets:[{w:45,r:8,wu:true},{w:95,r:5,wu:true},{w:155,r:6,rir:2}]}, c=classify(e,null); return eq([workSets(e).length, c.W.length, c.T0, entryBest(e)],[1,1,155,196.3]); });
+    T('a main lift opens on guided warm-ups built from the working weight; skipping goes straight to set 1', ()=>{ const keep=DRAFT; DB=engFx(); const d=newDraft('Upper A',{}); DRAFT=d; d.cur={i:gymExList().findIndex(e=>e.slot==='Barbell Bench'), s:0};
+      const a=gymCur(), w=a.sl.wu.map(x=>x.w), t=a.sl.wu.map(x=>x.t); const work=num(a.sl.sets[0].w), first=[a.wi, a.set.wu]; gymSkipWarmups(); const b=gymCur(); DRAFT=keep;
+      return eq([first, w[0], w.every((x,k)=>x<work && (k===0 || x>w[k-1])), t, b.wi, b.set.wu||false],[[0,true],45,true,[8,5,3,2,1],null,false]); });
+    T('a done warm-up goes to the next warm-up then set 1, moves nothing, and lands in the log marked', ()=>{ const keep=DRAFT; DB=engFx(); const d=newDraft('Upper A',{}); DRAFT=d; d.cur={i:gymExList().findIndex(e=>e.slot==='Barbell Bench'), s:0};
+      const g=gymCur(), work=g.sl.sets.map(x=>x.w).join(); g.sl.wu.forEach((x,k)=>{ if(k<g.sl.wu.length-1) x.done=true, x.r=x.t, x.auto=false; }); d.cur.w=g.sl.wu.length-1; renderGym();
+      try{ gymDone(); }catch(err){} d.rest=null; const after=gymCur(); const s0=after.sl.sets[0]; s0.w=145; s0.r=6; s0.rir=2; s0.done=true; const en=draftEntries(d).find(x=>x.slot==='Barbell Bench'); DRAFT=keep; DB=engFx();
+      return eq([after.wi, after.si, after.sl.sets.map(x=>x.w).join()===work, en.sets.filter(x=>x.wu).length, en.sets.filter(x=>!x.wu).length, en.sets[0].wu],[null,0,true,5,1,true]); });
+    T('bodyweight lunges: 0 lb is bodyweight, a 2.5 stand-in reads as bodyweight, the card says so', ()=>{ DB=engFx(); DB.logs.push({date:isoD('2026-10-18'),day:'Lower B',entries:[{exercise:'Walking Lunge',mode:'db',slot:'Walking Lunge',sets:[{w:2.5,r:10,rir:2},{w:2.5,r:10,rir:1}]}]});
+      const v={n:'Walking Lunge',mode:'db'}, c=cardOf('Lower B','Walking Lunge',null,null,'2026-10-25'), lvl=classify(DB.logs[DB.logs.length-1].entries[0], null);
+      return eq([c.w, c.aim, /bodyweight/.test(c.hint), lvl, stepLoad(v,2.5,-1), fmtSet({w:0,r:10,rir:2},'db','Walking Lunge'), /Bodyweight/.test(equipViz(v,0))],[0,11,true,null,0,'BW×10@2',true]); });
+    T('warm-up edits stick; skip keeps the done ones and a carried-over rest; warm-ups alone are not a logged lift', ()=>{ const keep=DRAFT; DB=engFx(); const d=newDraft('Upper A',{}); DRAFT=d; d.cur={i:gymExList().findIndex(e=>e.slot==='Barbell Bench'), s:0};
+      let g=gymCur(); g.set.r=''; gymSet('r','10',false); gymRir(4); g=gymCur(); const edited=[g.set.r, g.set.rir];
+      g.sl.wu[0].done=true; g.sl.wu[0].r=10; d.rest={endAt:Date.now()+60000,total:180,fired:false}; gymSkipWarmups(); const g2=gymCur(); const after=[g2.sl.wu.length, g2.sl.wu[0].done, !!d.rest, g2.wi];
+      const en=draftEntries(d).filter(e=>e.slot==='Barbell Bench'); DRAFT=keep; return eq([edited, after, en.length],[['10',4],[1,true,true,null],0]); });
+    T('a variant switch drops pending warm-ups for that implement and reopens on its first warm-up', ()=>{ const keep=DRAFT; DB=engFx(); const d=newDraft('Upper A',{}); DRAFT=d; d.cur={i:gymExList().findIndex(e=>e.slot==='Barbell Bench'), s:0};
+      let g=gymCur(); g.sl.wu[0].done=true; g.sl.wu[0].r=8; g.sl.wu[0].vn='Barbell Bench'; switchVariant(d, g.ex, g.ex.vars.find(x=>x.n==='DB Bench Press')); d.ex['Barbell Bench'].sets[0].w=50; g=gymCur(); const work=num(g.sl.sets[0].w), pend=g.sl.wu.filter(x=>!x.done);
+      DRAFT=keep; return eq([g.sl.wu[0].done, pend.every(x=>x.w<work), g.wi!=null && !g.set.done],[true,true,true]); });
+    T('Update on a done warm-up after working sets began stays on the working sets', ()=>{ const keep=DRAFT; DB=engFx(); const d=newDraft('Upper A',{}); DRAFT=d; d.cur={i:gymExList().findIndex(e=>e.slot==='Barbell Bench'), s:0};
+      let g=gymCur(); g.sl.wu[0].done=true; g.sl.wu[0].r=8; g.sl.sets[0].done=true; g.sl.sets[0].r=6; g.sl.sets[0].w=145; d.rest={endAt:Date.now()+90000,total:180,fired:false}; const r0=d.rest.endAt; gymPickWu(0); renderGym(); try{ gymDone(); }catch(e){}
+      g=gymCur(); const out=[g.wi, g.si, d.rest && d.rest.endAt===r0]; d.rest=null; DRAFT=keep; return eq(out,[null,1,true]); });
+    T('bodyweight lunges: full card, blank RIR earns nothing, a bodyweight set never re-predicts, kettlebells say kettlebell, BW only where it applies', ()=>{ DB=engFx();
+      const L=(dd,w,r,rir)=>({date:isoD(dd),day:'Lower B',entries:[{exercise:'Walking Lunge',mode:'db',slot:'Walking Lunge',sets:[{w,r,rir},{w,r,rir}]}]});
+      DB.logs.push(L('2026-10-18',0,12,undefined)); delete DB.logs[DB.logs.length-1].entries[0].sets[0].rir; delete DB.logs[DB.logs.length-1].entries[0].sets[1].rir; const c=cardOf('Lower B','Walking Lunge',null,null,'2026-10-25');
+      const ex=PROGRAM['Lower B'].find(e=>e.slot==='Walking Lunge'), v=ex.vars[0], sl={variant:v.n, card:{w:20,E:20,r:10,rirT:3,rirShown:3,rl:10,rh:12,track:'D',sets:2}, sets:[{w:0,r:12,rir:4,vn:v.n},{w:20,r:'',rir:''}]};
+      const kv={n:'KB Walking Lunge',mode:'kb'}; return eq([c.w, isNum(c.rl)&&isNum(c.rh), repredictAfter(ex,sl,v,0), /kettlebell/.test(equipViz(kv,0)), fmtSet({w:0,r:12},'db','Lateral Raise')],[0,true,null,true,'0×12']); });
     T('pull-up ladder levels', ()=>{ const L=x=>ladderLevel(Object.assign(newStats(),x)).n; return eq([L({hang:25}),L({hang:40,assistFirst:120,assistBest:120,assistNow:120}),L({hang:40,assistFirst:120,assistBest:55,assistNow:60}),L({strict:1}),L({strict:6})],[1,2,3,4,5]); });
     T('phases + header chip', ()=>{ DB=seeded(); DB.blocks=[blk(-14)]; DB.activeBlockId='t'; const c=ctx(), ch=chipText(c), t=TEMPLATES['strength-bulk']; return eq([c.w,ch.n,ch.l,phaseAt(t,8).name,!!phaseAt(t,8).deload,!!phaseAt(t,16).test,!!phaseAt(t,17).complete,phaseAt(TEMPLATES.maintain,8).name,phaseAt(TEMPLATES.maintain,9).name],[3,'W3/16','Groove','Deload',true,true,true,'Deload','Base']); });
     T('no block and pre-block both run week-1 targets', ()=>{ DB=seeded(); const main=PROGRAM['Lower A'][0]; const a=prescribe(main,ctx()); DB.blocks=[blk(5)]; DB.activeBlockId='t'; const c=ctx(), b=prescribe(main,c); return eq([a.sets,a.rl,a.rh,a.rir,b.sets,b.rir,chipText(c).n,!!c.ph.pre],[3,5,6,3,3,3,'5d',true]); });
